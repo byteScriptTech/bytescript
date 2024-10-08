@@ -2,25 +2,45 @@ import React from 'react';
 
 import {
   Card,
-  CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useContentContext } from '@/context/ContentContext';
 
-export const Content: React.FC = () => {
+type ContentProps = {};
+
+export const Content: React.FC<ContentProps> = () => {
+  const { content, loading } = useContentContext();
+  const courseContent = content && content[0];
   return (
     <Card x-chunk="dashboard-04-chunk-1">
-      <CardHeader>
-        <CardTitle>Store Name</CardTitle>
-        <CardDescription>
-          Used to identify your store in the marketplace.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>abxdddd</CardContent>
-      <CardFooter className="border-t px-6 py-4">card footer</CardFooter>
+      {loading ? (
+        <SkeletonContent />
+      ) : (
+        <React.Fragment>
+          <CardHeader>
+            <CardTitle>Introduction</CardTitle>
+            <CardDescription>
+              {courseContent?.introduction.text}
+            </CardDescription>
+          </CardHeader>
+        </React.Fragment>
+      )}
     </Card>
+  );
+};
+
+const SkeletonContent = () => {
+  return (
+    <div className="p-4">
+      <Skeleton className="h-[125px] rounded-xl" />
+      <div className="my-2">
+        <Skeleton className="h-6 my-2" />
+        <Skeleton className="h-6 my-2" />
+      </div>
+    </div>
   );
 };
 
