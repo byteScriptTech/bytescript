@@ -32,6 +32,7 @@ const Navigation: React.FC<NavigationProps> = ({
     setCurrentTopic(topic);
     addItem(topic);
   };
+
   return (
     <nav className="grid gap-4 h-[calc(100vh-30vh)] text-sm text-muted-foreground overflow-y-auto">
       {topics?.map((topic) => (
