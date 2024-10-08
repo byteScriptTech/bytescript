@@ -1,32 +1,26 @@
 'use client';
-import { signOut } from 'firebase/auth';
-import { useRouter } from 'next/navigation';
+import * as React from 'react';
 
+import Navbar from '@/components/common/Navbar';
+import SideBar from '@/components/common/Sidebar';
 import AuthGuard from '@/components/misc/authGuard';
 import LanguagesList from '@/components/specific/LanguagesList';
 import { LanguagesProvider } from '@/context/LanguagesContext';
 
-import { auth } from '../../../lib/firebase';
-
-const Dashboard = () => {
-  const router = useRouter();
-
-  const handleSignOut = async () => {
-    await signOut(auth);
-    router.push('/login');
-  };
-
+export function Dashboard() {
   return (
     <AuthGuard>
       <LanguagesProvider>
-        <div>
-          <LanguagesList />
-          <h1>Welcome to the Dashboard</h1>
-          <button onClick={handleSignOut}>Sign Out</button>
+        <div className="flex min-h-screen w-full flex-col bg-muted/40">
+          <SideBar />
+          <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
+            <Navbar />
+            <LanguagesList />
+          </div>
         </div>
       </LanguagesProvider>
     </AuthGuard>
   );
-};
+}
 
 export default Dashboard;
