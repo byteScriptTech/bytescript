@@ -34,7 +34,7 @@ const Navigation: React.FC<NavigationProps> = ({
   };
 
   return (
-    <nav className="grid gap-4 h-[calc(100vh-30vh)] text-sm text-muted-foreground overflow-y-auto">
+    <nav className="grid gap-4 h-[calc(100vh-30vh)] text-sm text-muted-foreground overflow-y-auto custom-scrollbar">
       {topics?.map((topic) => (
         <Link
           onClick={() => handleTopicClick(topic)}

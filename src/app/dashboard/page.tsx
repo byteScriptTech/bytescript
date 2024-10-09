@@ -7,7 +7,7 @@ import AuthGuard from '@/components/misc/authGuard';
 import LanguagesList from '@/components/specific/LanguagesList';
 import { LanguagesProvider } from '@/context/LanguagesContext';
 
-export function Dashboard() {
+function Dashboard() {
   return (
     <AuthGuard>
       <LanguagesProvider>

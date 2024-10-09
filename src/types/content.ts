@@ -8,6 +8,7 @@ interface Challenge {
 interface Example {
   code: string;
   description: string;
+  language: string;
 }
 
 interface RelatedTopic {
@@ -26,13 +27,11 @@ interface BestPracticesAndCommonMistakes {
 }
 
 interface Introduction {
-  glance: {
-    perequisites: string;
-    real_world_use_cases: string;
-    key_concepts: string;
-    objective: string;
-  }[];
   text: string;
+  key_concepts: string;
+  objective: string;
+  real_world_use_cases: string;
+  prerequisites: string;
 }
 
 export interface LanguageContent {
@@ -40,11 +39,11 @@ export interface LanguageContent {
   name: string;
   tag: string;
   applications: string[];
-  introduction: Introduction;
   explanation: string[];
-  examples: Example[];
-  challenges: Challenge[];
   best_practices_and_common_mistakes: BestPracticesAndCommonMistakes;
   related_topics: RelatedTopic[];
   topics: Topic[];
+  introduction: Introduction;
+  examples: Example[];
+  challenges: Challenge[];
 }

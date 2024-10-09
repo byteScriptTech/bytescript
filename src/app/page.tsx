@@ -1,4 +1,4 @@
-export function LoginForm() {
+function LoginForm() {
   return 'Landing Page!';
 }
 
