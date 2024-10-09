@@ -7,7 +7,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
 import { LanguageContent } from '@/types/content';
 import { decodeEntities } from '@/util/endecode';
 
@@ -20,31 +19,25 @@ interface ContentSectionsProps {
 }
 const ContentSections: React.FC<ContentSectionsProps> = ({
   section,
-  loading,
   courseContent,
 }) => {
-  console.log(section);
   const { introduction, explanation } = courseContent || {};
   switch (section) {
     case 'introduction':
       return (
         <section id="introduction">
           <Card>
-            {loading ? (
-              <SkeletonContent />
-            ) : (
-              <CardHeader>
-                <CardTitle>Introduction</CardTitle>
-                <CardDescription>
-                  {introduction?.text}
-                  {explanation?.map((exp, i) => (
-                    <p key={i} className="my-2">
-                      {exp}
-                    </p>
-                  ))}
-                </CardDescription>
-              </CardHeader>
-            )}
+            <CardHeader>
+              <CardTitle>Introduction</CardTitle>
+              <CardDescription>
+                {introduction?.text}
+                {explanation?.map((exp, i) => (
+                  <p key={i} className="my-2">
+                    {exp}
+                  </p>
+                ))}
+              </CardDescription>
+            </CardHeader>
           </Card>
         </section>
       );
@@ -159,20 +152,6 @@ const ContentSections: React.FC<ContentSectionsProps> = ({
     default:
       return null;
   }
-};
-
-const SkeletonContent = () => {
-  return (
-    <div className="p-4">
-      <Skeleton className="h-[125px] rounded-xl my-2" />
-      <Skeleton className="h-[125px] rounded-xl" />
-      <div className="my-2">
-        <Skeleton className="h-6 my-2" />
-        <Skeleton className="h-6 my-2" />
-        <Skeleton className="h-6 my-2" />
-      </div>
-    </div>
-  );
 };
 
 export default ContentSections;
