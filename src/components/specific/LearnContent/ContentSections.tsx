@@ -44,15 +44,19 @@ const ContentSections: React.FC<ContentSectionsProps> = ({
     case 'objective':
       return (
         <section id="objective">
-          {introduction?.objective && (
+          {introduction?.objective.length && (
             <ul>
               <li className="py-2">
                 <b>Objective: </b>
-                {introduction.objective}
+                {introduction.objective.map((obj, i) => (
+                  <li key={i}>{obj}</li>
+                ))}
               </li>
               <li className="py-2">
                 <b>Prerequisite: </b>
-                {introduction.prerequisites}
+                {introduction.prerequisites.map((prerequisite, i) => (
+                  <li key={i}>{prerequisite}</li>
+                ))}
               </li>
             </ul>
           )}
@@ -61,11 +65,13 @@ const ContentSections: React.FC<ContentSectionsProps> = ({
     case 'key_concepts':
       return (
         <section id="key_concepts">
-          {introduction?.key_concepts && (
+          {introduction?.key_concepts.length && (
             <ul>
               <li className="py-2">
                 <b>Key Concepts: </b>
-                {introduction.key_concepts}
+                {introduction.key_concepts.map((keyConcept, i) => (
+                  <li key={i}>{keyConcept}</li>
+                ))}
               </li>
             </ul>
           )}
@@ -78,7 +84,9 @@ const ContentSections: React.FC<ContentSectionsProps> = ({
             <ul>
               <li className="py-2">
                 <b>Real World Use Cases: </b>
-                {introduction.real_world_use_cases}
+                {introduction.real_world_use_cases.map((useCase, i) => (
+                  <li key={i}>{useCase}</li>
+                ))}
               </li>
             </ul>
           )}
@@ -103,7 +111,15 @@ const ContentSections: React.FC<ContentSectionsProps> = ({
           {courseContent?.challenges.map((challenge, i) => (
             <div key={i} className="py-2">
               <p>{challenge.question}</p>
-              <CodeBlock code={`${decodeEntities(challenge.code)}`} />
+              {challenge.code && (
+                <CodeBlock code={`${decodeEntities(challenge.code)}`} />
+              )}
+              <p className="bg-gray-100 p-2 w-20 text-center rounded-md">
+                Answer
+              </p>
+              {challenge.answer && (
+                <CodeBlock code={`${decodeEntities(challenge.answer)}`} />
+              )}
             </div>
           ))}
         </section>
@@ -114,13 +130,35 @@ const ContentSections: React.FC<ContentSectionsProps> = ({
           {courseContent?.challenges.length && <b>Best Practices:</b>}
           <ul className="py-2 list-disc list-inside">
             {courseContent?.best_practices_and_common_mistakes.best_practices.map(
-              (best_practice, i) => <li key={i}>{best_practice}</li>
+              (best_practice, i) => {
+                return (
+                  <React.Fragment key={i}>
+                    <li key={i}>{best_practice.text}</li>
+                    {best_practice.code && (
+                      <CodeBlock
+                        code={`${decodeEntities(best_practice.code)}`}
+                      />
+                    )}
+                  </React.Fragment>
+                );
+              }
             )}
           </ul>
           {courseContent?.challenges.length && <b>Common Mistakes:</b>}
           <ul className="py-2 list-disc list-inside">
             {courseContent?.best_practices_and_common_mistakes.common_mistakes.map(
-              (common_mistake, i) => <li key={i}>{common_mistake}</li>
+              (common_mistake, i) => {
+                return (
+                  <React.Fragment key={i}>
+                    <li key={i}>{common_mistake.text}</li>
+                    {common_mistake.code && (
+                      <CodeBlock
+                        code={`${decodeEntities(common_mistake.code)}`}
+                      />
+                    )}
+                  </React.Fragment>
+                );
+              }
             )}
           </ul>
         </section>
