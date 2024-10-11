@@ -22,16 +22,16 @@ interface Topic {
 }
 
 interface BestPracticesAndCommonMistakes {
-  common_mistakes: string[];
-  best_practices: string[];
+  common_mistakes: { text: string; code?: string }[];
+  best_practices: { text: string; code?: string }[];
 }
 
 interface Introduction {
   text: string;
-  key_concepts: string;
-  objective: string;
-  real_world_use_cases: string;
-  prerequisites: string;
+  key_concepts: string[];
+  objective: string[];
+  real_world_use_cases: string[];
+  prerequisites: string[];
 }
 
 export interface LanguageContent {
@@ -46,4 +46,5 @@ export interface LanguageContent {
   introduction: Introduction;
   examples: Example[];
   challenges: Challenge[];
+  [key: string]: any;
 }

@@ -1,16 +1,18 @@
 'use client';
 import { signInWithPopup } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
 
 import { auth, githubProvider, googleProvider } from '../../../lib/firebase';
 
 const Login = () => {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const { toast } = useToast();
 
   const handleGoogleLogin = async () => {
     try {
@@ -18,8 +20,12 @@ const Login = () => {
       const user = result.user;
       console.log('User info: ', user);
       router.push('/dashboard'); // Redirect to a dashboard after login
-    } catch (err) {
+    } catch (error: any) {
       setError('Failed to sign in');
+      toast({
+        variant: 'destructive',
+        description: error.message,
+      });
     }
   };
   const handleGithubLogin = async () => {
@@ -27,11 +33,15 @@ const Login = () => {
       const result = await signInWithPopup(auth, githubProvider);
       console.log(result.user);
       router.push('/dashboard');
-    } catch (error) {
+    } catch (error: any) {
       setError('Failed to sign in');
-      console.error('GitHub login failed', error);
+      toast({
+        variant: 'destructive',
+        description: error.message,
+      });
     }
   };
+  useEffect(() => {}, []);
 
   return (
     <div className="grid place-content-center h-screen">

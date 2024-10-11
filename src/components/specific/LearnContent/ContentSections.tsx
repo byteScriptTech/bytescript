@@ -95,7 +95,7 @@ const ContentSections: React.FC<ContentSectionsProps> = ({
     case 'examples':
       return (
         <section id="examples">
-          {courseContent?.examples.length && <b>Example:</b>}
+          {courseContent?.examples.length && <b>Examples:</b>}
           {courseContent?.examples.map((example, i) => (
             <div key={i} className="py-2">
               <p>{example.description}</p>
@@ -110,16 +110,23 @@ const ContentSections: React.FC<ContentSectionsProps> = ({
           {courseContent?.challenges.length && <b>Challenges:</b>}
           {courseContent?.challenges.map((challenge, i) => (
             <div key={i} className="py-2">
-              <p>{challenge.question}</p>
-              {challenge.code && (
-                <CodeBlock code={`${decodeEntities(challenge.code)}`} />
-              )}
-              <p className="bg-gray-100 p-2 w-20 text-center rounded-md">
-                Answer
+              <p>
+                <span className="font-bold">Question:</span>{' '}
+                {challenge.question}
               </p>
-              {challenge.answer && (
-                <CodeBlock code={`${decodeEntities(challenge.answer)}`} />
+              {challenge.code && (
+                <React.Fragment>
+                  <p className="mt-2 font-bold">Code:</p>
+                  <CodeBlock code={`${decodeEntities(challenge.code)}`} />
+                </React.Fragment>
               )}
+              <p className="font-bold mt-2">Answer</p>
+              {challenge.answer?.length &&
+                challenge.answer.map((answer, i) => (
+                  <React.Fragment key={i}>
+                    <CodeBlock code={`${decodeEntities(answer)}`} />
+                  </React.Fragment>
+                ))}
             </div>
           ))}
         </section>

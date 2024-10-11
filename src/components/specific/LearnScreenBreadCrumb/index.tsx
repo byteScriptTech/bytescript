@@ -1,3 +1,4 @@
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
 
 import {
@@ -10,7 +11,7 @@ import {
 } from '@/components/ui/breadcrumb';
 import { useBreadcrumbContext } from '@/context/BreadCrumbContext';
 
-interface dataType {
+interface Topic {
   name: string;
   id: string;
 }
@@ -18,9 +19,19 @@ interface LearnScreenBreadCrumbProps {}
 const LearnScreenBreadCrumb: React.FC<LearnScreenBreadCrumbProps> = () => {
   const { data, removeItem } = useBreadcrumbContext();
   const datalen = data && data.length;
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
-  const getBreadcrumb = (data: dataType[]) => {
-    return data.map((item: dataType, i: number) => {
+  const removeBreadcrumbItem = (item: Topic) => {
+    const name = searchParams.get('name');
+    const id = searchParams.get('id');
+    router.push(`${pathname}?name=${name}&id=${id}`);
+    removeItem(item.id);
+  };
+
+  const getBreadcrumb = (data: Topic[]) => {
+    return data.map((item: Topic, i: number) => {
       return (
         <React.Fragment key={item.id}>
           <BreadcrumbItem className="cursor-pointer">
@@ -28,7 +39,7 @@ const LearnScreenBreadCrumb: React.FC<LearnScreenBreadCrumbProps> = () => {
               <BreadcrumbPage>{item.name}</BreadcrumbPage>
             ) : (
               <BreadcrumbLink
-                onClick={() => removeItem(item.id)}
+                onClick={() => removeBreadcrumbItem(item)}
                 className="cursor-pointer"
               >
                 {item.name}

@@ -1,4 +1,5 @@
 import { collection, getDocs } from 'firebase/firestore/lite';
+import { useSearchParams } from 'next/navigation';
 import {
   createContext,
   ReactNode,
@@ -30,25 +31,28 @@ export const useContentContext = () => {
 };
 
 export const ContentProvider = ({ children }: { children: ReactNode }) => {
+  const searchParams = useSearchParams();
+  const topicNameArray = searchParams.getAll('name');
   const [content, setContent] = useState<LanguageContent[] | undefined>();
   const [loading, setLoading] = useState<boolean>(true);
   const [scrollToList, setScrollToList] = useState<
     { views: { name: string; id: string }[]; id: string }[]
   >([]);
+  const topicName = topicNameArray[0];
   const fetchContent = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const coursesContentCollection = collection(db, 'javascript');
+      const coursesContentCollection = collection(db, topicName);
       const courseContentSnapshot = await getDocs(coursesContentCollection);
       const courseContentList = courseContentSnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       })) as any;
       setContent(courseContentList);
-      setLoading(false);
     } catch (error) {
-      setLoading(false);
       console.error('Error fetching course content: ', error);
+    } finally {
+      setLoading(false);
     }
   };
   const fetchScrollToViewList = async () => {

@@ -1,12 +1,12 @@
 /* eslint-disable no-unused-vars */
-import React from 'react';
+import { useSearchParams } from 'next/navigation';
+import React, { useEffect, useState } from 'react';
 
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useContentContext } from '@/context/ContentContext';
 
 import { Content } from './Content';
-import data from './example.json';
 import Navigation from './Navigation';
 import ScrollToTopic from './ScrollToTopic';
 
@@ -22,11 +22,21 @@ const LearnContent: React.FC<LearnContentProps> = ({
   setCurrentTopic,
   currentTopic,
 }) => {
+  const [topics, setTopics] = useState<Topic[] | undefined>([]);
+  const searchParams = useSearchParams();
+  const topicIdArray = searchParams.getAll('id');
   const { content, loading } = useContentContext();
-  const courseContent = content && content[0];
-  const { topics } = courseContent || {};
-  console.log(content, 'content');
-
+  const courseContent: any = content && content[0];
+  const topicId = topicIdArray[1];
+  useEffect(() => {
+    if (topicId && courseContent) {
+      const { topics } = courseContent[topicId] || {};
+      setTopics(topics);
+    } else if (courseContent) {
+      const { topics } = courseContent || {};
+      setTopics(topics);
+    }
+  }, [topicId, courseContent]);
   return (
     <div className="mx-auto grid w-full max-w-6xl items-start gap-6 md:grid-cols-[20%_60%_20%] lg:grid-cols-[20%_60%_20%]">
       <Navigation
