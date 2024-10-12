@@ -40,7 +40,7 @@ const Authentication = () => {
           Welcome to biteScript
         </CardTitle>
         <CardDescription className="text-gray-600 mb-6">
-          Let&apos;s kickstart your journey to becoming a programmer!
+          Let&apos;s kickstart your journey to becoming a Rockstar programmer!
         </CardDescription>
         <CardContent>
           <div className="mb-4">
