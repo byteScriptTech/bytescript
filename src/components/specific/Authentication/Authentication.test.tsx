@@ -22,7 +22,9 @@ describe('Authentication', () => {
 
     expect(screen.getByText('Welcome to biteScript')).toBeInTheDocument();
     expect(
-      screen.getByText("Let's kickstart your journey to becoming a programmer!")
+      screen.getByText(
+        "Let's kickstart your journey to becoming a Rockstar programmer!"
+      )
     ).toBeInTheDocument();
 
     expect(
