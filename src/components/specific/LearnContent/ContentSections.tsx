@@ -54,7 +54,7 @@ const ContentSections: React.FC<ContentSectionsProps> = ({
               </li>
               <li className="py-2">
                 <b>Prerequisite: </b>
-                {introduction.prerequisites.map((prerequisite, i) => (
+                {introduction.prerequisites?.map((prerequisite, i) => (
                   <li key={i}>{prerequisite}</li>
                 ))}
               </li>
@@ -107,8 +107,8 @@ const ContentSections: React.FC<ContentSectionsProps> = ({
     case 'challenges':
       return (
         <section id="challenges">
-          {courseContent?.challenges.length && <b>Challenges:</b>}
-          {courseContent?.challenges.map((challenge, i) => (
+          {courseContent?.challenges?.length && <b>Challenges:</b>}
+          {courseContent?.challenges?.map((challenge, i) => (
             <div key={i} className="py-2">
               <p>
                 <span className="font-bold">Question:</span>{' '}
@@ -120,9 +120,9 @@ const ContentSections: React.FC<ContentSectionsProps> = ({
                   <CodeBlock code={`${decodeEntities(challenge.code)}`} />
                 </React.Fragment>
               )}
-              <p className="font-bold mt-2">Answer</p>
+              <p className="font-bold mt-2">Answer:</p>
               {challenge.answer?.length &&
-                challenge.answer.map((answer, i) => (
+                challenge.answer?.map((answer, i) => (
                   <React.Fragment key={i}>
                     <CodeBlock code={`${decodeEntities(answer)}`} />
                   </React.Fragment>
@@ -134,9 +134,9 @@ const ContentSections: React.FC<ContentSectionsProps> = ({
     case 'best_practices':
       return (
         <section id="best_practices">
-          {courseContent?.challenges.length && <b>Best Practices:</b>}
+          {courseContent?.challenges?.length && <b>Best Practices:</b>}
           <ul className="py-2 list-disc list-inside">
-            {courseContent?.best_practices_and_common_mistakes.best_practices.map(
+            {courseContent?.best_practices_and_common_mistakes?.best_practices?.map(
               (best_practice, i) => {
                 return (
                   <React.Fragment key={i}>
@@ -151,9 +151,9 @@ const ContentSections: React.FC<ContentSectionsProps> = ({
               }
             )}
           </ul>
-          {courseContent?.challenges.length && <b>Common Mistakes:</b>}
+          {courseContent?.challenges?.length && <b>Common Mistakes:</b>}
           <ul className="py-2 list-disc list-inside">
-            {courseContent?.best_practices_and_common_mistakes.common_mistakes.map(
+            {courseContent?.best_practices_and_common_mistakes?.common_mistakes?.map(
               (common_mistake, i) => {
                 return (
                   <React.Fragment key={i}>
@@ -173,9 +173,9 @@ const ContentSections: React.FC<ContentSectionsProps> = ({
     case 'applications':
       return (
         <section id="applications">
-          {courseContent?.applications.length && <b>Applications:</b>}
+          {courseContent?.applications?.length && <b>Applications:</b>}
           <ul className="py-2 list-disc list-inside">
-            {courseContent?.applications.map((application, i) => (
+            {courseContent?.applications?.map((application, i) => (
               <li key={i}>{application}</li>
             ))}
           </ul>
@@ -184,9 +184,9 @@ const ContentSections: React.FC<ContentSectionsProps> = ({
     case 'related_topics':
       return (
         <section id="related_topics">
-          {courseContent?.related_topics.length && <b>Applications:</b>}
+          {courseContent?.related_topics?.length && <b>Applications:</b>}
           <ul className="py-2 list-disc list-inside">
-            {courseContent?.related_topics.map((topic, i) => (
+            {courseContent?.related_topics?.map((topic, i) => (
               <li key={i}>
                 <Link href={`#`}>{topic.name}</Link>
               </li>

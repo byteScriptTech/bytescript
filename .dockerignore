@@ -1,0 +1,7 @@
+node_modules
+.next
+Dockerfile.dev
+Dockerfile
+.dockerignore
+.env.local
+.vscode

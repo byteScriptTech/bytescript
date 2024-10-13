@@ -18,7 +18,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { LanguagesProvider } from '@/context/LanguagesContext';
 
-export function Dashboard() {
+function Dashboard() {
   const [feedback, setFeedback] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const router = useRouter();
