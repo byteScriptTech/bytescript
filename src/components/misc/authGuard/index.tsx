@@ -16,7 +16,6 @@ const AuthGuard = ({ children }: { children: ReactNode }) => {
         setLoading(false);
       }
     });
-
     return () => unsubscribe();
   }, [router]);
 

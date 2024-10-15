@@ -1,4 +1,4 @@
-import { signInWithPopup, onAuthStateChanged } from 'firebase/auth';
+import { signInWithPopup, onAuthStateChanged, getAuth } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import {
   createContext,
@@ -10,7 +10,7 @@ import {
 
 import { useToast } from '@/hooks/use-toast';
 
-import { auth, githubProvider, googleProvider } from '../../lib/firebase';
+import { githubProvider, googleProvider } from '../../lib/firebase';
 
 interface AuthContextType {
   currentUser: any;
@@ -33,7 +33,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const router = useRouter();
   const { toast } = useToast();
-  console.log(currentUser, 'currentUser');
+  const auth = getAuth();
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
@@ -43,7 +44,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
 
     return () => unsubscribe();
-  }, [router]);
+  }, []);
 
   const signInWithGoogle = async () => {
     try {
@@ -90,6 +91,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       console.error('Sign Out Error:', error);
     }
   };
+
+  useEffect(() => {
+    setCurrentUser(auth.currentUser);
+  }, [auth.currentUser]);
 
   return (
     <AuthContext.Provider
