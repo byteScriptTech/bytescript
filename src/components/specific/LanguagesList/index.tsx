@@ -7,7 +7,7 @@ import CourseIcon from '../CourseIcon';
 const LanguagesList = () => {
   const { languages } = useLanguages();
   return (
-    <div className="flex">
+    <div className="flex gap-2">
       {languages.map((language) => (
         <div key={language.id}>
           <CourseIcon language={language.name} id={language.id} />

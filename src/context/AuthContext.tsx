@@ -1,6 +1,12 @@
-import { signInWithPopup } from 'firebase/auth';
+import { signInWithPopup, onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
-import { createContext, useContext, useState, ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from 'react';
 
 import { useToast } from '@/hooks/use-toast';
 
@@ -27,6 +33,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const router = useRouter();
   const { toast } = useToast();
+  console.log(currentUser, 'currentUser');
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+      if (user) {
+        router.push('/dashboard');
+      }
+    });
+
+    return () => unsubscribe();
+  }, [router]);
 
   const signInWithGoogle = async () => {
     try {
@@ -34,7 +51,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const user = result.user;
       setCurrentUser(user);
       console.log('Google User:', user);
-      router.push('/dashboard'); // Redirect after successful login
+      router.push('/dashboard');
     } catch (error: any) {
       toast({
         variant: 'destructive',
@@ -50,7 +67,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const user = result.user;
       setCurrentUser(user);
       console.log('Github User:', user);
-      router.push('/dashboard'); // Redirect after successful login
+      router.push('/dashboard');
     } catch (error: any) {
       toast({
         variant: 'destructive',

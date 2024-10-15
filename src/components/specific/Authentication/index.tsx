@@ -34,7 +34,7 @@ const Authentication = () => {
 
   return (
     <div className="grid place-content-center h-screen">
-      {error && <p>{error}</p>}
+      {error && <p className="text-red-500">{error}</p>}
       <Card className="sm:w-96 sm:h-auto p-6 text-center bg-white rounded-lg transition-shadow hover:shadow-md">
         <CardTitle className="text-2xl font-bold text-gray-800 mb-2">
           Welcome to biteScript
