@@ -21,6 +21,7 @@ interface LanguagesContextProps {
   addLanguage: (name: string) => Promise<void>;
   updateLanguage: (id: string, name: string) => Promise<void>;
   deleteLanguage: (id: string) => Promise<void>;
+  loading: boolean;
 }
 
 const LanguagesContext = createContext<LanguagesContextProps | undefined>(
@@ -40,8 +41,10 @@ export const LanguagesProvider = ({
   children: React.ReactNode;
 }) => {
   const [languages, setLanguages] = useState<Language[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const fetchLanguages = async () => {
+    setLoading(true);
     try {
       const querySnapshot = await getDocs(collection(db, 'languages'));
       const languagesList: Language[] = querySnapshot.docs.map((doc) => ({
@@ -51,6 +54,8 @@ export const LanguagesProvider = ({
       setLanguages(languagesList);
     } catch (error) {
       console.error('Error fetching languages: ', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -91,6 +96,7 @@ export const LanguagesProvider = ({
     <LanguagesContext.Provider
       value={{
         languages,
+        loading,
         fetchLanguages,
         addLanguage,
         updateLanguage,

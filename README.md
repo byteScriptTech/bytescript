@@ -21,7 +21,6 @@ Firebase authentication for user login and registration
 ├── .eslintrc.json
 ├── .gitignore
 ├── .env.local
-├── Dockerfile
 ├── Dockerfile.dev
 ├── docker-compose.yml
 ├── jest.config.js

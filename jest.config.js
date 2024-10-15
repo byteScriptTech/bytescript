@@ -5,11 +5,18 @@ const createJestConfig = nextJest({
 });
 
 const customJestConfig = {
-  preset: 'ts-jest',
-  testEnvironment: 'jsdom',
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+  preset: 'ts-jest', // Use ts-jest preset
+  testEnvironment: 'jsdom', // Set the test environment to jsdom for testing React components
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'], // Optional: set up testing library configurations
   moduleNameMapper: {
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy', // Handle CSS modules
+    '^@/(.*)$': '<rootDir>/src/$1',
+  },
+  transformIgnorePatterns: [
+    '/node_modules/(?!@firebase)', // Transform @firebase module to support ES modules
+  ],
+  transform: {
+    '^.+\\.tsx?$': 'ts-jest', // Use ts-jest for TypeScript files
   },
 };
 

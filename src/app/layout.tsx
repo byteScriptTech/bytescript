@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
+import NextTopLoader from 'nextjs-toploader';
+import 'regenerator-runtime/runtime';
 import './globals.css';
 import React from 'react';
 
@@ -29,6 +31,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
+        <NextTopLoader />
         {children}
         <Toaster />
       </body>
