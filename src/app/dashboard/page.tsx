@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 
 import Navbar from '@/components/common/Navbar';
 import AuthGuard from '@/components/misc/authGuard';
-import LanguagesList from '@/components/specific/LanguagesList';
+import ExploreLanguages from '@/components/specific/ExploreLanguages';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -52,25 +52,7 @@ function Dashboard() {
                 </div>
                 <div className="grid gap-4 md:grid-cols-[1fr_250px] lg:grid-cols-3 lg:gap-8">
                   <div className="grid auto-rows-max items-start gap-4 lg:col-span-2 lg:gap-8">
-                    <Card
-                      x-chunk="dashboard-07-chunk-2"
-                      className="border p-4 shadow-sm rounded-lg"
-                    >
-                      <CardHeader>
-                        <CardTitle className="text-xl font-bold text-gray-900">
-                          Explore Available Languages
-                        </CardTitle>
-                        <CardDescription className="text-gray-600 mt-1">
-                          Choose a language to continue your learning journey
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="grid gap-4 sm:grid-cols-2">
-                          <LanguagesList />
-                        </div>
-                      </CardContent>
-                    </Card>
-
+                    <ExploreLanguages />
                     <Card
                       x-chunk="dashboard-07-chunk-0"
                       className="bg-white rounded-lg  p-4"
