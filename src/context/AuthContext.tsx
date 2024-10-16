@@ -1,4 +1,5 @@
 import { signInWithPopup, onAuthStateChanged, getAuth } from 'firebase/auth';
+import { doc, getDoc, setDoc } from 'firebase/firestore/lite';
 import { useRouter } from 'next/navigation';
 import {
   createContext,
@@ -10,7 +11,7 @@ import {
 
 import { useToast } from '@/hooks/use-toast';
 
-import { githubProvider, googleProvider } from '../../lib/firebase';
+import { db, githubProvider, googleProvider } from '../../lib/firebase';
 
 interface AuthContextType {
   currentUser: any;
@@ -18,7 +19,12 @@ interface AuthContextType {
   signInWithGithub: () => Promise<void>;
   signOut: () => Promise<void>;
 }
-
+interface UserInfo {
+  uid: string;
+  displayName: string;
+  email: string;
+  photoURL: string | null;
+}
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const useAuth = () => {
@@ -46,12 +52,41 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => unsubscribe();
   }, []);
 
+  const saveUser = async (user: UserInfo) => {
+    const userDocRef = doc(db, 'users', user.uid);
+    const userDoc = await getDoc(userDocRef); // Check if the user exists
+
+    if (!userDoc.exists()) {
+      // User doesn't exist, save them
+      try {
+        await setDoc(userDocRef, {
+          uid: user.uid,
+          displayName: user.displayName,
+          email: user.email,
+          photoURL: user.photoURL,
+        });
+        console.log('User saved to Firestore:', user);
+      } catch (error) {
+        console.error('Error saving user to Firestore:', error);
+      }
+    } else {
+      console.log('User already exists in Firestore');
+    }
+  };
+
   const signInWithGoogle = async () => {
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
       setCurrentUser(user);
-      console.log('Google User:', user);
+      const importantUserInfo: UserInfo = {
+        uid: user.uid,
+        displayName: user.displayName || 'Anonymous',
+        email: user.email || 'No Email',
+        photoURL: user.photoURL,
+      };
+
+      await saveUser(importantUserInfo);
       router.push('/dashboard');
     } catch (error: any) {
       toast({
@@ -66,6 +101,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const result = await signInWithPopup(auth, githubProvider);
       const user = result.user;
+      const importantUserInfo: UserInfo = {
+        uid: user.uid,
+        displayName: user.displayName || 'Anonymous',
+        email: user.email || 'No Email',
+        photoURL: user.photoURL,
+      };
+      await saveUser(importantUserInfo);
       setCurrentUser(user);
       console.log('Github User:', user);
       router.push('/dashboard');

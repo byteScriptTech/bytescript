@@ -1,5 +1,3 @@
-/* eslint-disable no-unused-vars */
-import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React, { useEffect } from 'react';
 
