@@ -1,8 +1,8 @@
 import React, { createContext, ReactNode, useContext } from 'react';
 
 interface LocalStorageContextType {
-  setItem: (key: string, value: string) => void;
-  getItem: (key: string) => string | null;
+  setItem: (key: string, value: any) => void;
+  getItem: (key: string) => any | null;
   removeItem: (key: string) => void;
   clear: () => void;
 }
@@ -22,12 +22,19 @@ export const useLocalStorage = () => {
 };
 
 export const LocalStorageProvider = ({ children }: { children: ReactNode }) => {
-  const setItem = (key: string, value: string) => {
-    localStorage.setItem(key, value);
+  const setItem = (key: string, value: any) => {
+    const serializedValue =
+      typeof value === 'string' ? value : JSON.stringify(value);
+    localStorage.setItem(key, serializedValue);
   };
 
   const getItem = (key: string) => {
-    return localStorage.getItem(key);
+    const storedValue = localStorage.getItem(key);
+    try {
+      return storedValue ? JSON.parse(storedValue) : null;
+    } catch (error) {
+      return storedValue;
+    }
   };
 
   const removeItem = (key: string) => {

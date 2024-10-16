@@ -55,7 +55,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const saveUser = async (user: UserInfo) => {
     const userDocRef = doc(db, 'users', user.uid);
     const userDoc = await getDoc(userDocRef); // Check if the user exists
-
     if (!userDoc.exists()) {
       // User doesn't exist, save them
       try {

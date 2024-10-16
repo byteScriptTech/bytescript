@@ -15,7 +15,7 @@ import { db } from '../../lib/firebase';
 
 interface LanguagesContextProps {
   content: LanguageContent[] | undefined;
-  fetchContent: () => void;
+  fetchContent: (topicName: string) => void;
   loading: boolean;
   scrollToList: { views: { name: string; id: string }[]; id: string }[];
 }
@@ -55,7 +55,7 @@ export const ContentProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem(key, JSON.stringify(data));
   };
 
-  const fetchContent = debounce(async () => {
+  const fetchContent = debounce(async (topicName: string) => {
     setLoading(true);
 
     const cachedContent = getDataFromLocalStorage(`content_${topicName}`);
@@ -105,7 +105,7 @@ export const ContentProvider = ({ children }: { children: ReactNode }) => {
   }, 300);
 
   useEffect(() => {
-    fetchContent();
+    fetchContent(topicName);
     fetchScrollToViewList();
   }, [topicName]);
 

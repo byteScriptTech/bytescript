@@ -22,6 +22,10 @@ const CarryOnWhereLeft: React.FC = () => {
     setLastVisitedTopic(lvt_name);
     setCrryOnPath(`${lvt}&lvt_sub=${lvt_sub}`);
   }, []);
+  const handleCarryOnClick = () => {
+    router.push(carryOnPath);
+  };
+
   return (
     <Card x-chunk="dashboard-07-chunk-0" className="bg-white rounded-lg  p-4">
       <CardHeader>
@@ -47,7 +51,7 @@ const CarryOnWhereLeft: React.FC = () => {
         <div className="mt-6 space-y-2">
           <button
             className="w-full bg-[#00BFA6] hover:bg-[#00A38C] text-white font-semibold py-2 px-4 rounded-md shadow-sm transition-all duration-300"
-            onClick={() => router.push(carryOnPath)}
+            onClick={handleCarryOnClick}
           >
             Resume Learning
           </button>
