@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { useSearchParams } from 'next/navigation';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 interface DataItem {
