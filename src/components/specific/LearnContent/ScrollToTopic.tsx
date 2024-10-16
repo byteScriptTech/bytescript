@@ -1,8 +1,10 @@
-import React from 'react';
+import { useSearchParams } from 'next/navigation';
+import React, { useEffect } from 'react';
 
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useContentContext } from '@/context/ContentContext';
+import { useLocalStorage } from '@/context/LocalhostContext';
 
 type ScrollToTopicProps = {
   loading: boolean;
@@ -10,14 +12,24 @@ type ScrollToTopicProps = {
 
 const ScrollToTopic: React.FC<ScrollToTopicProps> = ({ loading }) => {
   const { scrollToList } = useContentContext();
+  const { setItem } = useLocalStorage();
+  const searchParams = useSearchParams();
+  const lastVisitedSubTopic = searchParams.get('lvt_sub');
   const handleScrollToTopic = (id: string) => {
     const element = document.getElementById(id);
+    setItem('lvt_sub', id);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
+  useEffect(() => {
+    if (lastVisitedSubTopic) {
+      const element = document.getElementById(lastVisitedSubTopic);
+      element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [lastVisitedSubTopic]);
 
-  if (loading) {
+  if (scrollToList.length === 0 || loading) {
     return (
       <React.Fragment>
         <Card className="h-1/2 flex flex-col gap-2 p-4">

@@ -43,7 +43,7 @@ const LearnContent: React.FC<LearnContentProps> = ({
         {...{ loading, topics, setCurrentTopic }}
       />
       <div className="grid gap-6 overflow-y-auto h-[calc(100vh-20vh)] custom-scrollbar">
-        {loading ? (
+        {!content || loading ? (
           <Card className="h-1/2">
             <ContentSkeleton />
           </Card>

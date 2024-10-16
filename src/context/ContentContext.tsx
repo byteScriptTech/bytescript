@@ -1,4 +1,5 @@
 import { collection, getDocs } from 'firebase/firestore/lite';
+import { debounce } from 'lodash';
 import { useSearchParams } from 'next/navigation';
 import {
   createContext,
@@ -14,10 +15,11 @@ import { db } from '../../lib/firebase';
 
 interface LanguagesContextProps {
   content: LanguageContent[] | undefined;
-  fetchContent: () => Promise<void>;
+  fetchContent: () => void;
   loading: boolean;
   scrollToList: { views: { name: string; id: string }[]; id: string }[];
 }
+
 const ContentContext = createContext<LanguagesContextProps | undefined>(
   undefined
 );
@@ -33,14 +35,36 @@ export const useContentContext = () => {
 export const ContentProvider = ({ children }: { children: ReactNode }) => {
   const searchParams = useSearchParams();
   const topicNameArray = searchParams.getAll('name');
+  const topicName = topicNameArray[0];
+
   const [content, setContent] = useState<LanguageContent[] | undefined>();
   const [loading, setLoading] = useState<boolean>(true);
   const [scrollToList, setScrollToList] = useState<
     { views: { name: string; id: string }[]; id: string }[]
   >([]);
-  const topicName = topicNameArray[0];
-  const fetchContent = async () => {
+
+  const getDataFromLocalStorage = (key: string) => {
+    const storedData = localStorage.getItem(key);
+    if (storedData) {
+      return JSON.parse(storedData);
+    }
+    return null;
+  };
+
+  const saveDataToLocalStorage = (key: string, data: any) => {
+    localStorage.setItem(key, JSON.stringify(data));
+  };
+
+  const fetchContent = debounce(async () => {
     setLoading(true);
+
+    const cachedContent = getDataFromLocalStorage(`content_${topicName}`);
+    if (cachedContent) {
+      setContent(cachedContent);
+      setLoading(false);
+      return;
+    }
+
     try {
       const coursesContentCollection = collection(db, topicName);
       const courseContentSnapshot = await getDocs(coursesContentCollection);
@@ -48,14 +72,23 @@ export const ContentProvider = ({ children }: { children: ReactNode }) => {
         id: doc.id,
         ...doc.data(),
       })) as any;
+
+      saveDataToLocalStorage(`content_${topicName}`, courseContentList);
       setContent(courseContentList);
     } catch (error) {
       console.error('Error fetching course content: ', error);
     } finally {
       setLoading(false);
     }
-  };
-  const fetchScrollToViewList = async () => {
+  }, 300);
+
+  const fetchScrollToViewList = debounce(async () => {
+    const cachedScrollToList = getDataFromLocalStorage('scrollToList');
+    if (cachedScrollToList) {
+      setScrollToList(cachedScrollToList);
+      return;
+    }
+
     try {
       const scrollToListCollection = collection(db, 'scroll_to_view');
       const scrollToViewSnapshot = await getDocs(scrollToListCollection);
@@ -63,15 +96,18 @@ export const ContentProvider = ({ children }: { children: ReactNode }) => {
         id: doc.id,
         ...doc.data(),
       })) as any;
+
+      saveDataToLocalStorage('scrollToList', scrollToList);
       setScrollToList(scrollToList);
     } catch (error) {
-      console.error('Error fetching course content: ', error);
+      console.error('Error fetching scroll to view list: ', error);
     }
-  };
+  }, 300);
+
   useEffect(() => {
     fetchContent();
     fetchScrollToViewList();
-  }, []);
+  }, [topicName]);
 
   return (
     <ContentContext.Provider
