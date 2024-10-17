@@ -22,13 +22,16 @@ const ContentSections: React.FC<ContentSectionsProps> = ({
   courseContent,
 }) => {
   const { introduction, explanation } = courseContent || {};
+
   switch (section) {
     case 'introduction':
       return (
         <section id="introduction">
           <Card>
-            <CardHeader>
-              <CardTitle>Introduction</CardTitle>
+            <CardHeader className="relative">
+              <CardTitle>
+                <div>Introduction</div>
+              </CardTitle>
               <CardDescription>
                 {introduction?.text}
                 {explanation?.map((exp, i) => (

@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 
 import { Skeleton } from '@/components/ui/skeleton';
 import { useBreadcrumbContext } from '@/context/BreadCrumbContext';
+import { useLocalStorage } from '@/context/LocalhostContext';
 
 type Topic = {
   id: string;
@@ -25,6 +26,7 @@ const Navigation: React.FC<NavigationProps> = ({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { data, addItem } = useBreadcrumbContext();
+  const { setItem } = useLocalStorage();
 
   useEffect(() => {
     const datalen = data && data.length;
@@ -32,6 +34,11 @@ const Navigation: React.FC<NavigationProps> = ({
       data[datalen - 1] && setCurrentTopic(data[data.length - 1]);
     }
   }, [data]);
+
+  useEffect(() => {
+    setItem('lvt', `${pathname}?${searchParams.toString()}`);
+    setItem('lvt_name', data[data.length - 1]?.name);
+  }, [searchParams, setItem, data, pathname]);
 
   const handleTopicClick = (topic: Topic) => {
     const name = searchParams.get('name');

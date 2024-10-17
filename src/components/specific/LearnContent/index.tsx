@@ -4,6 +4,8 @@ import React, { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useContentContext } from '@/context/ContentContext';
+import { useLanguages } from '@/context/LanguagesContext';
+import { useLocalStorage } from '@/context/LocalhostContext';
 
 import { Content } from './Content';
 import Navigation from './Navigation';
@@ -23,10 +25,21 @@ const LearnContent: React.FC<LearnContentProps> = ({
 }) => {
   const [topics, setTopics] = useState<Topic[] | undefined>([]);
   const searchParams = useSearchParams();
+  const { getItem } = useLocalStorage();
   const topicIdArray = searchParams.getAll('id');
   const { content, loading } = useContentContext();
   const courseContent: any = content && content[0];
   const topicId = topicIdArray[1];
+  const currentUser = getItem('user');
+  const { getUserLearningProgress } = useLanguages();
+  const currentLang = getItem('lvl_name');
+
+  useEffect(() => {
+    if (currentLang && currentUser) {
+      getUserLearningProgress(currentUser.uid, currentLang);
+    }
+  }, [searchParams]);
+
   useEffect(() => {
     if (topicId && courseContent) {
       const { topics } = courseContent[topicId] || {};
@@ -36,6 +49,8 @@ const LearnContent: React.FC<LearnContentProps> = ({
       setTopics(topics);
     }
   }, [topicId, courseContent]);
+
+  // FIXME: Refactor this below code, doesn't look very nice!
   return (
     <div className="mx-auto grid w-full max-w-6xl items-start gap-6 md:grid-cols-[20%_60%_20%] lg:grid-cols-[20%_60%_20%]">
       <Navigation
@@ -43,7 +58,7 @@ const LearnContent: React.FC<LearnContentProps> = ({
         {...{ loading, topics, setCurrentTopic }}
       />
       <div className="grid gap-6 overflow-y-auto h-[calc(100vh-20vh)] custom-scrollbar">
-        {loading ? (
+        {!content || loading ? (
           <Card className="h-1/2">
             <ContentSkeleton />
           </Card>
@@ -69,4 +84,4 @@ const ContentSkeleton = () => {
   );
 };
 
-export default LearnContent;
+export default React.memo(LearnContent);
