@@ -18,6 +18,13 @@ type Topic = {
   isCompleted: boolean;
 };
 
+type ShowToggleProps = {
+  handleIsCompleted: (id: string, isCompleted: boolean) => void;
+  topicId: string;
+  currentLPTopic: Topic | null;
+  isCompleted: boolean;
+};
+
 export const Content: React.FC<ContentProps> = () => {
   const searchParams = useSearchParams();
   const { content, loading, scrollToList } = useContentContext();
@@ -31,6 +38,7 @@ export const Content: React.FC<ContentProps> = () => {
     LanguageContent | undefined
   >();
   const [currentLPTopic, setCurrentLPTopic] = useState<Topic | null>(null);
+  const [isCompleted, setIsCompleted] = useState<boolean>(false);
 
   useEffect(() => {
     if (topicId && courseContent) {
@@ -46,14 +54,17 @@ export const Content: React.FC<ContentProps> = () => {
       const topic = learningProgress?.topics.find(
         (topic: Topic) => topic.id === topicId
       );
+      topic && setIsCompleted(topic?.isCompleted);
       topic && setCurrentLPTopic(topic);
     }
-  }, [learningProgress]);
+  }, [learningProgress, searchParams]);
+
   const handleIsCompleted = (id: string, isCompleted: boolean) => {
     const completedTopics = learningProgress?.topics.reduce(
       (acc: number, topic: Topic) => (topic.isCompleted ? acc + 1 : acc),
       0
     );
+    setIsCompleted((isCompleted) => !isCompleted);
     const updatedTopics = learningProgress?.topics.map((topic) => {
       if (topic.id === id) {
         topic.isCompleted = isCompleted;
@@ -73,23 +84,14 @@ export const Content: React.FC<ContentProps> = () => {
       );
     }
   };
+
   return (
     <div className="text-sm relative">
-      <div className="absolute top-2 right-2 z-10">
-        <Toggle
-          title="Click to mark topic as completed"
-          className={`p-1 h-8 w-8 rounded-full top-3 right-3 bg-gray-100 flex justify-center items-center`}
-          onPressedChange={() =>
-            handleIsCompleted(topicId, !currentLPTopic?.isCompleted)
-          }
-        >
-          {currentLPTopic?.isCompleted ? (
-            <FaCircle size={20} className="text-[#00BFA6]" />
-          ) : (
-            <BiSolidCircleThreeQuarter size={22} className="text-[#00BFA6]" />
-          )}
-        </Toggle>
-      </div>
+      {topicId && (
+        <ShowToggle
+          {...{ handleIsCompleted, topicId, currentLPTopic, isCompleted }}
+        />
+      )}
       {scrollToList[0]?.views.map((topic: { name: string; id: string }) => (
         <React.Fragment key={topic.id}>
           <ContentSections
@@ -105,4 +107,28 @@ export const Content: React.FC<ContentProps> = () => {
   );
 };
 
+const ShowToggle: React.FC<ShowToggleProps> = ({
+  handleIsCompleted,
+  topicId,
+  currentLPTopic,
+  isCompleted,
+}) => {
+  return (
+    <div className="absolute top-2 right-2 z-10">
+      <Toggle
+        title="Click to mark topic as completed"
+        className={`p-1 h-8 w-8 rounded-full top-3 right-3 bg-gray-100 flex justify-center items-center`}
+        onPressedChange={() =>
+          handleIsCompleted(topicId, !currentLPTopic?.isCompleted)
+        }
+      >
+        {isCompleted ? (
+          <FaCircle size={20} className="text-[#00BFA6]" />
+        ) : (
+          <BiSolidCircleThreeQuarter size={22} className="text-[#00BFA6]" />
+        )}
+      </Toggle>
+    </div>
+  );
+};
 export default React.memo(Content);

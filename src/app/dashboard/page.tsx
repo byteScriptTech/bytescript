@@ -133,11 +133,17 @@ function Dashboard() {
                             </CardHeader>
                             <CardContent>
                               <div className="grid gap-4">
-                                <div className="text-gray-700">
+                                {/* <div className="text-gray-700">
                                   <p>Progress: 20/50 problems completed</p>
                                   <p>Next Topic: Dynamic Programming</p>
+                                </div> */}
+                                <div className="text-center text-gray-500">
+                                  Coming Soon...
                                 </div>
-                                <Button className="w-full bg-[#00BFA6] hover:bg-[#00A38C]text-white rounded-md">
+                                <Button
+                                  disabled
+                                  className="w-full bg-[#00BFA6] hover:bg-[#00A38C]text-white rounded-md cursor-pointer"
+                                >
                                   Start Today&apos;s Challenge
                                 </Button>
                               </div>

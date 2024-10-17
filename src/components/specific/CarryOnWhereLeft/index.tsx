@@ -11,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { useLanguages } from '@/context/LanguagesContext';
 import { useLocalStorage } from '@/context/LocalhostContext';
 
 const CarryOnWhereLeft: React.FC = () => {
@@ -19,13 +20,23 @@ const CarryOnWhereLeft: React.FC = () => {
   const { getItem } = useLocalStorage();
   const router = useRouter();
   const currentLang = getItem('lvl_name');
+  const lvt_name = getItem('lvt_name');
+  const { learningProgress, getUserLearningProgress } = useLanguages();
+
   useEffect(() => {
     const lvt = getItem('lvt');
-    const lvt_name = getItem('lvt_name');
     const lvt_sub = getItem('lvt_sub');
+    const user = getItem('user');
     setLastVisitedTopic(lvt_name);
     setCrryOnPath(`${lvt}&lvt_sub=${lvt_sub}`);
+    getUserLearningProgress(user.uid, currentLang);
   }, []);
+
+  useEffect(() => {
+    if (learningProgress) {
+      // setCurrentTopic()
+    }
+  });
   const handleCarryOnClick = () => {
     router.push(carryOnPath);
   };
@@ -67,7 +78,7 @@ const CarryOnWhereLeft: React.FC = () => {
                 max={100}
                 min={0}
                 className="h-20"
-                value={10}
+                value={learningProgress?.progress || 0}
                 gaugePrimaryColor="#00BFA6"
                 gaugeSecondaryColor="rgba(0, 0, 0, 0.1)"
               />

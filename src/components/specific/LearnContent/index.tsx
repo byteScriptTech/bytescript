@@ -32,12 +32,13 @@ const LearnContent: React.FC<LearnContentProps> = ({
   const topicId = topicIdArray[1];
   const currentUser = getItem('user');
   const { getUserLearningProgress } = useLanguages();
+  const currentLang = getItem('lvl_name');
 
   useEffect(() => {
-    if (content) {
-      getUserLearningProgress(currentUser.uid, content[0]?.name);
+    if (currentLang && currentUser) {
+      getUserLearningProgress(currentUser.uid, currentLang);
     }
-  }, [content]);
+  }, [searchParams]);
 
   useEffect(() => {
     if (topicId && courseContent) {
@@ -48,6 +49,8 @@ const LearnContent: React.FC<LearnContentProps> = ({
       setTopics(topics);
     }
   }, [topicId, courseContent]);
+
+  // FIXME: Refactor this below code, doesn't look very nice!
   return (
     <div className="mx-auto grid w-full max-w-6xl items-start gap-6 md:grid-cols-[20%_60%_20%] lg:grid-cols-[20%_60%_20%]">
       <Navigation
