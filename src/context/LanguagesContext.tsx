@@ -42,7 +42,7 @@ interface LanguagesContextProps {
     language: string,
     updatedProgress: number,
     updatedTopics: Topic[]
-  ) => Promise<void>;
+  ) => void;
   getUserLearningProgress: (userUUID: string, language: string) => void;
   learningProgress: LearningProgress | null;
   loading: boolean;
@@ -160,28 +160,30 @@ export const LanguagesProvider = ({
   };
 
   // Update user's learning progress for a specific language
-  const updateUserLearningProgress = async (
-    userUUID: string,
-    language: string,
-    updatedProgress: number,
-    updatedTopics: Topic[]
-  ) => {
-    const languageRef = doc(
-      db,
-      `user_learnings/${userUUID}/languages`,
-      language
-    );
-
-    try {
-      await updateDoc(languageRef, {
-        progress: updatedProgress,
-        topics: updatedTopics,
-      });
-      console.log('User learning progress updated for language:', language);
-    } catch (error) {
-      console.error('Error updating user learning progress: ', error);
+  const updateUserLearningProgress = debounce(
+    async (
+      userUUID: string,
+      language: string,
+      updatedProgress: number,
+      updatedTopics: Topic[]
+    ) => {
+      const languageRef = doc(
+        db,
+        `user_learnings/${userUUID}/languages`,
+        language
+      );
+      try {
+        await updateDoc(languageRef, {
+          progress: updatedProgress,
+          topics: updatedTopics,
+        });
+        getUserLearningProgress(userUUID, language);
+        console.log('User learning progress updated for language:', language);
+      } catch (error) {
+        console.error('Error updating user learning progress: ', error);
+      }
     }
-  };
+  );
   // Get user's learning progress for a specific language
   const getUserLearningProgress = debounce(
     async (userUUID: string, language: string) => {
@@ -194,7 +196,6 @@ export const LanguagesProvider = ({
       try {
         const docSnap = await getDoc(languageRef);
         const learningProgress = docSnap.data();
-        console.log(docSnap.data(), 'docSnap.data()');
         if (docSnap.exists()) {
           setLearningProgress(learningProgress as LearningProgress);
         } else {

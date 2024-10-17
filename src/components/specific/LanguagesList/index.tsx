@@ -8,21 +8,18 @@ import { useLocalStorage } from '@/context/LocalhostContext';
 import CourseIcon from '../CourseIcon';
 
 const LanguagesList = () => {
-  const {
-    languages,
-    learningProgress,
-    getUserLearningProgress,
-    addUserLearningProgress,
-  } = useLanguages();
+  const { languages, getUserLearningProgress, addUserLearningProgress } =
+    useLanguages();
   const { content, fetchContent } = useContentContext();
   const { getItem, setItem } = useLocalStorage();
   const progress = getItem('progressCache');
   const { currentUser } = useAuth();
 
-  const handleLanguageClick = (id: string) => {
-    if (id && !content) {
-      fetchContent(id);
+  const handleLanguageClick = (name: string) => {
+    if (name && !content) {
+      fetchContent(name);
     }
+    setItem('lvl_name', name);
   };
 
   useEffect(() => {
@@ -36,7 +33,6 @@ const LanguagesList = () => {
       const findLanguage = progress?.includes(content[0]?.name.toLowerCase());
 
       if (!findLanguage) {
-        console.log('this runs!');
         if (progress?.length) {
           setItem('progressCache', [...progress, content[0]?.name]);
         } else {
@@ -46,11 +42,7 @@ const LanguagesList = () => {
       }
     }
   }, [content]);
-  useEffect(() => {
-    if (learningProgress) {
-      console.log(learningProgress);
-    }
-  }, [learningProgress]);
+
   return (
     <div className="flex gap-2">
       {languages.map((language) => (

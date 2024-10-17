@@ -4,6 +4,8 @@ import React, { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useContentContext } from '@/context/ContentContext';
+import { useLanguages } from '@/context/LanguagesContext';
+import { useLocalStorage } from '@/context/LocalhostContext';
 
 import { Content } from './Content';
 import Navigation from './Navigation';
@@ -23,10 +25,20 @@ const LearnContent: React.FC<LearnContentProps> = ({
 }) => {
   const [topics, setTopics] = useState<Topic[] | undefined>([]);
   const searchParams = useSearchParams();
+  const { getItem } = useLocalStorage();
   const topicIdArray = searchParams.getAll('id');
   const { content, loading } = useContentContext();
   const courseContent: any = content && content[0];
   const topicId = topicIdArray[1];
+  const currentUser = getItem('user');
+  const { getUserLearningProgress } = useLanguages();
+
+  useEffect(() => {
+    if (content) {
+      getUserLearningProgress(currentUser.uid, content[0]?.name);
+    }
+  }, [content]);
+
   useEffect(() => {
     if (topicId && courseContent) {
       const { topics } = courseContent[topicId] || {};
@@ -69,4 +81,4 @@ const ContentSkeleton = () => {
   );
 };
 
-export default LearnContent;
+export default React.memo(LearnContent);
