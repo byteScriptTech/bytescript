@@ -29,7 +29,7 @@ const LanguagesList = () => {
         id: topic.id,
         isCompleted: false,
       }));
-      getUserLearningProgress(currentUser.uid, content[0]?.name);
+      getUserLearningProgress(currentUser?.uid, content[0]?.name);
       const findLanguage = progress?.includes(content[0]?.name.toLowerCase());
 
       if (!findLanguage) {

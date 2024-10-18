@@ -22,14 +22,14 @@ const CarryOnWhereLeft: React.FC = () => {
   const currentLang = getItem('lvl_name');
   const lvt_name = getItem('lvt_name');
   const { learningProgress, getUserLearningProgress } = useLanguages();
+  const lvt = getItem('lvt');
+  const lvt_sub = getItem('lvt_sub');
+  const user = getItem('user');
 
   useEffect(() => {
-    const lvt = getItem('lvt');
-    const lvt_sub = getItem('lvt_sub');
-    const user = getItem('user');
     setLastVisitedTopic(lvt_name);
     setCrryOnPath(`${lvt}&lvt_sub=${lvt_sub}`);
-    getUserLearningProgress(user.uid, currentLang);
+    user && currentLang && getUserLearningProgress(user?.uid, currentLang);
   }, []);
 
   useEffect(() => {

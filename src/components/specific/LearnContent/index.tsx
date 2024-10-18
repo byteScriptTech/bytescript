@@ -33,7 +33,6 @@ const LearnContent: React.FC<LearnContentProps> = ({
   const currentUser = getItem('user');
   const { getUserLearningProgress } = useLanguages();
   const currentLang = getItem('lvl_name');
-
   useEffect(() => {
     if (currentLang && currentUser) {
       getUserLearningProgress(currentUser.uid, currentLang);

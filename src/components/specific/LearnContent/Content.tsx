@@ -71,6 +71,11 @@ export const Content: React.FC<ContentProps> = () => {
       }
       return topic;
     });
+    console.log(
+      typeof completedTopics === 'number',
+      learningProgress?.topics,
+      updatedTopics
+    );
     if (
       typeof completedTopics === 'number' &&
       learningProgress?.topics &&

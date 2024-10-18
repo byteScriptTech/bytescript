@@ -52,13 +52,13 @@ const ContentSections: React.FC<ContentSectionsProps> = ({
               <li className="py-2">
                 <b>Objective: </b>
                 {introduction.objective.map((obj, i) => (
-                  <li key={i}>{obj}</li>
+                  <span key={i}>{obj}</span>
                 ))}
               </li>
               <li className="py-2">
                 <b>Prerequisite: </b>
                 {introduction.prerequisites?.map((prerequisite, i) => (
-                  <li key={i}>{prerequisite}</li>
+                  <span key={i}>{prerequisite}</span>
                 ))}
               </li>
             </ul>
@@ -73,7 +73,7 @@ const ContentSections: React.FC<ContentSectionsProps> = ({
               <li className="py-2">
                 <b>Key Concepts: </b>
                 {introduction.key_concepts.map((keyConcept, i) => (
-                  <li key={i}>{keyConcept}</li>
+                  <span key={i}>{keyConcept}</span>
                 ))}
               </li>
             </ul>
@@ -88,7 +88,7 @@ const ContentSections: React.FC<ContentSectionsProps> = ({
               <li className="py-2">
                 <b>Real World Use Cases: </b>
                 {introduction.real_world_use_cases.map((useCase, i) => (
-                  <li key={i}>{useCase}</li>
+                  <span key={i}>{useCase}</span>
                 ))}
               </li>
             </ul>
