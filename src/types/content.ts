@@ -22,7 +22,7 @@ interface Topic {
 }
 
 interface BestPracticesAndCommonMistakes {
-  common_mistakes: { text: string; code?: string }[];
+  common_mistakes: { text: string; code?: string; fix?: string }[];
   best_practices: { text: string; code?: string }[];
 }
 

@@ -1,5 +1,5 @@
 import { signInWithPopup, onAuthStateChanged, getAuth } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore/lite';
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore/lite';
 import { useRouter } from 'next/navigation';
 import {
   createContext,
@@ -18,12 +18,17 @@ interface AuthContextType {
   signInWithGoogle: () => Promise<void>;
   signInWithGithub: () => Promise<void>;
   signOut: () => Promise<void>;
+  updateUser: (user: UserInfo, updates: Partial<UserInfo>) => Promise<void>;
 }
 interface UserInfo {
   uid: string;
   displayName: string;
   email: string;
   photoURL: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+  lastLoginAt?: string;
+  has_update?: boolean;
 }
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -55,15 +60,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const saveUser = async (user: UserInfo) => {
     const userDocRef = doc(db, 'users', user.uid);
     const userDoc = await getDoc(userDocRef); // Check if the user exists
-
+    console.log(user, 'user saved');
+    const { uid, displayName, email, photoURL, has_update } = user;
     if (!userDoc.exists()) {
       // User doesn't exist, save them
       try {
         await setDoc(userDocRef, {
-          uid: user.uid,
-          displayName: user.displayName,
-          email: user.email,
-          photoURL: user.photoURL,
+          uid,
+          displayName,
+          email,
+          photoURL,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          lastLoginAt: new Date().toISOString(),
+          has_update,
         });
         console.log('User saved to Firestore:', user);
       } catch (error) {
@@ -84,6 +94,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         displayName: user.displayName || 'Anonymous',
         email: user.email || 'No Email',
         photoURL: user.photoURL,
+        has_update: false,
       };
       localStorage.setItem('user', JSON.stringify(importantUserInfo));
 
@@ -97,6 +108,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       console.error('Google Sign In Error:', error);
     }
   };
+  const updateUser = async (user: UserInfo, updates: Partial<UserInfo>) => {
+    const userDocRef = doc(db, 'users', user.uid);
+    const userDoc = await getDoc(userDocRef);
+    console.log(user.uid, updates, 'user.uid');
+    if (userDoc.exists()) {
+      try {
+        await updateDoc(userDocRef, {
+          ...updates, // Only update the fields that are passed
+          updatedAt: new Date().toISOString(),
+        });
+        console.log('User updated in Firestore:', user);
+      } catch (error) {
+        console.error('Error updating user in Firestore:', error);
+      }
+    } else {
+      console.log('User does not exist in Firestore');
+    }
+  };
 
   const signInWithGithub = async () => {
     try {
@@ -107,6 +136,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         displayName: user.displayName || 'Anonymous',
         email: user.email || 'No Email',
         photoURL: user.photoURL,
+        has_update: false,
       };
       localStorage.setItem('user', JSON.stringify(importantUserInfo));
       await saveUser(importantUserInfo);
@@ -147,6 +177,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         signInWithGoogle,
         signInWithGithub,
         signOut,
+        updateUser,
       }}
     >
       {children}

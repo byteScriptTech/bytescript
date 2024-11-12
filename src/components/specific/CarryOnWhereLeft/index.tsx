@@ -32,11 +32,6 @@ const CarryOnWhereLeft: React.FC = () => {
     user && currentLang && getUserLearningProgress(user?.uid, currentLang);
   }, []);
 
-  useEffect(() => {
-    if (learningProgress) {
-      // setCurrentTopic()
-    }
-  });
   const handleCarryOnClick = () => {
     router.push(carryOnPath);
   };
