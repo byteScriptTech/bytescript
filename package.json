@@ -15,6 +15,7 @@
     "prepare": "husky install"
   },
   "dependencies": {
+    "@monaco-editor/react": "^4.6.0",
     "@radix-ui/react-checkbox": "^1.1.2",
     "@radix-ui/react-dialog": "^1.1.2",
     "@radix-ui/react-dropdown-menu": "^2.1.2",
@@ -32,6 +33,7 @@
     "firebase": "^10.14.0",
     "framer-motion": "^11.11.8",
     "lucide-react": "^0.447.0",
+    "monaco-editor": "^0.52.2",
     "next": "14.2.14",
     "nextjs-toploader": "^3.7.15",
     "react": "^18",

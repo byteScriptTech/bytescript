@@ -98,8 +98,8 @@ const ContentSections: React.FC<ContentSectionsProps> = ({
     case 'examples':
       return (
         <section id="examples">
-          {courseContent?.examples.length && <b>Examples:</b>}
-          {courseContent?.examples.map((example, i) => (
+          {courseContent?.examples?.length && <b>Examples:</b>}
+          {courseContent?.examples?.map((example, i) => (
             <div key={i} className="py-2">
               <p>{example.description}</p>
               <CodeBlock code={`${example.code}`} />
