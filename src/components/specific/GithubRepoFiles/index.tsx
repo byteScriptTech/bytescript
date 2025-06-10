@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 
 import ReadmeViewer from '@/components/common/ReadmeViewer';
+import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 
-const repoLink = process.env.NEXT_PUBLIC_GITHUB_REPO_LINK;
-interface GithubRepoFilesProps {}
+interface GithubRepoFilesProps {
+  repoLink: string;
+}
 
-const GithubRepoFiles: React.FC<GithubRepoFilesProps> = () => {
+const GithubRepoFiles: React.FC<GithubRepoFilesProps> = ({ repoLink }) => {
   const [files, setFiles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -37,11 +39,27 @@ const GithubRepoFiles: React.FC<GithubRepoFilesProps> = () => {
           <ReadmeViewer apiUrl={`${repoLink}/README.md`} />
         </li>
       )}
-      {files
-        .filter((file) => file !== readmeFile)
-        .map((file) => (
-          <li key={file.sha}>{file.name}</li>
-        ))}
+      <div className="flex gap-2 my-2">
+        {files
+          .filter((file) => file !== readmeFile)
+          .map((file) => (
+            <Card
+              onClick={() => {
+                const url = new URL(window.location.href);
+                url.searchParams.set('file', file.name);
+                window.history.pushState({}, '', url.toString());
+              }}
+              key={file.sha || file.name}
+              className="bg-white rounded-lg p-4 "
+            >
+              <CardHeader>
+                <CardTitle className="text-xl font-semibold text-gray-800">
+                  {file.name}
+                </CardTitle>
+              </CardHeader>
+            </Card>
+          ))}
+      </div>
     </ul>
   );
 };
