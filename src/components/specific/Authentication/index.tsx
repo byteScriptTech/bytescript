@@ -1,28 +1,12 @@
 'use client';
 import { useState } from 'react';
 import { FaGithub } from 'react-icons/fa';
-import { FcGoogle } from 'react-icons/fc';
 
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardTitle,
-} from '@/components/ui/card';
 import { useAuth } from '@/context/AuthContext';
 
 const Authentication = () => {
   const [error, setError] = useState<string | null>(null);
-  const { signInWithGoogle, signInWithGithub } = useAuth();
-
-  const handleGoogleLogin = async () => {
-    try {
-      await signInWithGoogle();
-    } catch (error: any) {
-      setError('Failed to sign in with Google');
-    }
-  };
+  const { signInWithGithub } = useAuth();
 
   const handleGithubLogin = async () => {
     try {
@@ -33,42 +17,49 @@ const Authentication = () => {
   };
 
   return (
-    <div className="grid place-content-center h-screen">
-      {error && <p className="text-red-500">{error}</p>}
-      <Card className="sm:w-96 sm:h-auto p-6 text-center bg-white rounded-lg transition-shadow hover:shadow-md">
-        <CardTitle className="text-2xl font-bold text-gray-800 mb-2">
-          Welcome to biteScript
-        </CardTitle>
-        <CardDescription className="text-gray-600 mb-6">
-          Let&apos;s kickstart your journey to becoming a Rockstar programmer!
-        </CardDescription>
-        <CardContent>
-          <div className="mb-4">
-            <Button
-              onClick={handleGoogleLogin}
-              variant="outline"
-              className="w-full border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors rounded-md py-2"
-            >
-              <span className="mr-2">
-                <FcGoogle size={23} />
+    <div
+      className="relative flex size-full min-h-screen flex-col bg-[#111418] dark group/design-root overflow-x-hidden"
+      style={{ fontFamily: 'Inter, "Noto Sans", sans-serif' }}
+    >
+      <div className="layout-container flex h-full grow flex-col">
+        <header className="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#283039] px-4 sm:px-10 py-3">
+          <div className="flex items-center gap-2 sm:gap-4">
+            <span>
+              <span className="text-white text-md sm:text-md font-bold">
+                bite
               </span>
-              Login with Google
-            </Button>
-          </div>
-          <div>
-            <Button
-              onClick={handleGithubLogin}
-              variant="outline"
-              className="w-full border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors rounded-md py-2"
-            >
-              <span className="mr-2">
-                <FaGithub size={23} />
+              <span className="text-[#00BFA6] text-base sm:text-xl font-bold">
+                Script.
               </span>
-              Login with GitHub
-            </Button>
+            </span>
           </div>
-        </CardContent>
-      </Card>
+        </header>
+        <div className="px-4 sm:px-40 flex flex-1 justify-center items-center">
+          <div className="layout-content-container flex flex-col w-full max-w-[512px] py-4 sm:py-5 justify-center items-center">
+            {error && <p className="text-red-500">{error}</p>}
+            <h2 className="text-white tracking-light text-[28px] font-semibold leading-tight px-4 text-center pb-3 pt-5">
+              Sign in to biteScript
+            </h2>
+            <div className="flex px-4 py-3 justify-center">
+              <button
+                className="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-10 px-4 bg-[#283039] text-white gap-2 pl-4 text-sm font-bold leading-normal tracking-[0.015em]"
+                onClick={handleGithubLogin}
+              >
+                <div
+                  className="text-white"
+                  data-icon="GithubLogo"
+                  data-size="20px"
+                  data-weight="regular"
+                  data-testid="github-logo"
+                >
+                  <FaGithub size={23} />
+                </div>
+                <span className="truncate">Sign in with GitHub</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

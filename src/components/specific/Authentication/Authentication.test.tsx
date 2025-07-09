@@ -1,56 +1,115 @@
 import { fireEvent, render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
 
 import { useAuth } from '@/context/AuthContext';
 
 import Authentication from '.';
 
-jest.mock('../../../context/AuthContext', () => ({ useAuth: jest.fn() }));
+jest.mock('@/context/AuthContext', () => ({
+  useAuth: jest.fn(() => ({
+    signInWithGithub: jest.fn(),
+  })),
+}));
 
-describe('Authentication', () => {
-  const mockGoogleSignIn = jest.fn();
-  const mockGithubSignIn = jest.fn();
+describe('Authentication Component', () => {
+  const mockSignInWithGithub = jest.fn(() => {
+    throw new Error('Failed to sign in with GitHub');
+  });
 
   beforeEach(() => {
+    jest.clearAllMocks();
     (useAuth as jest.Mock).mockReturnValue({
-      signInWithGoogle: mockGoogleSignIn,
-      signInWithGithub: mockGithubSignIn,
+      signInWithGithub: mockSignInWithGithub,
     });
   });
 
-  test("Should render the 'Authentication' component", () => {
+  test('renders without errors', () => {
     render(<Authentication />);
 
-    expect(screen.getByText('Welcome to biteScript')).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        "Let's kickstart your journey to becoming a Rockstar programmer!"
-      )
-    ).toBeInTheDocument();
+    // Check logo text
+    expect(screen.getByText('bite')).toBeInTheDocument();
+    expect(screen.getByText('Script.')).toBeInTheDocument();
 
-    expect(
-      screen.getByRole('button', { name: 'Login with Google' })
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole('button', { name: 'Login with GitHub' })
-    ).toBeInTheDocument();
+    // Check heading
+    expect(screen.getByText('Sign in to biteScript')).toBeInTheDocument();
+
+    // Check sign in button
+    const signInButton = screen.getByRole('button', {
+      name: 'Sign in with GitHub',
+    });
+    expect(signInButton).toBeInTheDocument();
+    expect(signInButton).toHaveClass('rounded-xl');
+    expect(signInButton).toHaveClass('bg-[#283039]');
+
+    // Check GitHub icon
+    expect(screen.getByTestId('github-logo')).toBeInTheDocument();
   });
 
-  test('Should run the signInWithGoogle function on button click', () => {
+  test('handles GitHub sign in click', async () => {
     render(<Authentication />);
-    const googleButton = screen.getByRole('button', {
-      name: 'Login with Google',
-    });
-    fireEvent.click(googleButton);
 
-    expect(mockGoogleSignIn).toHaveBeenCalled();
+    const signInButton = screen.getByRole('button', {
+      name: 'Sign in with GitHub',
+    });
+    fireEvent.click(signInButton);
+
+    expect(mockSignInWithGithub).toHaveBeenCalledTimes(1);
   });
-  test('Should run the signInWithGithub function on button click', () => {
-    render(<Authentication />);
-    const githubButton = screen.getByRole('button', {
-      name: 'Login with GitHub',
-    });
-    fireEvent.click(githubButton);
 
-    expect(mockGithubSignIn).toHaveBeenCalled();
+  test('displays error message when sign in fails', async () => {
+    render(<Authentication />);
+
+    // Simulate sign in failure
+    await fireEvent.click(
+      screen.getByRole('button', { name: 'Sign in with GitHub' })
+    );
+
+    // Wait for error message to appear
+    await screen.findByText('Failed to sign in with GitHub');
+    const errorMessage = screen.getByText('Failed to sign in with GitHub');
+    expect(errorMessage).toBeInTheDocument();
+    expect(errorMessage).toHaveClass('text-red-500');
+  });
+
+  test('has proper styling for logo text', () => {
+    render(<Authentication />);
+
+    // Check logo text colors and sizes
+    const biteText = screen.getByText('bite');
+    const scriptText = screen.getByText('Script.');
+
+    expect(biteText).toHaveClass('text-white');
+    expect(biteText).toHaveClass('text-md');
+    expect(biteText).toHaveClass('sm:text-md');
+    expect(scriptText).toHaveClass('text-[#00BFA6]');
+    expect(scriptText).toHaveClass('text-base');
+    expect(scriptText).toHaveClass('sm:text-xl');
+  });
+
+  test('has proper layout and spacing', () => {
+    render(<Authentication />);
+
+    // Check header spacing
+    expect(screen.getByRole('banner')).toHaveClass('px-4');
+    expect(screen.getByRole('banner')).toHaveClass('sm:px-10');
+
+    // Check content container layout
+    const contentContainer = screen
+      .getByText('Sign in to biteScript')
+      .closest('div');
+    expect(contentContainer).toHaveClass('layout-content-container');
+    expect(contentContainer).toHaveClass('flex');
+    expect(contentContainer).toHaveClass('flex-col');
+    expect(contentContainer).toHaveClass('w-full');
+    expect(contentContainer).toHaveClass('max-w-[512px]');
+    expect(contentContainer).toHaveClass('py-4');
+    expect(contentContainer).toHaveClass('sm:py-5');
+    expect(contentContainer).toHaveClass('justify-center');
+    expect(contentContainer).toHaveClass('items-center');
+
+    // Check heading alignment
+    expect(screen.getByText('Sign in to biteScript')).toHaveClass(
+      'text-center'
+    );
   });
 });
