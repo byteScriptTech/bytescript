@@ -66,7 +66,7 @@ export const LanguagesProvider = ({
   children: React.ReactNode;
 }) => {
   const [languages, setLanguages] = useState<Language[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [learningProgress, setLearningProgress] =
     useState<LearningProgress | null>(null);
 
