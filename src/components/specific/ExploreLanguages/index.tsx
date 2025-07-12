@@ -28,10 +28,10 @@ const ExploreLanguages: React.FC = () => {
     >
       <CardHeader>
         <CardTitle className="text-xl font-bold text-gray-900">
-          Explore Available Languages
+          Explore Learning Categories
         </CardTitle>
         <CardDescription className="text-gray-600 mt-1">
-          Choose a language to continue your learning journey
+          Select a topic and dive deeper into your skills.
         </CardDescription>
       </CardHeader>
       <CardContent>

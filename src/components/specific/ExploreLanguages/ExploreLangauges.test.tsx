@@ -35,10 +35,10 @@ describe('ExploreLanguages Component', () => {
 
     render(<ExploreLanguages />);
 
-    expect(screen.getByText('Explore Available Languages')).toBeInTheDocument();
+    expect(screen.getByText('Explore Learning Categories')).toBeInTheDocument();
 
     expect(
-      screen.getByText('Choose a language to continue your learning journey')
+      screen.getByText('Select a topic and dive deeper into your skills.')
     ).toBeInTheDocument();
   });
 });
