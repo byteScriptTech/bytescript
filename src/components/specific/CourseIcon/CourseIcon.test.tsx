@@ -53,12 +53,6 @@ describe('CourseIcon Component Test', () => {
     expect(pythonIcon).toBeInTheDocument();
   });
 
-  test('Should render the Typescript icon', () => {
-    render(<CourseIcon language="typescript" id="abc" />);
-    const typescriptIcon = screen.getByTestId('typescript-icon');
-    expect(typescriptIcon).toBeInTheDocument();
-  });
-
   test('Should render the DataStructures icon', () => {
     render(<CourseIcon language="data structures & algorithms" id="abc" />);
     const dataStructuresIcon = screen.getByTestId('data-structures-icon');

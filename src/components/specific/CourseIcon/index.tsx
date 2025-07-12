@@ -5,7 +5,6 @@ import CompetitiveProgrammingIcon from '@/assets/CourseIcons/CompetitiveProgramm
 import DataStructuresIcon from '@/assets/CourseIcons/DataStructuresIcon';
 import JavascriptIcon from '@/assets/CourseIcons/Javascript';
 import PythonIcon from '@/assets/CourseIcons/Python';
-import TypeScriptIcon from '@/assets/CourseIcons/TypeScriptIcon';
 
 interface CourseIconProps {
   language: string;
@@ -36,14 +35,7 @@ const CourseIcon: React.FC<CourseIconProps> = ({ language, id }) => {
           </div>
         </Link>
       );
-    case 'typescript':
-      return (
-        <Link href={`/language?name=${language}&id=${id}`}>
-          <div className={cardStyles} tabIndex={0} role="button">
-            <TypeScriptIcon altText="TypeScript" size={40} />
-          </div>
-        </Link>
-      );
+
     case 'competitive programming':
       return (
         <Link href={`/language?name=${language}&id=${id}`}>
