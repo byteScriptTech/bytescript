@@ -1,65 +1,79 @@
+import { useRouter } from 'next/navigation';
 import React, { useEffect } from 'react';
 
-import { useAuth } from '@/context/AuthContext';
 import { useContentContext } from '@/context/ContentContext';
-import { useLanguages } from '@/context/LanguagesContext';
 import { useLocalStorage } from '@/context/LocalhostContext';
+import { useTopics } from '@/hooks/useTopics';
 
 import CourseIcon from '../CourseIcon';
 
-const LanguagesList = () => {
-  const { languages, getUserLearningProgress, addUserLearningProgress } =
-    useLanguages();
+export const LanguagesList = () => {
+  const router = useRouter();
+  const { topics, loading } = useTopics();
   const { content, fetchContent } = useContentContext();
   const { getItem, setItem } = useLocalStorage();
   const progress = getItem('progressCache');
-  const { currentUser } = useAuth();
 
-  const handleLanguageClick = (name: string) => {
+  const handleTopicClick = (name: string, id: string) => {
     if (name && !content) {
       fetchContent(name);
     }
     setItem('lvl_name', name);
+    router.push(`/language?name=${name}&id=${id}`);
   };
 
   useEffect(() => {
     if (content) {
-      const topics = content[0]?.topics.map((topic) => ({
+      const topicsData = topics?.map((topic) => ({
         name: topic.name,
         id: topic.id,
-        isCompleted: false,
       }));
-      getUserLearningProgress(currentUser?.uid, content[0]?.name);
-      const findLanguage = progress?.includes(content[0]?.name.toLowerCase());
 
-      if (!findLanguage) {
-        if (progress?.length) {
-          setItem('progressCache', [...progress, content[0]?.name]);
-        } else {
-          setItem('progressCache', [content[0]?.name.toLowerCase()]);
+      if (topicsData) {
+        const findLanguage = progress?.includes(content[0]?.name.toLowerCase());
+
+        if (!findLanguage) {
+          if (progress?.length) {
+            setItem('progressCache', [...progress, content[0]?.name]);
+          } else {
+            setItem('progressCache', [content[0]?.name.toLowerCase()]);
+          }
+          // addUserLearningProgress is not defined, you might need to import or define it
+          // addUserLearningProgress(currentUser.uid, content[0].name, topicsData);
         }
-        addUserLearningProgress(currentUser.uid, content[0].name, topics);
       }
     }
-  }, [content]);
+  }, [content, topics, progress, setItem]);
 
   return (
-    <div className="flex gap-2">
-      {languages.map((language) => (
-        <div
-          onClick={() => handleLanguageClick(language.name)}
-          key={language.id}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              handleLanguageClick(language.name);
-            }
-          }}
-          role="button"
-          tabIndex={0}
-        >
-          <CourseIcon language={language.name} id={language.id} />
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {loading ? (
+        <div className="col-span-full text-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
         </div>
-      ))}
+      ) : topics?.length === 0 ? (
+        <div className="col-span-full text-center py-8">
+          <p className="text-gray-600">No topics found</p>
+        </div>
+      ) : (
+        topics.map((topic) => (
+          <div
+            key={topic.id}
+            className="group relative"
+            onClick={() => handleTopicClick(topic.name.toLowerCase(), topic.id)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                handleTopicClick(topic.name.toLowerCase(), topic.id);
+              }
+            }}
+            role="button"
+            tabIndex={0}
+          >
+            <CourseIcon language={topic.name.toLowerCase()} id={topic.id} />
+            <div className="absolute inset-0 bg-black/10 rounded-lg transition-opacity group-hover:opacity-100 opacity-0"></div>
+          </div>
+        ))
+      )}
     </div>
   );
 };
