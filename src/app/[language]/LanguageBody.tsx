@@ -4,7 +4,6 @@ import { notFound } from 'next/navigation';
 import React from 'react';
 
 import Navbar from '@/components/common/Navbar';
-import SideBar from '@/components/common/Sidebar';
 import LearnContent from '@/components/specific/LearnContent';
 import LearnScreenBreadCrumb from '@/components/specific/LearnScreenBreadCrumb';
 import { useLanguages } from '@/context/LanguagesContext';
@@ -46,7 +45,6 @@ const LanguageBody: React.FC<LanguageBodyProps> = ({
 
   return (
     <div>
-      <SideBar />
       <div className="flex min-h-screen w-full flex-col">
         <Navbar />
         <main className="flex min-h-[calc(100vh_-_theme(spacing.16))] flex-1 flex-col gap-4 bg-muted/40 p-4 md:gap-8 md:p-10">
