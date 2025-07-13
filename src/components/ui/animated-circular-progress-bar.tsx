@@ -5,10 +5,14 @@ import { cn } from '@/lib/utils';
 interface Props {
   max: number;
   value: number;
-  min: number;
+  min?: number;
   gaugePrimaryColor: string;
   gaugeSecondaryColor: string;
   className?: string;
+  role?: string;
+  'aria-valuenow'?: number;
+  'aria-valuemin'?: number;
+  'aria-valuemax'?: number;
 }
 
 export default function AnimatedCircularProgressBar({
@@ -26,6 +30,10 @@ export default function AnimatedCircularProgressBar({
   return (
     <div
       className={cn('relative size-40 text-2xl font-semibold', className)}
+      role="progressbar"
+      aria-valuenow={currentPercent}
+      aria-valuemin={min}
+      aria-valuemax={max}
       style={
         {
           '--circle-size': '100px',
