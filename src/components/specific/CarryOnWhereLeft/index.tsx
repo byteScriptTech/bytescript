@@ -29,7 +29,7 @@ const CarryOnWhereLeft: React.FC = () => {
     if (user && currentLang) {
       getUserLearningProgress(user?.uid, currentLang);
     }
-  }, [user, currentLang, getUserLearningProgress]);
+  }, [currentLang]);
 
   const handleCarryOnClick = () => {
     router.push(`${lvt}&lvt_sub=${lvt_sub}`);
