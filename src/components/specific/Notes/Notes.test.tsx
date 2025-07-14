@@ -1,0 +1,118 @@
+import { render, screen, fireEvent } from '@testing-library/react';
+import React from 'react';
+
+import '@testing-library/jest-dom';
+import { AuthProvider } from '@/context/AuthContext';
+import { useNotes } from '@/context/NotesContext';
+import { NotesProvider } from '@/context/NotesContext';
+
+import { Notes } from './index';
+
+jest.mock('@/context/NotesContext', () => ({
+  useNotes: jest.fn(),
+  NotesProvider: ({ children }: any) => <>{children}</>,
+}));
+
+jest.mock('@/context/AuthContext', () => ({
+  useAuth: jest.fn(() => ({ currentUser: { uid: 'user1' } })),
+  AuthProvider: ({ children }: any) => <>{children}</>,
+}));
+
+describe('Notes Component', () => {
+  let mockHandleCreateNote: jest.Mock;
+  let mockHandleUpdateNote: jest.Mock;
+  let mockHandleDeleteNote: jest.Mock;
+  let mockSetNewNoteContent: jest.Mock;
+  let mockSetEditingNote: jest.Mock;
+
+  const getBaseProps = (overrides = {}) => ({
+    notes: [],
+    newNoteContent: '',
+    editingNote: null,
+    handleCreateNote: mockHandleCreateNote,
+    handleUpdateNote: mockHandleUpdateNote,
+    handleDeleteNote: mockHandleDeleteNote,
+    setNewNoteContent: mockSetNewNoteContent,
+    setEditingNote: mockSetEditingNote,
+    ...overrides,
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockHandleCreateNote = jest.fn();
+    mockHandleUpdateNote = jest.fn();
+    mockHandleDeleteNote = jest.fn();
+    mockSetNewNoteContent = jest.fn();
+    mockSetEditingNote = jest.fn();
+  });
+
+  const renderComponent = () =>
+    render(
+      <AuthProvider>
+        <NotesProvider>
+          <Notes />
+        </NotesProvider>
+      </AuthProvider>
+    );
+
+  it('renders textarea and create button', () => {
+    (useNotes as jest.Mock).mockReturnValue(getBaseProps());
+    renderComponent();
+
+    expect(screen.getByTestId('new-note-textarea')).toBeInTheDocument();
+    expect(screen.getByTestId('create-note-btn')).toBeInTheDocument();
+  });
+
+  it('shows empty state when no notes exist', () => {
+    (useNotes as jest.Mock).mockReturnValue(getBaseProps());
+    renderComponent();
+
+    expect(screen.getByTestId('empty-state')).toBeInTheDocument();
+  });
+
+  it('calls setNewNoteContent on typing', () => {
+    (useNotes as jest.Mock).mockReturnValue(getBaseProps());
+    renderComponent();
+
+    fireEvent.change(screen.getByTestId('new-note-textarea'), {
+      target: { value: 'Hello' },
+    });
+
+    expect(mockSetNewNoteContent).toHaveBeenCalledWith('Hello');
+  });
+
+  it('creates a new note and resets input', async () => {
+    mockHandleCreateNote.mockResolvedValue(undefined);
+
+    (useNotes as jest.Mock).mockReturnValue(
+      getBaseProps({ newNoteContent: 'abc' })
+    );
+
+    renderComponent();
+
+    fireEvent.click(screen.getByTestId('create-note-btn'));
+    await Promise.resolve();
+
+    expect(mockHandleCreateNote).toHaveBeenCalled();
+    expect(mockSetNewNoteContent).toHaveBeenCalledWith('');
+  });
+
+  it('displays note with edit and delete buttons', () => {
+    const note = {
+      id: '1',
+      content: 'Test note',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    (useNotes as jest.Mock).mockReturnValue(getBaseProps({ notes: [note] }));
+    renderComponent();
+
+    expect(screen.getByTestId('note-content')).toHaveTextContent('Test note');
+
+    fireEvent.click(screen.getByTestId('delete-note-btn'));
+    expect(mockHandleDeleteNote).toHaveBeenCalledWith('1');
+
+    fireEvent.click(screen.getByTestId('edit-note-btn'));
+    expect(mockSetEditingNote).toHaveBeenCalledWith(note);
+  });
+});
