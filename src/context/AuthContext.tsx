@@ -44,13 +44,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
-      if (user) {
-        router.push('/dashboard');
-      }
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [auth]);
 
   const saveUser = async (user: UserInfo) => {
     const userDocRef = doc(db, 'users', user.uid);
@@ -112,7 +109,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       await saveUser(importantUserInfo);
       setCurrentUser(user);
       console.log('Github User:', user);
-      router.push('/dashboard');
+      if (user) {
+        // Only redirect if we're not already on the dashboard
+        const currentPath = window.location.pathname;
+        if (currentPath !== '/dashboard') {
+          router.push('/dashboard');
+        }
+      }
     } catch (error: any) {
       toast({
         variant: 'destructive',
