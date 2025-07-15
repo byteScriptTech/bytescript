@@ -1,6 +1,7 @@
 'use client';
 
 import { formatDistanceToNow } from 'date-fns';
+import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
 
@@ -17,6 +18,12 @@ interface ProblemsProps {
 }
 
 export const Problems = ({ problems }: ProblemsProps) => {
+  const router = useRouter();
+
+  const handlePractice = (id: string) => {
+    router.push(`/competitive-programming/${id}`);
+  };
+
   return (
     <div className="space-y-4">
       {problems.map((problem) => (
@@ -52,7 +59,11 @@ export const Problems = ({ problems }: ProblemsProps) => {
                   addSuffix: true,
                 })}
               </span>
-              <Button variant="outline" size="sm">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handlePractice(problem.id)}
+              >
                 Practice
               </Button>
             </div>
