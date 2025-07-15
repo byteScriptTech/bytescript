@@ -19,7 +19,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: 'biteScript',
+  title: 'Home - biteScript',
   description: 'code like a pro!',
 };
 

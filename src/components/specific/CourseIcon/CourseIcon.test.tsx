@@ -54,13 +54,13 @@ describe('CourseIcon Component Test', () => {
   });
 
   test('Should render the DataStructures icon', () => {
-    render(<CourseIcon language="data structures & algorithms" id="abc" />);
+    render(<CourseIcon language="data-structures-&-algorithms" id="abc" />);
     const dataStructuresIcon = screen.getByTestId('data-structures-icon');
     expect(dataStructuresIcon).toBeInTheDocument();
   });
 
   test('Should render the CompetitiveProgramming icon', () => {
-    render(<CourseIcon language="competitive programming" id="abc" />);
+    render(<CourseIcon language="competitive-programming" id="abc" />);
     const competitiveProgrammingIcon = screen.getByTestId(
       'competitive-programming-icon'
     );
