@@ -128,27 +128,33 @@ export function Notes(): React.JSX.Element {
                       &quot;{note.content}&quot;
                     </p>
                     <div className="flex justify-between items-center">
-                      <span className="text-xs text-gray-400">
+                      <span className="text-xs text-gray-400 mr-2">
                         Last edited:{' '}
                         {formatDistanceToNow(new Date(note.updatedAt), {
                           addSuffix: true,
                         })}
                       </span>
                       <div className="flex gap-2">
-                        <Button
+                        <div
+                          role="button"
+                          tabIndex={0}
+                          onKeyDown={() => setEditingNote(note)}
                           onClick={() => setEditingNote(note)}
-                          className="p-2 rounded-full bg-blue-50 hover:bg-blue"
+                          className="cursor-pointer"
                           data-testid="edit-note-btn"
                         >
-                          <Pencil className="h-4 w-4 text-blue-600" />
-                        </Button>
-                        <Button
+                          <Pencil className="h-4 w-4 text-blue-600 hover:text-blue-800" />
+                        </div>
+                        <div
+                          role="button"
+                          tabIndex={0}
+                          onKeyDown={() => handleDeleteNote(note.id)}
                           onClick={() => handleDeleteNote(note.id)}
-                          className="p-2 rounded-full bg-red-600 hover:bg-red-800"
+                          className="cursor-pointer"
                           data-testid="delete-note-btn"
                         >
-                          <Trash2 className="h-4 w-4 text-white" />
-                        </Button>
+                          <Trash2 className="h-4 w-4 text-red-600 hover:text-red-800" />
+                        </div>
                       </div>
                     </div>
                   </div>
