@@ -1,15 +1,8 @@
 'use client';
 
-import { formatDistanceToNow } from 'date-fns';
-
 import Navbar from '@/components/common/Navbar';
 import AuthGuard from '@/components/misc/authGuard';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { CardContent } from '@/components/ui/card';
-import { CardHeader } from '@/components/ui/card';
-import { CardTitle } from '@/components/ui/card';
-import { CardDescription } from '@/components/ui/card';
+import { Problems } from '@/components/specific/Problems';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ContentProvider } from '@/context/ContentContext';
 import { LanguagesProvider } from '@/context/LanguagesContext';
@@ -20,16 +13,37 @@ export default function CompetitiveProgrammingPage() {
     {
       id: '1',
       title: 'Two Sum',
-      difficulty: 'Easy',
+      difficulty: 'Easy' as const,
+      solved: false,
+      lastAttempted: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+    },
+    {
+      id: '2',
+      title: 'Reverse String',
+      difficulty: 'Easy' as const,
       solved: true,
       lastAttempted: new Date(),
     },
     {
-      id: '2',
-      title: 'Longest Substring Without Repeating Characters',
-      difficulty: 'Medium',
+      id: '3',
+      title: 'Binary Search',
+      difficulty: 'Medium' as const,
       solved: false,
-      lastAttempted: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+      lastAttempted: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+    },
+    {
+      id: '4',
+      title: 'Merge Sort',
+      difficulty: 'Medium' as const,
+      solved: false,
+      lastAttempted: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+    },
+    {
+      id: '5',
+      title: 'Dijkstra Algorithm',
+      difficulty: 'Hard' as const,
+      solved: false,
+      lastAttempted: new Date(Date.now() - 24 * 60 * 60 * 1000),
     },
   ];
 
@@ -52,47 +66,7 @@ export default function CompetitiveProgrammingPage() {
                     <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
                   </TabsList>
                   <TabsContent value="problems">
-                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                      {problems.map((problem) => (
-                        <Card
-                          key={problem.id}
-                          className="hover:shadow-lg transition-shadow"
-                        >
-                          <CardHeader>
-                            <CardTitle>{problem.title}</CardTitle>
-                            <CardDescription className="flex items-center gap-2">
-                              <span
-                                className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                  problem.difficulty === 'Easy'
-                                    ? 'bg-green-100 text-green-800'
-                                    : problem.difficulty === 'Medium'
-                                      ? 'bg-yellow-100 text-yellow-800'
-                                      : 'bg-red-100 text-red-800'
-                                }`}
-                              >
-                                {problem.difficulty}
-                              </span>
-                              {problem.solved && (
-                                <span className="px-2 py-1 rounded-full bg-green-100 text-green-800">
-                                  Solved
-                                </span>
-                              )}
-                            </CardDescription>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="flex justify-between items-center">
-                              <span className="text-sm text-gray-500">
-                                Last Attempted:{' '}
-                                {formatDistanceToNow(problem.lastAttempted, {
-                                  addSuffix: true,
-                                })}
-                              </span>
-                              <Button variant="outline">Practice</Button>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
+                    <Problems problems={problems} />
                   </TabsContent>
                   <TabsContent value="submissions">
                     Submissions content
