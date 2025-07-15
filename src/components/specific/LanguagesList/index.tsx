@@ -19,7 +19,14 @@ export const LanguagesList = () => {
       fetchContent(name);
     }
     setItem('lvl_name', name);
-    router.push(`/language?name=${name}&id=${id}`);
+
+    if (name === 'competitive-programming') {
+      router.push('/competitive-programming');
+    } else if (name === 'data-structures-&-algorithms') {
+      router.push('/data-structures');
+    } else {
+      router.push(`/language?name=${name}&id=${id}`);
+    }
   };
 
   useEffect(() => {
@@ -49,7 +56,11 @@ export const LanguagesList = () => {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {loading ? (
         <div className="col-span-full text-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+          <div
+            className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"
+            role="status"
+            aria-label="Loading"
+          ></div>
         </div>
       ) : topics?.length === 0 ? (
         <div className="col-span-full text-center py-8">
@@ -60,6 +71,7 @@ export const LanguagesList = () => {
           <div
             key={topic.id}
             className="group relative"
+            data-testid={`topic-${topic.name.toLowerCase()}`}
             onClick={() => handleTopicClick(topic.name.toLowerCase(), topic.id)}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
@@ -67,6 +79,7 @@ export const LanguagesList = () => {
               }
             }}
             role="button"
+            aria-label={topic.name}
             tabIndex={0}
           >
             <CourseIcon language={topic.name.toLowerCase()} id={topic.id} />

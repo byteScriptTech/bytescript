@@ -65,6 +65,7 @@ const LearnScreenBreadCrumb: React.FC<LearnScreenBreadCrumbProps> = ({
       <BreadcrumbList>
         <BreadcrumbItem>
           <BreadcrumbLink
+            className="cursor-pointer hover:text-primary"
             onClick={() => router.push('/dashboard')}
             data-testid="dashboard-link"
           >
