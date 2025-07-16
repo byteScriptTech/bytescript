@@ -3,9 +3,9 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React from 'react';
 
-import { auth } from '@/../../lib/firebase';
 import Logo from '@/components/common/Logo';
 import UserDropDown from '@/components/specific/UserDropDown';
+import { auth } from '@/firebase/config';
 
 const Navbar = () => {
   const router = useRouter();

@@ -1,4 +1,4 @@
-import { collection, getDocs } from 'firebase/firestore/lite';
+import { collection, getDocs } from 'firebase/firestore';
 import { debounce } from 'lodash';
 import { useSearchParams } from 'next/navigation';
 import {
@@ -9,9 +9,8 @@ import {
   useState,
 } from 'react';
 
+import { db } from '@/firebase/config';
 import { LanguageContent } from '@/types/content';
-
-import { db } from '../../lib/firebase';
 
 interface LanguagesContextProps {
   content: LanguageContent[] | undefined;
@@ -66,7 +65,7 @@ export const ContentProvider = ({ children }: { children: ReactNode }) => {
     }
 
     try {
-      const coursesContentCollection = collection(db, topicName);
+      const coursesContentCollection = collection(db, topicName || 'default');
       const courseContentSnapshot = await getDocs(coursesContentCollection);
       const courseContentList = courseContentSnapshot.docs.map((doc) => ({
         id: doc.id,

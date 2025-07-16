@@ -7,12 +7,11 @@ import {
   getDocs,
   setDoc,
   updateDoc,
-} from 'firebase/firestore/lite';
+} from 'firebase/firestore';
 import { debounce } from 'lodash';
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-import { db } from '../../lib/firebase';
-
+import { db } from '@/firebase/config';
 interface Language {
   id: string;
   name: string;

@@ -10,7 +10,7 @@ import '@testing-library/jest-dom';
 
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { notesService } from '@/lib/firebase/notes';
+import { notesService } from '@/services/firebase/notesService';
 
 import { NotesProvider, useNotes } from './NotesContext';
 
@@ -23,7 +23,7 @@ jest.mock('@/hooks/use-toast', () => ({
   useToast: jest.fn(),
 }));
 // Mock notesService
-jest.mock('@/lib/firebase/notes', () => ({
+jest.mock('@/services/firebase/notesService', () => ({
   notesService: {
     getNotes: jest.fn(),
     createNote: jest.fn(),

@@ -1,17 +1,16 @@
 import { signInWithPopup, onAuthStateChanged, getAuth } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore/lite';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import {
   createContext,
+  ReactNode,
   useContext,
   useEffect,
   useState,
-  ReactNode,
 } from 'react';
 
+import { db, githubProvider, googleProvider } from '@/firebase/config';
 import { useToast } from '@/hooks/use-toast';
-
-import { db, githubProvider, googleProvider } from '../../lib/firebase';
 
 interface AuthContextType {
   currentUser: any;

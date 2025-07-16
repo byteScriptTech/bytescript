@@ -45,12 +45,32 @@ import { useLanguages } from '@/context/LanguagesContext';
 
 import LanguageBody from '../LanguageBody';
 
-// Mock Firebase
-jest.mock('../../../../lib/firebase', () => ({
-  auth: () => ({
+// Mock Firebase auth
+jest.mock('@/firebase/config', () => ({
+  auth: {
     currentUser: null,
     signOut: jest.fn(),
-  }),
+  },
+}));
+
+// Mock Firebase services
+jest.mock('@/services/firebase/problemsService', () => ({
+  problemsService: {
+    getAllProblems: jest.fn(),
+    getProblemById: jest.fn(),
+    createProblem: jest.fn(),
+    updateProblem: jest.fn(),
+    deleteProblem: jest.fn(),
+  },
+}));
+
+jest.mock('@/services/firebase/notesService', () => ({
+  notesService: {
+    getNotes: jest.fn(),
+    createNote: jest.fn(),
+    updateNote: jest.fn(),
+    deleteNote: jest.fn(),
+  },
 }));
 
 // Mock Next.js router
