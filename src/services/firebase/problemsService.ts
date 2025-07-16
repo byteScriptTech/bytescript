@@ -1,34 +1,21 @@
-import {
-  collection,
-  query,
-  where,
-  getDocs,
-  doc,
-  getDoc,
-  updateDoc,
-  addDoc,
-  deleteDoc,
-  Firestore,
-} from 'firebase/firestore';
+import { deleteDoc, getDoc, addDoc, updateDoc } from 'firebase/firestore';
+import { collection, query, getDocs, doc } from 'firebase/firestore';
 
-import { db } from '../../firebase/config';
-
-// Ensure db is of type Firestore
-const firestoreDb = db as Firestore;
+import { db } from '@/firebase/config';
 
 export interface Problem {
   id: string;
   title: string;
-  difficulty: 'Easy' | 'Medium' | 'Hard';
   description: string;
+  difficulty: 'Easy' | 'Medium' | 'Hard';
+  category: string;
+  tags: string[];
   examples: Array<{
     input: string;
     output: string;
     explanation: string;
   }>;
   constraints: string[];
-  category: string;
-  tags: string[];
   solved?: boolean;
   lastAttempted?: Date;
   createdAt: Date;
@@ -38,7 +25,7 @@ export interface Problem {
 export const problemsService = {
   // Get all problems
   async getAllProblems() {
-    const q = query(collection(firestoreDb, 'problems'));
+    const q = query(collection(db, 'problems'));
     const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map(
       (doc) =>
@@ -95,37 +82,5 @@ export const problemsService = {
   async deleteProblem(id: string) {
     const problemRef = doc(db, 'problems', id);
     await deleteDoc(problemRef);
-  },
-
-  // Get problems by difficulty
-  async getProblemsByDifficulty(difficulty: string) {
-    const q = query(
-      collection(db, 'problems'),
-      where('difficulty', '==', difficulty)
-    );
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(
-      (doc) =>
-        ({
-          id: doc.id,
-          ...doc.data(),
-        }) as Problem
-    );
-  },
-
-  // Get problems by category
-  async getProblemsByCategory(category: string) {
-    const q = query(
-      collection(db, 'problems'),
-      where('category', '==', category)
-    );
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(
-      (doc) =>
-        ({
-          id: doc.id,
-          ...doc.data(),
-        }) as Problem
-    );
   },
 };

@@ -1,7 +1,7 @@
 import * as admin from 'firebase-admin';
 import { Timestamp } from 'firebase-admin/firestore';
 
-import { Problem } from '@/services/firebase/problemsService.server';
+import { Problem } from '@/services/firebase/problemsService';
 
 // Initialize Firebase Admin SDK
 admin.initializeApp({
@@ -27,7 +27,6 @@ async function seedTestCases() {
     const problems = problemsSnapshot.docs.map((doc) => {
       const problemData = doc.data() as Problem;
       return {
-        id: doc.id,
         ...problemData,
       };
     });
