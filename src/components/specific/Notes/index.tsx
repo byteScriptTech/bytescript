@@ -15,7 +15,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { useNotes } from '@/context/NotesContext';
 import type { EditableNote } from '@/context/NotesContext';
-import { Note } from '@/lib/firebase/notes';
+import { Note } from '@/services/firebase/notesService';
 
 export function Notes(): React.JSX.Element {
   const {

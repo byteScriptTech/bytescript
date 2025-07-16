@@ -3,7 +3,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { notesService, Note } from '@/lib/firebase/notes';
+import { notesService, Note } from '@/services/firebase/notesService';
 
 export type EditableNote = {
   id: string;

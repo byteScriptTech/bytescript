@@ -36,7 +36,7 @@ const CourseIcon: React.FC<CourseIconProps> = ({ language, id }) => {
         </Link>
       );
 
-    case 'competitive programming':
+    case 'competitive-programming':
       return (
         <Link href={`/language?name=${language}&id=${id}`}>
           <div className={cardStyles} tabIndex={0} role="button">
@@ -47,7 +47,7 @@ const CourseIcon: React.FC<CourseIconProps> = ({ language, id }) => {
           </div>
         </Link>
       );
-    case 'data structures & algorithms':
+    case 'data-structures-&-algorithms':
       return (
         <Link href={`/language?name=${language}&id=${id}`}>
           <div className={cardStyles} tabIndex={0} role="button">

@@ -1,7 +1,8 @@
 import { collection, getDocs, doc, setDoc } from 'firebase/firestore';
 import { useState, useEffect } from 'react';
 
-import { db } from '../config/firebase';
+import { db } from '@/firebase/config';
+
 import { Topic } from '../types/topic';
 
 export const addTopic = async (topic: Omit<Topic, 'id'>) => {
