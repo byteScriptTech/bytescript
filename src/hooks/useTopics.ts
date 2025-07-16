@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 
 import { db } from '@/firebase/config';
 
-import { Topic } from '../types/topic';
+import { Topic } from '../types/content';
 
 export const addTopic = async (topic: Omit<Topic, 'id'>) => {
   try {

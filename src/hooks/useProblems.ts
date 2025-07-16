@@ -15,8 +15,8 @@ export interface Problem {
   constraints: string[];
   category: string;
   tags: string[];
-  solved: boolean;
-  lastAttempted: Date;
+  solved?: boolean;
+  lastAttempted?: Date;
   createdAt: Date;
   updatedAt: Date;
 }

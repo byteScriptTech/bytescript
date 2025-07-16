@@ -66,14 +66,14 @@ export const Problems = () => {
                     )}
                   </div>
                   <p className="mt-4 text-gray-600">
-                    {formatDistanceToNow(
-                      problem.lastAttempted instanceof Timestamp
-                        ? problem.lastAttempted.toDate()
-                        : problem.lastAttempted,
-                      {
-                        addSuffix: true,
-                      }
-                    )}
+                    {problem.lastAttempted
+                      ? formatDistanceToNow(
+                          problem.lastAttempted instanceof Timestamp
+                            ? problem.lastAttempted.toDate()
+                            : problem.lastAttempted,
+                          { addSuffix: true }
+                        )
+                      : 'Never attempted'}
                   </p>
                 </div>
                 <Button

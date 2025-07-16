@@ -16,9 +16,10 @@ interface RelatedTopic {
   description: string;
 }
 
-interface Topic {
+export interface Topic {
   name: string;
   id: string;
+  slug: string;
 }
 
 interface BestPracticesAndCommonMistakes {
