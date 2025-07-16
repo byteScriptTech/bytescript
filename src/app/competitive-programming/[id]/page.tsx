@@ -1,8 +1,9 @@
 'use client';
 
 import { formatDistanceToNow } from 'date-fns';
+import { Timestamp } from 'firebase/firestore';
 import { useParams } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import Navbar from '@/components/common/Navbar';
 import AuthGuard from '@/components/misc/authGuard';
@@ -10,66 +11,40 @@ import { Button } from '@/components/ui/button';
 import { ContentProvider } from '@/context/ContentContext';
 import { LanguagesProvider } from '@/context/LanguagesContext';
 import { LocalStorageProvider } from '@/context/LocalhostContext';
-
-interface Problem {
-  id: string;
-  title: string;
-  difficulty: 'Easy' | 'Medium' | 'Hard';
-  description: string;
-  examples: Array<{ input: string; output: string; explanation: string }>;
-  constraints: string[];
-  lastAttempted: Date;
-  solved: boolean;
-}
-
-const PROBLEMS: Record<string, Problem> = {
-  '1': {
-    id: '1',
-    title: 'Two Sum',
-    difficulty: 'Easy',
-    description: `Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.
-
-You may assume that each input would have exactly one solution, and you may not use the same element twice.
-
-You can return the answer in any order.
-
-Example 1:
-Input: nums = [2,7,11,15], target = 9
-Output: [0,1]
-Explanation: Because nums[0] + nums[1] == 9, we return [0, 1].
-
-Example 2:
-Input: nums = [3,2,4], target = 6
-Output: [1,2]
-
-Example 3:
-Input: nums = [3,3], target = 6
-Output: [0,1]`,
-    examples: [
-      {
-        input: 'nums = [2,7,11,15], target = 9',
-        output: '[0,1]',
-        explanation: 'Because nums[0] + nums[1] == 9, we return [0, 1].',
-      },
-    ],
-    constraints: [
-      '2 <= nums.length <= 104',
-      '-109 <= nums[i] <= 109',
-      '-109 <= target <= 109',
-      'Only one valid answer exists.',
-    ],
-    lastAttempted: new Date(),
-    solved: false,
-  },
-  // Add more problems here
-};
+import { problemsService } from '@/services/firebase/problemsService';
+import { Problem } from '@/services/firebase/problemsService';
 
 export default function ProblemPage() {
-  const { id } = useParams();
-  const problem = PROBLEMS[id as string];
+  const params = useParams();
+  const id = params.id;
+
+  const [problem, setProblem] = useState<Problem | null>(null);
   const [code, setCode] = useState('');
   const [output, setOutput] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (id) {
+      const fetchProblem = async () => {
+        try {
+          setLoading(true);
+          const problem = await problemsService.getProblemById(id as string);
+          setProblem(problem);
+        } catch (err) {
+          console.error('Error fetching problem:', err);
+          setError('Failed to fetch problem');
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchProblem();
+    }
+  }, [id]);
+
+  if (loading) {
+    return <div className="text-center py-8">Loading problem...</div>;
+  }
 
   if (!problem) {
     return <div className="text-center py-8">Problem not found</div>;
@@ -120,9 +95,16 @@ export default function ProblemPage() {
                           )}
                         </div>
                         <p className="mt-4 text-gray-600">
-                          {formatDistanceToNow(problem.lastAttempted, {
-                            addSuffix: true,
-                          })}
+                          {problem.lastAttempted
+                            ? formatDistanceToNow(
+                                problem.lastAttempted instanceof Timestamp
+                                  ? problem.lastAttempted.toDate()
+                                  : problem.lastAttempted,
+                                {
+                                  addSuffix: true,
+                                }
+                              )
+                            : 'Never attempted'}
                         </p>
                       </div>
 
