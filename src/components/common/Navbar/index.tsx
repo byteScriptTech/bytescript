@@ -1,14 +1,18 @@
 import { signOut } from 'firebase/auth';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React from 'react';
 
 import Logo from '@/components/common/Logo';
 import UserDropDown from '@/components/specific/UserDropDown';
+import { Button } from '@/components/ui/button';
 import { auth } from '@/firebase/config';
 
 const Navbar = () => {
   const router = useRouter();
+  const canGoBack = window.history.length > 1;
+  const canGoForward = window.history.state?.forward !== null;
 
   const handleSignOut = async () => {
     await signOut(auth);
@@ -21,17 +25,37 @@ const Navbar = () => {
     router.push('settings');
   };
   return (
-    <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b bg-background p-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
-      <div className="flex items-center gap-4">
+    <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b bg-background p-3 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-4">
+      <div className="flex items-center gap-3 sm:gap-4">
         <Logo />
-        <Link
-          href="/dashboard"
-          className="px-3 py-2 rounded-md text-sm font-medium text-foreground hover:text-primary hover:bg-muted/50 transition-colors"
-        >
-          Dashboard
+        <Link href="/dashboard">
+          <Button
+            size="sm"
+            className="px-2 h-8 bg-muted text-dark hover:bg-gray-300 transition-colors"
+          >
+            Go to Dashboard
+          </Button>
         </Link>
+        <button
+          onClick={() => {
+            window.history.back();
+          }}
+          className="p-2 rounded-md hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={!canGoBack}
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </button>
+        <button
+          onClick={() => {
+            window.history.forward();
+          }}
+          className="p-2 rounded-md hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={!canGoForward}
+        >
+          <ChevronRight className="h-4 w-4" />
+        </button>
       </div>
-      <div className="flex items-center">
+      <div className="flex items-center gap-3 sm:gap-4">
         <UserDropDown
           {...{
             handleSignOut,
