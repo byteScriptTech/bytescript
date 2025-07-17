@@ -12,7 +12,7 @@ import {
 import { db, githubProvider, googleProvider } from '@/firebase/config';
 import { useToast } from '@/hooks/use-toast';
 
-interface AuthContextType {
+export interface AuthContextType {
   currentUser: any;
   signInWithGoogle: () => Promise<void>;
   signInWithGithub: () => Promise<void>;
@@ -24,7 +24,9 @@ interface UserInfo {
   email: string;
   photoURL: string | null;
 }
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | undefined>(
+  undefined
+);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
