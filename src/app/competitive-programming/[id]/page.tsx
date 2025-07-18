@@ -5,6 +5,7 @@ import { Timestamp } from 'firebase/firestore';
 import { useParams } from 'next/navigation';
 import { useEffect, useState, useCallback } from 'react';
 
+import Markdown from '@/components/common/Markdown';
 import Navbar from '@/components/common/Navbar';
 import AuthGuard from '@/components/misc/authGuard';
 import { Button } from '@/components/ui/button';
@@ -200,7 +201,7 @@ export default function ProblemPage() {
                       <h1 className="text-2xl font-bold text-gray-900">
                         {problem.title}
                       </h1>
-                      <div className="text-gray-600">
+                      <div className="text-sm text-gray-500">
                         <p>
                           Last attempted:{' '}
                           {problem.lastAttempted
@@ -212,67 +213,69 @@ export default function ProblemPage() {
                               )
                             : 'Never'}
                         </p>
-                        <p>Difficulty: {problem.difficulty}</p>
-                        <p>Category: {problem.category}</p>
                       </div>
+
+                      {/* Basic Problem Info */}
                       <div className="space-y-4">
                         {/* Problem Requirements */}
                         <div className="bg-gray-50 p-4 rounded-lg">
-                          <h2 className="font-semibold mb-2">
-                            Problem Requirements
-                          </h2>
+                          <h2 className="font-semibold mb-2">Problem Type</h2>
                           <div className="space-y-4">
-                            <div className="space-y-2">
-                              <h3 className="font-medium">Difficulty</h3>
-                              <div className="flex items-center gap-2">
-                                <div className="w-4 h-4 rounded-full bg-yellow-500"></div>
-                                <span className="font-medium">
-                                  {problem.difficulty}
+                            <div className="flex items-center gap-6">
+                              <div>
+                                <h3 className="text-sm font-medium text-gray-500">
+                                  Difficulty
+                                </h3>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <span className="text-sm">
+                                    {problem.difficulty}
+                                  </span>
+                                </div>
+                              </div>
+                              <div>
+                                <h3 className="text-sm font-medium text-gray-500">
+                                  Category
+                                </h3>
+                                <span className="text-sm">
+                                  {problem.category}
                                 </span>
                               </div>
                             </div>
-                            <div className="space-y-2">
-                              <h3 className="font-medium">Category</h3>
-                              <span className="text-gray-600">
-                                {problem.category}
-                              </span>
-                            </div>
-                            <div className="space-y-2">
-                              <h3 className="font-medium">Constraints</h3>
-                              <ul className="list-disc list-inside space-y-1 text-gray-600">
-                                {problem.constraints?.map(
-                                  (constraint, index) => (
-                                    <li key={index}>{constraint}</li>
-                                  )
-                                )}
-                              </ul>
-                            </div>
-                            <div className="space-y-2">
-                              <h3 className="font-medium">Tags</h3>
-                              <div className="flex flex-wrap gap-2">
-                                {problem.tags.map((tag, index) => (
-                                  <span
-                                    key={index}
-                                    className="px-2 py-1 bg-gray-100 rounded text-sm"
-                                  >
-                                    {tag}
-                                  </span>
-                                ))}
-                              </div>
+                            <div className="flex flex-wrap gap-2">
+                              {problem.tags.map((tag, index) => (
+                                <span
+                                  key={index}
+                                  className="px-2 py-1 bg-gray-100 rounded text-sm"
+                                >
+                                  {tag}
+                                </span>
+                              ))}
                             </div>
                           </div>
                         </div>
-
                         {/* Problem Description */}
-                        <div className="bg-gray-50 p-4 rounded-lg">
-                          <h2 className="font-semibold mb-2">Description</h2>
-                          <pre className="whitespace-pre-wrap">
-                            {problem.description}
-                          </pre>
+                        <div className="space-y-4">
+                          <h2 className="font-semibold mb-2">
+                            Problem Description
+                          </h2>
+                          <div className="prose max-w-none">
+                            <Markdown content={problem.description} />
+                          </div>
                         </div>
 
+                        {/* Constraints */}
+                        {problem.constraints && (
+                          <div className="space-y-4">
+                            <h2 className="font-semibold mb-2">Constraints</h2>
+                            <div className="prose max-w-none">
+                              <Markdown
+                                content={problem.constraints.join('\n')}
+                              />
+                            </div>
+                          </div>
+                        )}
                         {/* Examples */}
-                        <div className="bg-gray-50 p-4 rounded-lg">
+                        <div className="space-y-4">
                           <h2 className="font-semibold mb-2">Examples</h2>
                           {problem.examples?.map((example, index) => (
                             <div
