@@ -27,6 +27,7 @@ export async function executeCode(
       body: JSON.stringify({
         code,
         problemId: testCases[0].problemId,
+        functionName: 'solve',
       }),
     });
 

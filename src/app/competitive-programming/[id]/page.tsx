@@ -118,6 +118,7 @@ export default function ProblemPage() {
 
     try {
       const result = await executeCode(code, testCases);
+      console.log(result, 'result is here!');
       setExecutionResult(result);
       if (result.error) setError(result.error);
 
@@ -196,7 +197,7 @@ export default function ProblemPage() {
               <main className="flex-1 container mx-auto p-4">
                 <div className="flex flex-col lg:flex-row gap-6">
                   {/* Problem Details Side */}
-                  <div className="md:w-1/2 bg-white rounded-lg shadow p-6">
+                  <div className="md:w-1/2 bg-white rounded-lg p-6">
                     <div className="space-y-4">
                       <h1 className="text-2xl font-bold text-gray-900">
                         {problem.title}
@@ -241,73 +242,76 @@ export default function ProblemPage() {
                                 </span>
                               </div>
                             </div>
-                            <div className="flex flex-wrap gap-2">
-                              {problem.tags.map((tag, index) => (
-                                <span
-                                  key={index}
-                                  className="px-2 py-1 bg-gray-100 rounded text-sm"
-                                >
-                                  {tag}
-                                </span>
-                              ))}
-                            </div>
                           </div>
                         </div>
                         {/* Problem Description */}
-                        <div className="space-y-4">
-                          <h2 className="font-semibold mb-2">
+                        <div className="space-y-2">
+                          <h2 className="text-sm font-medium text-gray-700 uppercase tracking-wider">
                             Problem Description
                           </h2>
-                          <div className="prose max-w-none">
+                          <div className="text-sm text-gray-800 leading-relaxed">
                             <Markdown content={problem.description} />
+                          </div>
+                        </div>
+
+                        {/* Examples */}
+                        <div className="space-y-3">
+                          <h2 className="text-sm font-medium text-gray-700 uppercase tracking-wider">
+                            Examples
+                          </h2>
+                          <div className="space-y-3">
+                            {problem.examples?.map((example, index) => (
+                              <div key={index} className="p-3 text-sm">
+                                <div className="font-medium text-gray-900 mb-2">
+                                  Example {index + 1}
+                                </div>
+                                <div className="space-y-2">
+                                  <div className="flex flex-col gap-1">
+                                    <span className="text-xs font-medium text-gray-600">
+                                      Input:
+                                    </span>
+                                    <pre className="whitespace-pre-wrap bg-gray-100 p-2 rounded text-xs font-mono text-gray-800">
+                                      {JSON.stringify(example.input)}
+                                    </pre>
+                                  </div>
+                                  <div className="flex flex-col gap-1">
+                                    <span className="text-xs font-medium text-gray-600">
+                                      Output:
+                                    </span>
+                                    <pre className="whitespace-pre-wrap bg-gray-100 p-2 rounded text-xs font-mono text-gray-800">
+                                      {JSON.stringify(example.output)}
+                                    </pre>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
                           </div>
                         </div>
 
                         {/* Constraints */}
                         {problem.constraints && (
-                          <div className="space-y-4">
-                            <h2 className="font-semibold mb-2">Constraints</h2>
-                            <div className="prose max-w-none">
-                              <Markdown
-                                content={problem.constraints.join('\n')}
-                              />
-                            </div>
+                          <div className="space-y-2">
+                            <h2 className="text-sm font-medium  text-gray-700 uppercase tracking-wider">
+                              Constraints
+                            </h2>
+                            <ul className="text-sm space-y-1.5 text-gray-600 pl-4">
+                              {problem.constraints.map((constraint, index) => (
+                                <li key={index} className="leading-tight">
+                                  <span className="text-gray-900 font-medium">
+                                    •
+                                  </span>{' '}
+                                  {constraint}
+                                </li>
+                              ))}
+                            </ul>
                           </div>
                         )}
-                        {/* Examples */}
-                        <div className="space-y-4">
-                          <h2 className="font-semibold mb-2">Examples</h2>
-                          {problem.examples?.map((example, index) => (
-                            <div
-                              key={index}
-                              className="mb-4 p-3 sm:p-4 bg-white rounded"
-                            >
-                              <div className="font-medium mb-2">
-                                Example {index + 1}
-                              </div>
-                              <div className="space-y-2">
-                                <div className="flex items-center gap-2">
-                                  <span className="font-medium">Input:</span>
-                                  <pre className="whitespace-pre-wrap text-sm bg-gray-100 p-2 rounded">
-                                    {JSON.stringify(example.input)}
-                                  </pre>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <span className="font-medium">Output:</span>
-                                  <pre className="whitespace-pre-wrap text-sm bg-gray-100 p-2 rounded">
-                                    {JSON.stringify(example.output)}
-                                  </pre>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
                       </div>
                     </div>
                   </div>
 
                   {/* Code Editor Side */}
-                  <div className="md:w-1/2 bg-white rounded-lg shadow p-6">
+                  <div className="md:w-1/2 bg-white rounded-lg p-6">
                     <div className="space-y-4">
                       <div className="flex justify-between items-center">
                         <h2 className="text-xl font-semibold">Solution</h2>
