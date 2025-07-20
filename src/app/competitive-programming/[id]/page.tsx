@@ -13,7 +13,7 @@ import { CodeEditor } from '@/components/ui/CodeEditor';
 import { ContentProvider } from '@/context/ContentContext';
 import { LanguagesProvider } from '@/context/LanguagesContext';
 import { LocalStorageProvider } from '@/context/LocalhostContext';
-import { executeCode } from '@/services/codeExecutionService';
+import { competitiveRuntime } from '@/services/client/competitiveRuntime';
 import { problemsService, Problem } from '@/services/firebase/problemsService';
 import {
   submissionsService,
@@ -115,13 +115,30 @@ export default function ProblemPage() {
 
     setLoading(true);
     setError('');
+    setExecutionResult(null);
 
     try {
-      const result = await executeCode(code, testCases);
-      console.log(result, 'result is here!');
-      setExecutionResult(result);
-      if (result.error) setError(result.error);
+      // Execute the code against all test cases using the browser runtime
+      const result = await competitiveRuntime.executeCode(
+        code,
+        testCases,
+        'solve'
+      );
 
+      setExecutionResult({
+        success: result.testResults.every((r) => r.passed),
+        output: result.testResults.map((r) => r.output).join('\n'),
+        testResults: result.testResults.map((r, i) => ({
+          testCase: testCases[i],
+          passed: r.passed,
+          output: r.output,
+          error: r.error,
+          executionTime: r.executionTime || 0,
+          memoryUsage: 0, // Browser doesn't provide memory usage
+        })),
+      });
+
+      // If all tests passed, save the submission
       if (result.testResults.every((r) => r.passed)) {
         await submissionsService.addSubmission({
           userId: 'user-id',
@@ -130,19 +147,32 @@ export default function ProblemPage() {
           result: { ...result, output: 'All tests passed' },
           status: 'passed',
           executionTime: result.testResults.reduce(
-            (a, c) => a + c.executionTime,
+            (a, c) => a + (c.executionTime || 0),
             0
           ),
-          memoryUsage: result.testResults.reduce(
-            (a, c) => a + c.memoryUsage,
-            0
-          ),
+          memoryUsage: 0, // Browser doesn't provide memory usage
         });
         await loadSubmissions();
       }
     } catch (err) {
       console.error('Error executing code:', err);
-      setError(err instanceof Error ? err.message : 'Failed to execute code');
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to execute code';
+      setError(errorMessage);
+
+      // Set a basic error result for the UI
+      setExecutionResult({
+        success: false,
+        output: errorMessage,
+        testResults: testCases.map((testCase) => ({
+          testCase,
+          passed: false,
+          output: '',
+          error: errorMessage,
+          executionTime: 0,
+          memoryUsage: 0,
+        })),
+      });
     } finally {
       setLoading(false);
     }
@@ -156,25 +186,33 @@ export default function ProblemPage() {
 
     setLoading(true);
     setError('');
+
     try {
-      await submissionsService.addSubmission({
+      const status: 'passed' | 'failed' = executionResult.testResults.every(
+        (r) => r.passed
+      )
+        ? 'passed'
+        : 'failed';
+
+      const submission = {
         userId: 'user-id',
         problemId: problem!.id,
         code,
         result: { ...executionResult },
-        status: executionResult.testResults.every((r) => r.passed)
-          ? 'passed'
-          : 'failed',
+        status,
         executionTime: executionResult.testResults.reduce(
-          (a, c) => a + c.executionTime,
+          (a, c) => a + (c.executionTime || 0),
           0
         ),
-        memoryUsage: executionResult.testResults.reduce(
-          (a, c) => a + c.memoryUsage,
-          0
-        ),
-      });
+        memoryUsage: 0, // Browser doesn't provide memory usage
+        submittedAt: new Date().toISOString(),
+      };
+
+      await submissionsService.addSubmission(submission);
       await loadSubmissions();
+
+      // Show success message
+      setError('');
     } catch (err) {
       console.error('Error submitting solution:', err);
       setError('Failed to submit solution');

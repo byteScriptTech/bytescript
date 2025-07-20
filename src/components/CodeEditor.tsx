@@ -1,8 +1,30 @@
 'use client';
 
+import { Timestamp } from 'firebase/firestore';
 import { useState, useRef, useEffect } from 'react';
 
-import { browserRuntime } from '@/services/client/browserRuntime';
+import { competitiveRuntime } from '@/services/client/competitiveRuntime';
+import type { TestCase } from '@/services/firebase/testCasesService';
+
+// Sample test cases for the code editor
+const sampleTestCases: TestCase[] = [
+  {
+    id: '1',
+    problemId: 'sample',
+    input: JSON.stringify([2, 3]),
+    expectedOutput: '5',
+    createdAt: Timestamp.now(),
+    updatedAt: Timestamp.now(),
+  },
+  {
+    id: '2',
+    problemId: 'sample',
+    input: JSON.stringify([5, 7]),
+    expectedOutput: '12',
+    createdAt: Timestamp.now(),
+    updatedAt: Timestamp.now(),
+  },
+];
 
 interface ExecutionResult {
   output: string;
@@ -22,18 +44,51 @@ export default function CodeEditor() {
     if (!code.trim()) return;
 
     setIsRunning(true);
-    setResult(null);
+    setResult({
+      output: 'Running tests...\n',
+      executionTime: 0,
+    });
 
     try {
-      const executionResult = await browserRuntime.executeCode(code);
+      const executionResult = await competitiveRuntime.executeCode(
+        code,
+        sampleTestCases,
+        'add' // Default function name to test
+      );
+
+      // Format the test results
+      let output = '';
+      let passedCount = 0;
+
+      executionResult.testResults.forEach((testResult, index) => {
+        const testCase = sampleTestCases[index];
+        output += `Test Case #${index + 1}: ${testResult.passed ? '✅' : '❌'}\n`;
+        output += `Input: ${testCase.input}\n`;
+        output += `Expected: ${testCase.expectedOutput}\n`;
+        output += `Got: ${testResult.output || 'undefined'}\n`;
+        output += `Execution time: ${testResult.executionTime?.toFixed(2) || 0}ms\n`;
+        if (testResult.error) {
+          output += `Error: ${testResult.error}\n`;
+        }
+        output += '\n';
+
+        if (testResult.passed) passedCount++;
+      });
+
+      output += `\n${passedCount} of ${sampleTestCases.length} test cases passed.`;
+
       setResult({
-        output: executionResult.output,
+        output,
         error: executionResult.error,
-        executionTime: executionResult.executionTime,
+        executionTime: executionResult.testResults.reduce(
+          (sum, test) => sum + (test.executionTime || 0),
+          0
+        ),
       });
     } catch (error) {
       setResult({
-        output: '',
+        output:
+          'Failed to execute tests. Please check your code for syntax errors.',
         error:
           error instanceof Error ? error.message : 'An unknown error occurred',
         executionTime: 0,
