@@ -5,6 +5,7 @@ import { Timestamp } from 'firebase/firestore';
 import { useParams } from 'next/navigation';
 import { useEffect, useState, useCallback } from 'react';
 
+import Markdown from '@/components/common/Markdown';
 import Navbar from '@/components/common/Navbar';
 import AuthGuard from '@/components/misc/authGuard';
 import { Button } from '@/components/ui/button';
@@ -12,7 +13,7 @@ import { CodeEditor } from '@/components/ui/CodeEditor';
 import { ContentProvider } from '@/context/ContentContext';
 import { LanguagesProvider } from '@/context/LanguagesContext';
 import { LocalStorageProvider } from '@/context/LocalhostContext';
-import { executeCode } from '@/services/codeExecutionService';
+import { competitiveRuntime } from '@/services/client/competitiveRuntime';
 import { problemsService, Problem } from '@/services/firebase/problemsService';
 import {
   submissionsService,
@@ -114,12 +115,30 @@ export default function ProblemPage() {
 
     setLoading(true);
     setError('');
+    setExecutionResult(null);
 
     try {
-      const result = await executeCode(code, testCases);
-      setExecutionResult(result);
-      if (result.error) setError(result.error);
+      // Execute the code against all test cases using the browser runtime
+      const result = await competitiveRuntime.executeCode(
+        code,
+        testCases,
+        'solve'
+      );
 
+      setExecutionResult({
+        success: result.testResults.every((r) => r.passed),
+        output: result.testResults.map((r) => r.output).join('\n'),
+        testResults: result.testResults.map((r, i) => ({
+          testCase: testCases[i],
+          passed: r.passed,
+          output: r.output,
+          error: r.error,
+          executionTime: r.executionTime || 0,
+          memoryUsage: 0, // Browser doesn't provide memory usage
+        })),
+      });
+
+      // If all tests passed, save the submission
       if (result.testResults.every((r) => r.passed)) {
         await submissionsService.addSubmission({
           userId: 'user-id',
@@ -128,19 +147,32 @@ export default function ProblemPage() {
           result: { ...result, output: 'All tests passed' },
           status: 'passed',
           executionTime: result.testResults.reduce(
-            (a, c) => a + c.executionTime,
+            (a, c) => a + (c.executionTime || 0),
             0
           ),
-          memoryUsage: result.testResults.reduce(
-            (a, c) => a + c.memoryUsage,
-            0
-          ),
+          memoryUsage: 0, // Browser doesn't provide memory usage
         });
         await loadSubmissions();
       }
     } catch (err) {
       console.error('Error executing code:', err);
-      setError(err instanceof Error ? err.message : 'Failed to execute code');
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to execute code';
+      setError(errorMessage);
+
+      // Set a basic error result for the UI
+      setExecutionResult({
+        success: false,
+        output: errorMessage,
+        testResults: testCases.map((testCase) => ({
+          testCase,
+          passed: false,
+          output: '',
+          error: errorMessage,
+          executionTime: 0,
+          memoryUsage: 0,
+        })),
+      });
     } finally {
       setLoading(false);
     }
@@ -154,25 +186,33 @@ export default function ProblemPage() {
 
     setLoading(true);
     setError('');
+
     try {
-      await submissionsService.addSubmission({
+      const status: 'passed' | 'failed' = executionResult.testResults.every(
+        (r) => r.passed
+      )
+        ? 'passed'
+        : 'failed';
+
+      const submission = {
         userId: 'user-id',
         problemId: problem!.id,
         code,
         result: { ...executionResult },
-        status: executionResult.testResults.every((r) => r.passed)
-          ? 'passed'
-          : 'failed',
+        status,
         executionTime: executionResult.testResults.reduce(
-          (a, c) => a + c.executionTime,
+          (a, c) => a + (c.executionTime || 0),
           0
         ),
-        memoryUsage: executionResult.testResults.reduce(
-          (a, c) => a + c.memoryUsage,
-          0
-        ),
-      });
+        memoryUsage: 0, // Browser doesn't provide memory usage
+        submittedAt: new Date().toISOString(),
+      };
+
+      await submissionsService.addSubmission(submission);
       await loadSubmissions();
+
+      // Show success message
+      setError('');
     } catch (err) {
       console.error('Error submitting solution:', err);
       setError('Failed to submit solution');
@@ -195,12 +235,12 @@ export default function ProblemPage() {
               <main className="flex-1 container mx-auto p-4">
                 <div className="flex flex-col lg:flex-row gap-6">
                   {/* Problem Details Side */}
-                  <div className="md:w-1/2 bg-white rounded-lg shadow p-6">
+                  <div className="md:w-1/2 bg-white rounded-lg p-6">
                     <div className="space-y-4">
                       <h1 className="text-2xl font-bold text-gray-900">
                         {problem.title}
                       </h1>
-                      <div className="text-gray-600">
+                      <div className="text-sm text-gray-500">
                         <p>
                           Last attempted:{' '}
                           {problem.lastAttempted
@@ -212,99 +252,104 @@ export default function ProblemPage() {
                               )
                             : 'Never'}
                         </p>
-                        <p>Difficulty: {problem.difficulty}</p>
-                        <p>Category: {problem.category}</p>
                       </div>
+
+                      {/* Basic Problem Info */}
                       <div className="space-y-4">
                         {/* Problem Requirements */}
                         <div className="bg-gray-50 p-4 rounded-lg">
-                          <h2 className="font-semibold mb-2">
-                            Problem Requirements
-                          </h2>
+                          <h2 className="font-semibold mb-2">Problem Type</h2>
                           <div className="space-y-4">
-                            <div className="space-y-2">
-                              <h3 className="font-medium">Difficulty</h3>
-                              <div className="flex items-center gap-2">
-                                <div className="w-4 h-4 rounded-full bg-yellow-500"></div>
-                                <span className="font-medium">
-                                  {problem.difficulty}
-                                </span>
-                              </div>
-                            </div>
-                            <div className="space-y-2">
-                              <h3 className="font-medium">Category</h3>
-                              <span className="text-gray-600">
-                                {problem.category}
-                              </span>
-                            </div>
-                            <div className="space-y-2">
-                              <h3 className="font-medium">Constraints</h3>
-                              <ul className="list-disc list-inside space-y-1 text-gray-600">
-                                {problem.constraints?.map(
-                                  (constraint, index) => (
-                                    <li key={index}>{constraint}</li>
-                                  )
-                                )}
-                              </ul>
-                            </div>
-                            <div className="space-y-2">
-                              <h3 className="font-medium">Tags</h3>
-                              <div className="flex flex-wrap gap-2">
-                                {problem.tags.map((tag, index) => (
-                                  <span
-                                    key={index}
-                                    className="px-2 py-1 bg-gray-100 rounded text-sm"
-                                  >
-                                    {tag}
+                            <div className="flex items-center gap-6">
+                              <div>
+                                <h3 className="text-sm font-medium text-gray-500">
+                                  Difficulty
+                                </h3>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <span className="text-sm">
+                                    {problem.difficulty}
                                   </span>
-                                ))}
+                                </div>
+                              </div>
+                              <div>
+                                <h3 className="text-sm font-medium text-gray-500">
+                                  Category
+                                </h3>
+                                <span className="text-sm">
+                                  {problem.category}
+                                </span>
                               </div>
                             </div>
                           </div>
                         </div>
-
                         {/* Problem Description */}
-                        <div className="bg-gray-50 p-4 rounded-lg">
-                          <h2 className="font-semibold mb-2">Description</h2>
-                          <pre className="whitespace-pre-wrap">
-                            {problem.description}
-                          </pre>
+                        <div className="space-y-2">
+                          <h2 className="text-sm font-medium text-gray-700 uppercase tracking-wider">
+                            Problem Description
+                          </h2>
+                          <div className="text-sm text-gray-800 leading-relaxed">
+                            <Markdown content={problem.description} />
+                          </div>
                         </div>
 
                         {/* Examples */}
-                        <div className="bg-gray-50 p-4 rounded-lg">
-                          <h2 className="font-semibold mb-2">Examples</h2>
-                          {problem.examples?.map((example, index) => (
-                            <div
-                              key={index}
-                              className="mb-4 p-3 sm:p-4 bg-white rounded"
-                            >
-                              <div className="font-medium mb-2">
-                                Example {index + 1}
-                              </div>
-                              <div className="space-y-2">
-                                <div className="flex items-center gap-2">
-                                  <span className="font-medium">Input:</span>
-                                  <pre className="whitespace-pre-wrap text-sm bg-gray-100 p-2 rounded">
-                                    {JSON.stringify(example.input)}
-                                  </pre>
+                        <div className="space-y-3">
+                          <h2 className="text-sm font-medium text-gray-700 uppercase tracking-wider">
+                            Examples
+                          </h2>
+                          <div className="space-y-3">
+                            {problem.examples?.map((example, index) => (
+                              <div key={index} className="p-3 text-sm">
+                                <div className="font-medium text-gray-900 mb-2">
+                                  Example {index + 1}
                                 </div>
-                                <div className="flex items-center gap-2">
-                                  <span className="font-medium">Output:</span>
-                                  <pre className="whitespace-pre-wrap text-sm bg-gray-100 p-2 rounded">
-                                    {JSON.stringify(example.output)}
-                                  </pre>
+                                <div className="space-y-2">
+                                  <div className="flex flex-col gap-1">
+                                    <span className="text-xs font-medium text-gray-600">
+                                      Input:
+                                    </span>
+                                    <pre className="whitespace-pre-wrap bg-gray-100 p-2 rounded text-xs font-mono text-gray-800">
+                                      {JSON.stringify(example.input)}
+                                    </pre>
+                                  </div>
+                                  <div className="flex flex-col gap-1">
+                                    <span className="text-xs font-medium text-gray-600">
+                                      Output:
+                                    </span>
+                                    <pre className="whitespace-pre-wrap bg-gray-100 p-2 rounded text-xs font-mono text-gray-800">
+                                      {JSON.stringify(example.output)}
+                                    </pre>
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          ))}
+                            ))}
+                          </div>
                         </div>
+
+                        {/* Constraints */}
+                        {problem.constraints && (
+                          <div className="space-y-2">
+                            <h2 className="text-sm font-medium  text-gray-700 uppercase tracking-wider">
+                              Constraints
+                            </h2>
+                            <ul className="text-sm space-y-1.5 text-gray-600 pl-4">
+                              {problem.constraints.map((constraint, index) => (
+                                <li key={index} className="leading-tight">
+                                  <span className="text-gray-900 font-medium">
+                                    •
+                                  </span>{' '}
+                                  {constraint}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
 
                   {/* Code Editor Side */}
-                  <div className="md:w-1/2 bg-white rounded-lg shadow p-6">
+                  <div className="md:w-1/2 bg-white rounded-lg p-6">
                     <div className="space-y-4">
                       <div className="flex justify-between items-center">
                         <h2 className="text-xl font-semibold">Solution</h2>

@@ -1,17 +1,23 @@
 # biteScript
 
-bitescript.fun is a platform for developers who are passionate about learning programming, starting with JavaScript and soon expanding to TypeScript and Python. Whether you're just beginning or looking to sharpen your skills, we’ve designed the platform to guide you through a step-by-step journey. Each concept is presented with real-life examples, practical best practices, and lessons from common mistakes—so you can learn from others' experiences. You’ll also find an interactive code editor right in your browser, so you can practice and experiment without needing extra tools. Plus, with our wide range of coding challenges and a personalized dashboard to track your progress, you’ll stay motivated as you grow your skills and become a more confident programmer.
+bitescript.fun is a platform for developers who are passionate about learning programming, starting with JavaScript and soon expanding to TypeScript and Python. Whether you're just beginning or looking to sharpen your skills, we've designed the platform to guide you through a step-by-step journey. Each concept is presented with real-life examples, practical best practices, and lessons from common mistakes—so you can learn from others' experiences. You’ll also find an interactive code editor right in your browser, so you can practice and experiment without needing extra tools. Plus, with our wide range of coding challenges and a personalized dashboard to track your progress, you’ll stay motivated as you grow your skills and become a more confident programmer.
 
 ## Features
 
-Next.js 14 for modern web development
-TypeScript for static type checking
-Docker for local development and containerization
-ESLint and Prettier for code linting and formatting
-Jest for unit and integration testing
-Environment configuration using .env files
-Deployed to Vercel for production
-Firebase authentication for user login and registration
+- **Interactive Code Editor**: Write and execute JavaScript directly in your browser
+- **Real-time Execution**: See results immediately with our browser-based runtime
+- **Safe Sandbox**: All code runs securely in your browser with no server-side execution
+- **Console Output**: View `console.log` and other console methods in real-time
+- **Error Handling**: Get clear error messages for syntax and runtime errors
+- **Execution Time**: See how long your code takes to run
+- Next.js 14 for modern web development
+- TypeScript for static type checking
+- Docker for local development and containerization
+- ESLint and Prettier for code linting and formatting
+- Jest for unit and integration testing
+- Environment configuration using .env files
+- Deployed to Vercel for production
+- Firebase authentication for user login and registration
 
 ## Project Structure
 
