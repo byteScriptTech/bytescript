@@ -45,14 +45,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
-      if (user) {
-        const currentPath = window.location.pathname;
-        if (currentPath !== '/dashboard') {
-          router.push('/dashboard');
-        }
-      }
     });
-
     return () => unsubscribe();
   }, [auth]);
 

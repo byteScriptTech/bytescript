@@ -11,8 +11,13 @@ import { auth } from '@/firebase/config';
 
 const Navbar = () => {
   const router = useRouter();
-  const canGoBack = window.history.length > 1;
-  const canGoForward = window.history.state?.forward !== null;
+  const [canGoBack, setCanGoBack] = React.useState(false);
+  const [canGoForward, setCanGoForward] = React.useState(false);
+
+  React.useEffect(() => {
+    setCanGoBack(window.history.length > 1);
+    setCanGoForward(window.history.state?.forward !== null);
+  }, []);
 
   const handleSignOut = async () => {
     await signOut(auth);
