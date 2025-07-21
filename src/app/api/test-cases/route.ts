@@ -2,10 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { testCasesService } from '@/services/firebase/testCasesService';
 
+// Mark this route as dynamic to prevent static generation
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const problemId = searchParams.get('problemId');
+    const problemId = request.nextUrl.searchParams.get('problemId');
 
     if (!problemId) {
       return NextResponse.json(

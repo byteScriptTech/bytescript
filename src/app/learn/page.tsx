@@ -5,7 +5,7 @@ import React from 'react';
 import Navbar from '@/components/common/Navbar';
 import { LearnTopicCard } from '@/components/specific/LearnTopicCard';
 import { AuthProvider } from '@/context/AuthContext';
-import { ContentProvider } from '@/context/ContentContext';
+import { ContentProviderClient } from '@/context/ContentProviderClient';
 import { LanguagesProvider } from '@/context/LanguagesContext';
 import { LocalStorageProvider } from '@/context/LocalhostContext';
 import { NotesProvider } from '@/context/NotesContext';
@@ -20,7 +20,7 @@ export default function Learn() {
     <AuthProvider>
       <LocalStorageProvider>
         <LanguagesProvider>
-          <ContentProvider>
+          <ContentProviderClient>
             <NotesProvider>
               <div className="flex min-h-screen w-full flex-col bg-background">
                 <div className="flex flex-col flex-1">
@@ -58,7 +58,7 @@ export default function Learn() {
                 </div>
               </div>
             </NotesProvider>
-          </ContentProvider>
+          </ContentProviderClient>
         </LanguagesProvider>
       </LocalStorageProvider>
     </AuthProvider>
