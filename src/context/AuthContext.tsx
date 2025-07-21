@@ -45,15 +45,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
-      if (user) {
-        const currentPath = window.location.pathname;
-        // Allow access to learn page and its subroutes without redirection
-        if (currentPath !== '/dashboard' && !currentPath.startsWith('/learn')) {
-          router.push('/dashboard');
-        }
-      }
     });
-
     return () => unsubscribe();
   }, [auth]);
 

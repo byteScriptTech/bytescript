@@ -11,9 +11,10 @@ import PythonIcon from '@/assets/CourseIcons/Python';
 interface CourseIconProps {
   language: string;
   id: string;
+  size?: number;
 }
 
-const CourseIcon: React.FC<CourseIconProps> = ({ language, id }) => {
+const CourseIcon: React.FC<CourseIconProps> = ({ language, id, size = 40 }) => {
   if (!language || !id) {
     return null;
   }
@@ -25,7 +26,7 @@ const CourseIcon: React.FC<CourseIconProps> = ({ language, id }) => {
       return (
         <Link href={`/language?name=${language}&id=${id}`}>
           <div className={cardStyles} tabIndex={0} role="button">
-            <JavascriptIcon altText="JavaScript" size={40} />
+            <JavascriptIcon altText="JavaScript" size={size} />
           </div>
         </Link>
       );
@@ -33,7 +34,7 @@ const CourseIcon: React.FC<CourseIconProps> = ({ language, id }) => {
       return (
         <Link href={`/language?name=${language}&id=${id}`}>
           <div className={cardStyles} tabIndex={0} role="button">
-            <PythonIcon altText="Python" size={40} />
+            <PythonIcon altText="Python" size={size} />
           </div>
         </Link>
       );
@@ -44,7 +45,7 @@ const CourseIcon: React.FC<CourseIconProps> = ({ language, id }) => {
           <div className={cardStyles} tabIndex={0} role="button">
             <CompetitiveProgrammingIcon
               altText="Competitive Programming"
-              size={40}
+              size={size}
             />
           </div>
         </Link>
@@ -55,7 +56,7 @@ const CourseIcon: React.FC<CourseIconProps> = ({ language, id }) => {
           <div className={cardStyles} tabIndex={0} role="button">
             <DataStructuresIcon
               altText="Data Structures & Algorithms"
-              size={40}
+              size={size}
             />
           </div>
         </Link>
