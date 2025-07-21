@@ -1,27 +1,15 @@
-'use client';
-
+import { Metadata } from 'next';
 import React from 'react';
 
-import { AuthProvider } from '@/context/AuthContext';
-import { ContentProvider } from '@/context/ContentContext';
-import { LanguagesProvider } from '@/context/LanguagesContext';
-import { LocalStorageProvider } from '@/context/LocalhostContext';
-import { NotesProvider } from '@/context/NotesContext';
+export const metadata: Metadata = {
+  title: 'Learn - biteScript',
+  description: 'Your learning page',
+};
 
 export default function LearnLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <AuthProvider>
-      <LocalStorageProvider>
-        <LanguagesProvider>
-          <ContentProvider>
-            <NotesProvider>{children}</NotesProvider>
-          </ContentProvider>
-        </LanguagesProvider>
-      </LocalStorageProvider>
-    </AuthProvider>
-  );
+  return <>{children}</>;
 }
