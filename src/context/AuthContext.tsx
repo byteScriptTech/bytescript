@@ -47,7 +47,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setCurrentUser(user);
       if (user) {
         const currentPath = window.location.pathname;
-        if (currentPath !== '/dashboard') {
+        // Allow access to learn page and its subroutes without redirection
+        if (currentPath !== '/dashboard' && !currentPath.startsWith('/learn')) {
           router.push('/dashboard');
         }
       }
