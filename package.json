@@ -50,7 +50,12 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "lint-staged": {
-    "**/*.{ts,tsx,js,jsx}": [
+    "**/*.{ts,tsx}": [
+      "bash -c 'tsc --noEmit -p tsconfig.json --pretty'",
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "**/*.{js,jsx}": [
       "eslint --fix",
       "prettier --write"
     ],

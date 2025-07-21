@@ -53,7 +53,7 @@ const mockHistory = {
   back: jest.fn(),
   forward: jest.fn(),
   length: 1,
-  state: { forward: null },
+  state: { forward: null as boolean | null },
 };
 Object.defineProperty(window, 'history', {
   value: mockHistory,
@@ -162,16 +162,60 @@ describe('Navbar', () => {
     expect(window.history.forward).toHaveBeenCalled();
   });
 
-  it('calls signOut and navigates to /login on Sign Out', async () => {
+  it('does not render UserDropDown when there is no current user', () => {
     render(
       <AuthContext.Provider value={authContextValue}>
         <Navbar />
       </AuthContext.Provider>
     );
+
+    // Should only have 3 buttons: Dashboard, Back, Forward
     const buttons = screen.getAllByRole('button');
+    expect(buttons).toHaveLength(3);
+
+    // Verify the buttons are in the expected order
+    expect(buttons[0]).toHaveTextContent(/go to dashboard/i);
+    expect(buttons[1]).toHaveAttribute('aria-label', 'Go back');
+    expect(buttons[2]).toHaveAttribute('aria-label', 'Go forward');
+
+    // User button should not be in the document
+    expect(screen.queryByLabelText('user')).not.toBeInTheDocument();
+  });
+
+  it('renders UserDropDown when there is a current user', () => {
+    // Set up a mock current user
+    authContextValue.currentUser = { uid: '123', displayName: 'Test User' };
+
+    render(
+      <AuthContext.Provider value={authContextValue}>
+        <Navbar />
+      </AuthContext.Provider>
+    );
+
+    // Should have 4 buttons now: Dashboard, Back, Forward, User
+    const buttons = screen.getAllByRole('button');
+    expect(buttons).toHaveLength(4);
+
+    // The last button should be the user button
     const userButton = buttons[3];
+    expect(userButton).toHaveAttribute('aria-label', 'user');
+  });
+
+  it('calls signOut and navigates to /login on Sign Out', async () => {
+    // Set up a mock current user for the sign out test
+    authContextValue.currentUser = { uid: '123', displayName: 'Test User' };
+
+    render(
+      <AuthContext.Provider value={authContextValue}>
+        <Navbar />
+      </AuthContext.Provider>
+    );
+
+    // Click the user button to open the dropdown
+    const userButton = screen.getByLabelText('user');
     fireEvent.click(userButton);
 
+    // Click the sign out button
     const signOutButton = screen.getByRole('menuitem', { name: /sign out/i });
     fireEvent.click(signOutButton);
 
