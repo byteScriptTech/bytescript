@@ -7,9 +7,11 @@ import React from 'react';
 import Logo from '@/components/common/Logo';
 import UserDropDown from '@/components/specific/UserDropDown';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/context/AuthContext';
 import { auth } from '@/firebase/config';
 
 const Navbar = () => {
+  const { currentUser } = useAuth();
   const router = useRouter();
   const [canGoBack, setCanGoBack] = React.useState(false);
   const [canGoForward, setCanGoForward] = React.useState(false);
@@ -47,6 +49,7 @@ const Navbar = () => {
           }}
           className="p-2 rounded-md hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={!canGoBack}
+          aria-label="Go back"
         >
           <ChevronLeft className="h-4 w-4" />
         </button>
@@ -56,19 +59,22 @@ const Navbar = () => {
           }}
           className="p-2 rounded-md hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={!canGoForward}
+          aria-label="Go forward"
         >
           <ChevronRight className="h-4 w-4" />
         </button>
       </div>
-      <div className="flex items-center gap-3 sm:gap-4">
-        <UserDropDown
-          {...{
-            handleSignOut,
-            handleMyAccountClick,
-            handleSettingsClick,
-          }}
-        />
-      </div>
+      {currentUser && (
+        <div className="flex items-center gap-3 sm:gap-4">
+          <UserDropDown
+            {...{
+              handleSignOut,
+              handleMyAccountClick,
+              handleSettingsClick,
+            }}
+          />
+        </div>
+      )}
     </header>
   );
 };
