@@ -15,6 +15,7 @@
     "test:watch": "jest --watch",
     "precommit": "lint-staged",
     "prepare": "husky install",
+    "seed:topics": "ts-node -P tsconfig.node.json scripts/seed-topics.ts",
     "fetch:all": "ts-node -P tsconfig.node.json scripts/fetchAllCollections.ts"
   },
   "dependencies": {
@@ -38,6 +39,7 @@
     "dotenv": "^17.2.0",
     "firebase": "^10.14.1",
     "framer-motion": "^11.11.8",
+    "highlight.js": "^11.11.1",
     "lucide-react": "^0.447.0",
     "monaco-editor": "^0.52.2",
     "next": "14.2.14",
@@ -45,7 +47,10 @@
     "react": "^18",
     "react-dom": "^18",
     "react-icons": "^5.3.0",
+    "react-markdown": "^9.1.0",
     "react-syntax-highlighter": "^15.6.1",
+    "rehype-highlight": "^7.0.2",
+    "remark-gfm": "^4.0.1",
     "tailwind-merge": "^2.5.3",
     "tailwindcss-animate": "^1.0.7"
   },
@@ -68,7 +73,7 @@
     "@testing-library/react": "^16.0.1",
     "@types/jest": "^29.5.13",
     "@types/lodash": "^4.17.10",
-    "@types/node": "^20.19.8",
+    "@types/node": "^20.19.9",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "@types/react-syntax-highlighter": "^15.5.13",
