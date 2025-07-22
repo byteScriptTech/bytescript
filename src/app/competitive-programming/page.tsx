@@ -1,16 +1,16 @@
 'use client';
 
 import Navbar from '@/components/common/Navbar';
-import AuthGuard from '@/components/misc/authGuard';
 import { Problems } from '@/components/specific/Problems';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { AuthProvider } from '@/context/AuthContext';
 import { ContentProvider } from '@/context/ContentContext';
 import { LanguagesProvider } from '@/context/LanguagesContext';
 import { LocalStorageProvider } from '@/context/LocalhostContext';
 
 export default function CompetitiveProgrammingPage() {
   return (
-    <AuthGuard>
+    <AuthProvider>
       <ContentProvider>
         <LocalStorageProvider>
           <LanguagesProvider>
@@ -44,6 +44,6 @@ export default function CompetitiveProgrammingPage() {
           </LanguagesProvider>
         </LocalStorageProvider>
       </ContentProvider>
-    </AuthGuard>
+    </AuthProvider>
   );
 }
