@@ -25,7 +25,7 @@ export const LanguagesList = () => {
     } else if (name === 'data-structures-&-algorithms') {
       router.push('/data-structures');
     } else {
-      router.push(`/language?name=${name}&id=${id}`);
+      router.push(`/lang?name=${name}&id=${id}`);
     }
   };
 

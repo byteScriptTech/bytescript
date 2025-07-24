@@ -90,7 +90,7 @@ describe('LanguagesList Component', () => {
 
     expect(fetchContentMock).toHaveBeenCalledWith('javascript');
     expect(mockSetItem).toHaveBeenCalledWith('lvl_name', 'javascript');
-    expect(mockPush).toHaveBeenCalledWith('/language?name=javascript&id=1');
+    expect(mockPush).toHaveBeenCalledWith('/lang?name=javascript&id=1');
   });
 
   it('redirects to correct custom routes for known topics', () => {

@@ -27,29 +27,40 @@ const LearnContent: React.FC<LearnContentProps> = ({
   const searchParams = useSearchParams();
   const { getItem } = useLocalStorage();
   const topicIdArray = searchParams.getAll('id');
-  const { content, loading } = useContentContext();
-  const courseContent: any = content && content[0];
   const topicId = topicIdArray[1];
-  const currentUser = getItem('user');
+
+  const currentUser = React.useMemo(() => getItem('user'), [getItem]);
+  const currentLang = React.useMemo(() => getItem('lvl_name'), [getItem]);
+
+  const { content, loading } = useContentContext();
   const { getUserLearningProgress } = useLanguages();
-  const currentLang = getItem('lvl_name');
+
+  const courseContent = React.useMemo(() => content?.[0], [content]);
+
   useEffect(() => {
-    if (currentLang && currentUser) {
+    if (currentLang && currentUser?.uid) {
       getUserLearningProgress(currentUser.uid, currentLang);
     }
-  }, [searchParams]);
+  }, [currentLang, currentUser?.uid]);
 
+  // Update topics when course content or topicId changes
   useEffect(() => {
-    if (topicId && courseContent) {
-      const { topics } = courseContent[topicId] || {};
-      setTopics(topics);
-    } else if (courseContent) {
-      const { topics } = courseContent || {};
-      setTopics(topics);
-    }
-  }, [topicId, courseContent]);
+    if (!courseContent) return;
 
-  // FIXME: Refactor this below code, doesn't look very nice!
+    const newTopics =
+      topicId && courseContent[topicId]
+        ? courseContent[topicId]?.topics
+        : courseContent.topics;
+
+    setTopics((prevTopics) => {
+      // Only update if topics have actually changed
+      if (JSON.stringify(prevTopics) !== JSON.stringify(newTopics)) {
+        return newTopics;
+      }
+      return prevTopics;
+    });
+  }, [courseContent, topicId]);
+
   return (
     <div className="mx-auto grid w-full max-w-6xl items-start gap-6 md:grid-cols-[20%_60%_20%] lg:grid-cols-[20%_60%_20%]">
       <Navigation
