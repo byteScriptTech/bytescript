@@ -32,7 +32,7 @@ const Course: React.FC<CourseProps> = ({ searchParams }) => {
 
   return (
     <AuthProvider>
-      <AuthGuard>
+      <AuthGuard requireAuth={false}>
         <ContentProvider>
           <LocalStorageProvider>
             <BreadcrumbProvider>
