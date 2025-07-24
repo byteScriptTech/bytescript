@@ -1,5 +1,6 @@
 import { collection, getDocs } from 'firebase/firestore';
 import { debounce } from 'lodash';
+import { useSearchParams } from 'next/navigation';
 import {
   createContext,
   ReactNode,
@@ -30,15 +31,11 @@ export const useContentContext = () => {
   return context;
 };
 
-interface ContentProviderProps {
-  children: ReactNode;
-  topicName?: string;
-}
+export const ContentProvider = ({ children }: { children: ReactNode }) => {
+  const searchParams = useSearchParams();
+  const topicNameArray = searchParams.getAll('name');
+  const topicName = topicNameArray[0];
 
-export const ContentProvider = ({
-  children,
-  topicName,
-}: ContentProviderProps) => {
   const [content, setContent] = useState<LanguageContent[] | undefined>();
   const [loading, setLoading] = useState<boolean>(true);
   const [scrollToList, setScrollToList] = useState<
@@ -85,30 +82,31 @@ export const ContentProvider = ({
   }, 300);
 
   const fetchScrollToViewList = debounce(async () => {
-    const storedScrollToList = getDataFromLocalStorage('scrollToList');
-    if (storedScrollToList) {
-      setScrollToList(storedScrollToList);
+    const cachedScrollToList = getDataFromLocalStorage('scrollToList');
+    if (cachedScrollToList) {
+      setScrollToList(cachedScrollToList);
       return;
     }
 
     try {
-      const querySnapshot = await getDocs(collection(db, 'scrollToViewList'));
-      const scrollToViewData = querySnapshot.docs.map((doc) => ({
+      const scrollToListCollection = collection(db, 'scroll_to_view');
+      const scrollToViewSnapshot = await getDocs(scrollToListCollection);
+      const scrollToList = scrollToViewSnapshot.docs.map((doc) => ({
         id: doc.id,
-        views: doc.data().views || [],
-      }));
-      setScrollToList(scrollToViewData);
+        ...doc.data(),
+      })) as any;
+
+      saveDataToLocalStorage('scrollToList', scrollToList);
+      setScrollToList(scrollToList);
     } catch (error) {
-      console.error('Error fetching scroll to view list:', error);
+      console.error('Error fetching scroll to view list: ', error);
     }
   }, 300);
 
   useEffect(() => {
+    fetchContent(topicName);
     fetchScrollToViewList();
-    if (topicName) {
-      fetchContent(topicName);
-    }
-  }, [topicName, fetchContent, fetchScrollToViewList]);
+  }, [topicName]);
 
   return (
     <ContentContext.Provider
