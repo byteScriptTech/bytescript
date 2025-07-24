@@ -24,7 +24,7 @@ const CourseIcon: React.FC<CourseIconProps> = ({ language, id, size = 40 }) => {
   switch (language) {
     case 'javascript':
       return (
-        <Link href={`/language?name=${language}&id=${id}`}>
+        <Link href={`/lang?name=${language}&id=${id}`}>
           <div className={cardStyles} tabIndex={0} role="button">
             <JavascriptIcon altText="JavaScript" size={size} />
           </div>
@@ -32,7 +32,7 @@ const CourseIcon: React.FC<CourseIconProps> = ({ language, id, size = 40 }) => {
       );
     case 'python':
       return (
-        <Link href={`/language?name=${language}&id=${id}`}>
+        <Link href={`/lang?name=${language}&id=${id}`}>
           <div className={cardStyles} tabIndex={0} role="button">
             <PythonIcon altText="Python" size={size} />
           </div>
@@ -41,7 +41,7 @@ const CourseIcon: React.FC<CourseIconProps> = ({ language, id, size = 40 }) => {
 
     case 'competitive-programming':
       return (
-        <Link href={`/language?name=${language}&id=${id}`}>
+        <Link href={`/lang?name=${language}&id=${id}`}>
           <div className={cardStyles} tabIndex={0} role="button">
             <CompetitiveProgrammingIcon
               altText="Competitive Programming"
@@ -52,7 +52,7 @@ const CourseIcon: React.FC<CourseIconProps> = ({ language, id, size = 40 }) => {
       );
     case 'data-structures-&-algorithms':
       return (
-        <Link href={`/language?name=${language}&id=${id}`}>
+        <Link href={`/lang?name=${language}&id=${id}`}>
           <div className={cardStyles} tabIndex={0} role="button">
             <DataStructuresIcon
               altText="Data Structures & Algorithms"

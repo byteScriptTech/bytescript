@@ -78,7 +78,7 @@ describe('CourseIcon Component Test', () => {
     expect(link).toBeInTheDocument();
     expect(link.closest('a')).toHaveAttribute(
       'href',
-      '/language?name=javascript&id=123'
+      '/lang?name=javascript&id=123'
     );
   });
 });

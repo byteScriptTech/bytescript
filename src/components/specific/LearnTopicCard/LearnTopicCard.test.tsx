@@ -47,7 +47,7 @@ describe('LearnTopicCard', () => {
     fireEvent.click(card);
 
     expect(mockRouter.push).toHaveBeenCalledWith(
-      '/language?name=JavaScript&id=test-topic'
+      '/lang?name=javascript&id=test-topic'
     );
   });
 

@@ -44,7 +44,7 @@ const components: Components = {
     children?: React.ReactNode;
   }) => {
     // Extract language from className if needed in the future
-    // const _match = /language-(\w+)/.exec(className || '');
+    // const _match = /lang-(\w+)/.exec(className || '');
     return !inline ? (
       <pre className="bg-gray-800 rounded-lg p-4 overflow-x-auto my-4">
         <code className={className} {...props}>

@@ -30,7 +30,7 @@ export const LearnTopicCard: React.FC<LearnTopicCardProps> = ({
         router.push('/data-structures');
       } else {
         router.push(
-          `/language?name=${encodeURIComponent(topic.name)}&id=${topic.id}`
+          `/lang?name=${encodeURIComponent(topic.name.toLowerCase())}&id=${topic.id}`
         );
       }
     }
