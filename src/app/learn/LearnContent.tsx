@@ -7,7 +7,6 @@ import { useTopics } from '@/hooks/useTopics';
 
 function LearnContentInner() {
   const { topics, loading } = useTopics();
-
   return (
     <div className="container mx-auto px-4 py-6 sm:px-6 lg:px-8 max-w-7xl">
       <div className="mb-8 text-center sm:text-left">
@@ -24,8 +23,12 @@ function LearnContentInner() {
           {[...Array(6)].map((_, i) => (
             <div
               key={i}
-              className="h-40 rounded-lg bg-muted/50 animate-pulse"
-            />
+              className="group relative flex flex-col items-center p-6 rounded-xl border border-border bg-card/90 shadow-sm"
+            >
+              <div className="w-16 h-16 rounded-full bg-muted/80 dark:bg-muted/60 animate-pulse mb-4" />
+              <div className="h-6 w-3/4 bg-muted/80 dark:bg-muted/60 animate-pulse rounded-md mb-2" />
+              <div className="h-4 w-1/2 bg-muted/80 dark:bg-muted/60 animate-pulse rounded-md" />
+            </div>
           ))}
         </div>
       ) : (
