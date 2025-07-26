@@ -10,7 +10,7 @@ interface ProblemEditorProps {
   onRun: () => void;
   onSubmit: () => void;
   loading: boolean;
-  error: string | null;
+  error?: string | null;
   executionResult: {
     testResults: TestResult[];
     output?: string;
