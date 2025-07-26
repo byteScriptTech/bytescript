@@ -40,7 +40,23 @@ const Navbar = () => {
             size="sm"
             className="px-2 h-8 bg-muted text-dark hover:bg-gray-300 transition-colors"
           >
-            Go to Dashboard
+            Dashboard
+          </Button>
+        </Link>
+        <Link href="/learn">
+          <Button
+            size="sm"
+            className="px-2 h-8 bg-muted text-dark hover:bg-gray-300 transition-colors"
+          >
+            Learn
+          </Button>
+        </Link>
+        <Link href="/practice">
+          <Button
+            size="sm"
+            className="px-2 h-8 bg-muted text-dark hover:bg-gray-300 transition-colors"
+          >
+            Practice
           </Button>
         </Link>
         <button
