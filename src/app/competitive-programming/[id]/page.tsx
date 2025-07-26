@@ -1,5 +1,6 @@
 'use client';
 
+import Navbar from '@/components/common/Navbar';
 import ProblemPageContent from '@/components/specific/ProblemPageContent';
 import { AuthProvider } from '@/context/AuthContext';
 import { ContentProvider } from '@/context/ContentContext';
@@ -12,6 +13,7 @@ export default function ProblemPage() {
       <ContentProvider>
         <LanguagesProvider>
           <LocalStorageProvider>
+            <Navbar />
             <ProblemPageContent />
           </LocalStorageProvider>
         </LanguagesProvider>

@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from 'react';
 import ProblemDetail from '@/components/specific/ProblemDetail';
 import ProblemEditor from '@/components/specific/ProblemEditor';
 import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 import { problemsService } from '@/services/firebase/problemsService';
 import { submissionsService } from '@/services/firebase/submissionsService';
 import { testCasesService } from '@/services/firebase/testCasesService';
@@ -39,23 +40,31 @@ const ProblemPageContent = () => {
   const [code, setCode] = useState<string>('');
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string>('');
   const [executionResult, setExecutionResult] =
     useState<CodeExecutionResult | null>(null);
+  const { toast } = useToast();
   const { currentUser } = useAuth();
 
   const loadSubmissions = useCallback(
     async (userId: string) => {
       if (!id) return;
       try {
-        const userSubmissions =
+        const allSubmissions =
           await submissionsService.getUserSubmissions(userId);
-        setSubmissions(userSubmissions);
+        const problemSubmissions = allSubmissions.filter(
+          (submission: Submission) => submission.problemId === id
+        );
+        setSubmissions(problemSubmissions);
       } catch (err) {
-        console.error('Error loading submissions:', err);
+        console.error('Error fetching submissions:', err);
+        toast({
+          title: 'Error',
+          description: 'Failed to load submissions',
+          variant: 'destructive',
+        });
       }
     },
-    [id]
+    [id, toast]
   );
 
   useEffect(() => {
@@ -64,42 +73,65 @@ const ProblemPageContent = () => {
       setLoading(true);
       try {
         const fetchedProblem = await problemsService.getProblemById(id);
-        if (!fetchedProblem) throw new Error('Problem not found');
+        if (!fetchedProblem) {
+          toast({
+            title: 'Error',
+            description: 'Problem not found',
+            variant: 'destructive',
+          });
+          return;
+        }
 
-        const fetchedTestCases =
-          (currentUser &&
-            (await testCasesService.getTestCasesByProblemId(id))) ??
-          [];
+        let fetchedTestCases: TestCase[] = [];
+        if (currentUser) {
+          try {
+            fetchedTestCases =
+              await testCasesService.getTestCasesByProblemId(id);
+          } catch (err) {
+            console.error('Error fetching test cases:', err);
+            toast({
+              title: 'Warning',
+              description: 'Failed to load test cases',
+              variant: 'destructive',
+            });
+          }
+        }
 
-        const problemWithDefaultStarterCode = fetchedProblem
-          ? ({
-              ...fetchedProblem,
-              starterCode:
-                'starterCode' in fetchedProblem &&
-                typeof (fetchedProblem as any).starterCode === 'string'
-                  ? (fetchedProblem as any).starterCode
-                  : '// Write your solution here',
-              lastAttempted:
-                'lastAttempted' in fetchedProblem
-                  ? (fetchedProblem as any).lastAttempted
-                  : null,
-            } as unknown as ProblemWithOptionalStarterCode)
-          : null;
+        const problemWithDefaultStarterCode = {
+          ...fetchedProblem,
+          starterCode:
+            'starterCode' in fetchedProblem &&
+            typeof (fetchedProblem as any).starterCode === 'string'
+              ? (fetchedProblem as any).starterCode
+              : '// Write your solution here',
+          lastAttempted:
+            'lastAttempted' in fetchedProblem
+              ? (fetchedProblem as any).lastAttempted
+              : null,
+        } as unknown as ProblemWithOptionalStarterCode;
 
         setProblem(problemWithDefaultStarterCode);
         setTestCases(fetchedTestCases);
-        // TODO: Get actual user ID from auth context
-        await loadSubmissions('current-user-id');
+
+        if (currentUser?.uid) {
+          await loadSubmissions(currentUser.uid);
+        }
       } catch (err) {
         console.error('Error fetching data:', err);
-        setError(err instanceof Error ? err.message : 'Failed to fetch data');
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to fetch data';
+        toast({
+          title: 'Error',
+          description: errorMessage,
+          variant: 'destructive',
+        });
       } finally {
         setLoading(false);
       }
     };
 
     fetchProblemAndTestCases();
-  }, [id, loadSubmissions]);
+  }, [id, loadSubmissions, currentUser, toast]);
 
   useEffect(() => {
     if (!problem) {
@@ -122,18 +154,34 @@ const ProblemPageContent = () => {
     setCode(template);
   }, [problem]);
 
-  const handleRun = async () => {
+  const handleRun = useCallback(async () => {
     try {
-      if (!code || !testCases.length) {
-        throw new Error('Please write some code first');
+      if (!currentUser) {
+        toast({
+          title: 'Authentication Required',
+          description: 'Please sign in to run code',
+          variant: 'destructive',
+        });
+        return;
       }
-
+      if (!code || !testCases.length) {
+        toast({
+          title: 'Error',
+          description: 'Please write some code first',
+          variant: 'destructive',
+        });
+        return;
+      }
       if (!problem) {
-        throw new Error('Problem not loaded');
+        toast({
+          title: 'Error',
+          description: 'Problem not loaded',
+          variant: 'destructive',
+        });
+        return;
       }
 
       setLoading(true);
-      setError('');
       setExecutionResult(null);
 
       // Mock implementation of code execution
@@ -156,7 +204,7 @@ const ProblemPageContent = () => {
 
       // Save the submission
       const submissionData = {
-        userId: 'current-user-id', // TODO: Get from auth context
+        userId: currentUser.uid,
         problemId: problem.id,
         code,
         result: {
@@ -185,23 +233,42 @@ const ProblemPageContent = () => {
           (sum, r) => sum + r.memoryUsage,
           0
         ),
+        submittedAt: new Date(),
       };
 
       await submissionsService.addSubmission(submissionData);
-      await loadSubmissions('current-user-id');
+      if (currentUser?.uid) {
+        await loadSubmissions(currentUser.uid);
+      }
     } catch (err) {
       console.error('Error executing code:', err);
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to execute code';
-      setError(errorMessage);
+      toast({
+        title: 'Error',
+        description: errorMessage,
+        variant: 'destructive',
+      });
     } finally {
       setLoading(false);
     }
-  };
+  }, [code, currentUser, loadSubmissions, problem, testCases, toast]);
 
   const handleSubmit = useCallback(async () => {
+    if (!currentUser) {
+      toast({
+        title: 'Authentication Required',
+        description: 'Please sign in to submit your solution',
+        variant: 'destructive',
+      });
+      return;
+    }
     if (!problem || !executionResult) {
-      setError('Problem or execution result not available');
+      toast({
+        title: 'Error',
+        description: 'Problem or execution result not available',
+        variant: 'destructive',
+      });
       return;
     }
 
@@ -214,7 +281,7 @@ const ProblemPageContent = () => {
         : 'failed';
 
       const submissionData = {
-        userId: 'current-user-id', // Replace with actual user ID from auth
+        userId: currentUser.uid,
         problemId: problem.id,
         code,
         result: {
@@ -247,15 +314,28 @@ const ProblemPageContent = () => {
       };
 
       await submissionsService.addSubmission(submissionData);
-      await loadSubmissions('current-user-id');
-      setError('');
+      if (currentUser?.uid) {
+        await loadSubmissions(currentUser.uid);
+      }
+
+      toast({
+        title: 'Success',
+        description: 'Your solution has been submitted!',
+        variant: 'default',
+      });
     } catch (err) {
       console.error('Error submitting solution:', err);
-      setError('Failed to submit solution');
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to submit solution';
+      toast({
+        title: 'Error',
+        description: errorMessage,
+        variant: 'destructive',
+      });
     } finally {
       setLoading(false);
     }
-  }, [code, executionResult, loadSubmissions, problem]);
+  }, [currentUser, code, executionResult, loadSubmissions, problem, toast]);
 
   if (loading) {
     return (
@@ -265,13 +345,8 @@ const ProblemPageContent = () => {
     );
   }
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-red-600">{error}</div>
-      </div>
-    );
-  }
+  // Error state is now handled by toasts
+  // No need for a separate error state UI
 
   if (!problem) {
     return (
@@ -304,7 +379,7 @@ const ProblemPageContent = () => {
                 onRun={handleRun}
                 onSubmit={handleSubmit}
                 loading={loading}
-                error={error}
+                error={null}
                 executionResult={executionResult}
                 testCases={testCases}
                 submissions={submissions}

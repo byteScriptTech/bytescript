@@ -80,16 +80,25 @@ describe('Navbar', () => {
     };
   });
 
-  it('renders logo and dashboard link', () => {
+  it('renders logo, dashboard link, practice link and learn link', () => {
     render(
       <AuthContext.Provider value={authContextValue}>
         <Navbar />
       </AuthContext.Provider>
     );
     expect(screen.getByText('Logo')).toBeInTheDocument();
-    expect(
-      screen.getByRole('link', { name: /go to dashboard/i })
-    ).toHaveAttribute('href', '/dashboard');
+    expect(screen.getByRole('link', { name: /dashboard/i })).toHaveAttribute(
+      'href',
+      '/dashboard'
+    );
+    expect(screen.getByRole('link', { name: /practice/i })).toHaveAttribute(
+      'href',
+      '/practice'
+    );
+    expect(screen.getByRole('link', { name: /learn/i })).toHaveAttribute(
+      'href',
+      '/learn'
+    );
   });
 
   it('disables Back when history.length ≤ 1', () => {
@@ -99,7 +108,7 @@ describe('Navbar', () => {
       </AuthContext.Provider>
     );
     const buttons = screen.getAllByRole('button');
-    const backButton = buttons[1];
+    const backButton = buttons[3];
     expect(backButton).toBeDisabled();
   });
 
@@ -111,20 +120,28 @@ describe('Navbar', () => {
       </AuthContext.Provider>
     );
     const buttons = screen.getAllByRole('button');
-    const backButton = buttons[1];
+    const backButton = buttons[3];
     expect(backButton).toBeEnabled();
   });
 
   it('calls window.history.back() on Back click', () => {
+    // Mock window.history.back
+    const backSpy = jest
+      .spyOn(window.history, 'back')
+      .mockImplementation(() => {});
+
     mockHistory.length = 2;
     render(
       <AuthContext.Provider value={authContextValue}>
         <Navbar />
       </AuthContext.Provider>
     );
+
     const buttons = screen.getAllByRole('button');
-    fireEvent.click(buttons[1]);
+    fireEvent.click(buttons[3]);
     expect(window.history.back).toHaveBeenCalled();
+
+    backSpy.mockRestore();
   });
 
   it('disables Forward when history.state.forward is falsy', () => {
@@ -134,7 +151,7 @@ describe('Navbar', () => {
       </AuthContext.Provider>
     );
     const buttons = screen.getAllByRole('button');
-    const forwardButton = buttons[2];
+    const forwardButton = buttons[4];
     expect(forwardButton).toBeDisabled();
   });
 
@@ -146,20 +163,46 @@ describe('Navbar', () => {
       </AuthContext.Provider>
     );
     const buttons = screen.getAllByRole('button');
-    const forwardButton = buttons[2];
+    const forwardButton = buttons[4];
     expect(forwardButton).toBeEnabled();
   });
 
   it('calls window.history.forward() on Forward click', () => {
-    mockHistory.state = { forward: true };
+    // Mock window.history.forward
+    const forwardSpy = jest
+      .spyOn(window.history, 'forward')
+      .mockImplementation(() => {});
+
+    // Mock history.state.forward to be true
+    const originalHistoryState = window.history.state;
+    Object.defineProperty(window, 'history', {
+      value: {
+        ...window.history,
+        state: { forward: true },
+      },
+    });
+
     render(
-      <AuthContext.Provider value={authContextValue}>
+      <AuthContext.Provider
+        value={{ ...authContextValue, currentUser: { uid: '123' } }}
+      >
         <Navbar />
       </AuthContext.Provider>
     );
+
     const buttons = screen.getAllByRole('button');
-    fireEvent.click(buttons[2]);
+    // Forward button is now at index 4 (after Dashboard, Learn, Practice, Back)
+    fireEvent.click(buttons[4]);
     expect(window.history.forward).toHaveBeenCalled();
+
+    // Restore original implementation
+    forwardSpy.mockRestore();
+    Object.defineProperty(window, 'history', {
+      value: {
+        ...window.history,
+        state: originalHistoryState,
+      },
+    });
   });
 
   it('does not render UserDropDown when there is no current user', () => {
@@ -169,35 +212,36 @@ describe('Navbar', () => {
       </AuthContext.Provider>
     );
 
-    // Should only have 3 buttons: Dashboard, Back, Forward
+    // Should only have 4 buttons: Dashboard, Learn, Practice, Back, Forward
     const buttons = screen.getAllByRole('button');
-    expect(buttons).toHaveLength(3);
+    expect(buttons).toHaveLength(5);
 
     // Verify the buttons are in the expected order
-    expect(buttons[0]).toHaveTextContent(/go to dashboard/i);
-    expect(buttons[1]).toHaveAttribute('aria-label', 'Go back');
-    expect(buttons[2]).toHaveAttribute('aria-label', 'Go forward');
+    expect(buttons[0]).toHaveTextContent(/dashboard/i);
+    expect(buttons[1]).toHaveTextContent(/learn/i);
+    expect(buttons[2]).toHaveTextContent(/practice/i);
+    expect(buttons[3]).toHaveAttribute('aria-label', 'Go back');
+    expect(buttons[4]).toHaveAttribute('aria-label', 'Go forward');
 
     // User button should not be in the document
     expect(screen.queryByLabelText('user')).not.toBeInTheDocument();
   });
 
   it('renders UserDropDown when there is a current user', () => {
-    // Set up a mock current user
-    authContextValue.currentUser = { uid: '123', displayName: 'Test User' };
-
     render(
-      <AuthContext.Provider value={authContextValue}>
+      <AuthContext.Provider
+        value={{ ...authContextValue, currentUser: { uid: '123' } }}
+      >
         <Navbar />
       </AuthContext.Provider>
     );
 
-    // Should have 4 buttons now: Dashboard, Back, Forward, User
+    // Should have 6 buttons now: Dashboard, Learn, Practice, Back, Forward, User
     const buttons = screen.getAllByRole('button');
-    expect(buttons).toHaveLength(4);
+    expect(buttons).toHaveLength(6);
 
     // The last button should be the user button
-    const userButton = buttons[3];
+    const userButton = buttons[5];
     expect(userButton).toHaveAttribute('aria-label', 'user');
   });
 
