@@ -1,27 +1,35 @@
 import {
   render,
-  screen,
-  fireEvent,
-  waitFor,
   act,
+  waitFor,
+  fireEvent,
+  screen,
 } from '@testing-library/react';
-import React from 'react';
 import '@testing-library/jest-dom';
+import React from 'react';
+import { toast } from 'sonner';
 
 import { useAuth } from '@/context/AuthContext';
-import { useToast } from '@/hooks/use-toast';
 import { notesService } from '@/services/firebase/notesService';
 
 import { NotesProvider, useNotes } from './NotesContext';
+
+// Mock the toast module
+jest.mock('sonner', () => ({
+  toast: {
+    success: jest.fn(),
+    error: jest.fn(),
+  },
+}));
+
+// Create mock functions
+const mockToastSuccess = toast.success as jest.Mock;
 
 // Mock AuthContext
 jest.mock('@/context/AuthContext', () => ({
   useAuth: jest.fn(),
 }));
-// Mock useToast
-jest.mock('@/hooks/use-toast', () => ({
-  useToast: jest.fn(),
-}));
+
 // Mock notesService
 jest.mock('@/services/firebase/notesService', () => ({
   notesService: {
@@ -37,12 +45,9 @@ describe('NotesContext', () => {
     { id: '1', content: 'A', createdAt: new Date(), updatedAt: new Date() },
     { id: '2', content: 'B', createdAt: new Date(), updatedAt: new Date() },
   ];
-  const toast = jest.fn();
-
   beforeEach(() => {
     jest.clearAllMocks();
     (useAuth as jest.Mock).mockReturnValue({ currentUser: { uid: 'uid1' } });
-    (useToast as jest.Mock).mockReturnValue({ toast });
   });
 
   const TestLoader = () => {
@@ -110,10 +115,9 @@ describe('NotesContext', () => {
         'New content',
         'uid1'
       );
-      expect(toast).toHaveBeenCalledWith({
-        title: 'Success',
-        description: 'Note created successfully',
-      });
+      expect(mockToastSuccess).toHaveBeenCalledWith(
+        'Note created successfully!'
+      );
       expect(screen.getByTestId('count2')).toHaveTextContent('1');
     });
   });
@@ -143,11 +147,9 @@ describe('NotesContext', () => {
     fireEvent.click(screen.getByTestId('update'));
     expect(notesService.updateNote).toHaveBeenCalledWith('uid1', '1', 'A');
     await waitFor(() => {
-      expect(toast).toHaveBeenCalledWith({
-        title: 'Success',
-        description: 'Note updated successfully',
-        variant: 'default',
-      });
+      expect(mockToastSuccess).toHaveBeenCalledWith(
+        'Note updated successfully!'
+      );
     });
   });
 
@@ -173,11 +175,9 @@ describe('NotesContext', () => {
     fireEvent.click(screen.getByTestId('del'));
     expect(notesService.deleteNote).toHaveBeenCalledWith('uid1', '1');
     await waitFor(() => {
-      expect(toast).toHaveBeenCalledWith({
-        title: 'Success',
-        description: 'Note deleted successfully',
-        variant: 'default',
-      });
+      expect(mockToastSuccess).toHaveBeenCalledWith(
+        'Note deleted successfully!'
+      );
     });
   });
 });

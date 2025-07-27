@@ -1,8 +1,14 @@
 import { Timestamp } from 'firebase/firestore';
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from 'react';
+import { toast } from 'sonner';
 
 import { useAuth } from '@/context/AuthContext';
-import { useToast } from '@/hooks/use-toast';
 import { notesService, Note } from '@/services/firebase/notesService';
 
 export type EditableNote = {
@@ -29,15 +35,13 @@ interface NotesContextType {
 const NotesContext = createContext<NotesContextType | undefined>(undefined);
 
 export function NotesProvider({ children }: { children: React.ReactNode }) {
-  const { toast } = useToast();
   const [notes, setNotes] = useState<Note[]>([]);
   const [newNoteContent, setNewNoteContent] = useState('');
   const [editingNote, setEditingNote] = useState<EditableNote>(null);
 
-  // Load notes when component mounts
   const { currentUser } = useAuth();
 
-  const loadNotes = async () => {
+  const loadNotes = useCallback(async () => {
     try {
       if (!currentUser?.uid) {
         throw new Error('User not authenticated');
@@ -56,19 +60,21 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
       }));
       setNotes(formattedNotes);
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to load notes',
-        variant: 'destructive',
-      });
+      console.error('Error loading notes:', error);
+      toast.error('Failed to load notes');
     }
-  };
+  }, [currentUser?.uid]);
 
+  // Load notes when the component mounts or when currentUser changes
   useEffect(() => {
-    loadNotes();
-  }, []);
+    if (currentUser) {
+      loadNotes();
+    } else {
+      setNotes([]);
+    }
+  }, [currentUser, loadNotes]);
 
-  const handleCreateNote = async () => {
+  const handleCreateNote = useCallback(async () => {
     if (!newNoteContent.trim()) return;
 
     try {
@@ -81,65 +87,51 @@ export function NotesProvider({ children }: { children: React.ReactNode }) {
       );
       setNotes((prev: Note[]) => [...prev, note]);
       setNewNoteContent('');
-      toast({
-        title: 'Success',
-        description: 'Note created successfully',
-      });
+      toast.success('Note created successfully!');
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to create note',
-        variant: 'destructive',
-      });
+      console.error('Error creating note:', error);
+      toast.error('Failed to create note. Please try again.');
     }
-  };
+  }, [currentUser?.uid, newNoteContent]);
 
-  const handleUpdateNote = async (note: Note) => {
-    try {
-      if (!currentUser?.uid) {
-        throw new Error('User not authenticated');
+  const handleUpdateNote = useCallback(
+    async (note: Note) => {
+      try {
+        if (!currentUser?.uid) {
+          throw new Error('User not authenticated');
+        }
+        await notesService.updateNote(currentUser.uid, note.id, note.content);
+        setNotes((prev: Note[]) => {
+          return prev.map((n: Note) => (n.id === note.id ? note : n));
+        });
+        setEditingNote(null);
+        toast.success('Note updated successfully!');
+      } catch (error) {
+        console.error('Error updating note:', error);
+        toast.error('Failed to update note. Please try again.');
       }
-      await notesService.updateNote(currentUser.uid, note.id, note.content);
-      setNotes((prev: Note[]) => {
-        return prev.map((n: Note) => (n.id === note.id ? note : n));
-      });
-      setEditingNote(null);
-      toast({
-        title: 'Success',
-        description: 'Note updated successfully',
-        variant: 'default',
-      });
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to update note',
-        variant: 'destructive',
-      });
-    }
-  };
+    },
+    [currentUser?.uid]
+  );
 
-  const handleDeleteNote = async (id: string) => {
-    try {
-      if (!currentUser?.uid) {
-        throw new Error('User not authenticated');
+  const handleDeleteNote = useCallback(
+    async (id: string) => {
+      try {
+        if (!currentUser?.uid) {
+          throw new Error('User not authenticated');
+        }
+        await notesService.deleteNote(currentUser.uid, id);
+        setNotes((prev: Note[]) => {
+          return prev.filter((note: Note) => note.id !== id);
+        });
+        toast.success('Note deleted successfully!');
+      } catch (error) {
+        console.error('Error deleting note:', error);
+        toast.error('Failed to delete note. Please try again.');
       }
-      await notesService.deleteNote(currentUser.uid, id);
-      setNotes((prev: Note[]) => {
-        return prev.filter((note: Note) => note.id !== id);
-      });
-      toast({
-        title: 'Success',
-        description: 'Note deleted successfully',
-        variant: 'default',
-      });
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to delete note',
-        variant: 'destructive',
-      });
-    }
-  };
+    },
+    [currentUser?.uid]
+  );
 
   return (
     <NotesContext.Provider
