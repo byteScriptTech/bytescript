@@ -44,10 +44,10 @@ const LandingPageBody: React.FC<LandingPageBodyProps> = ({
                 solving.
               </h2>
             </div>
-            <div className="grid grid-cols-[repeat(auto-fit,minmax(158px,1fr))] gap-3 p-0">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full p-0">
               <div
                 data-testid="feature-card-interactive"
-                className="flex flex-1 gap-3 rounded-lg border border-[#dce0e5] bg-white p-4 flex-col"
+                className="flex w-full gap-3 rounded-lg border border-[#dce0e5] bg-white p-4 flex-col"
               >
                 <div
                   className="text-[#111418]"
@@ -78,7 +78,7 @@ const LandingPageBody: React.FC<LandingPageBodyProps> = ({
               </div>
               <div
                 data-testid="feature-card-problem-solving"
-                className="flex flex-1 gap-3 rounded-lg border border-[#dce0e5] bg-white p-4 flex-col"
+                className="flex w-full gap-3 rounded-lg border border-[#dce0e5] bg-white p-4 flex-col"
               >
                 <div
                   className="text-[#111418]"
@@ -108,7 +108,7 @@ const LandingPageBody: React.FC<LandingPageBodyProps> = ({
               </div>
               <div
                 data-testid="feature-card-community-collaboration"
-                className="flex flex-1 gap-3 rounded-lg border border-[#dce0e5] bg-white p-4 flex-col"
+                className="flex w-full gap-3 rounded-lg border border-[#dce0e5] bg-white p-4 flex-col"
               >
                 <div
                   className="text-[#111418]"
