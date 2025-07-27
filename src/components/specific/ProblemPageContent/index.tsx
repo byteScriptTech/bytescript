@@ -154,6 +154,50 @@ const ProblemPageContent = () => {
     setCode(template);
   }, [problem]);
 
+  // Simple function to run code and capture output
+  const executeCode = (
+    code: string,
+    input: unknown
+  ): { output: string; error?: string } => {
+    const originalConsole = { log: console.log, error: console.error };
+    let output = '';
+    let error: string | undefined;
+
+    // Override console methods to capture output
+    console.log = (...args) => {
+      output +=
+        args
+          .map((arg) =>
+            typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
+          )
+          .join(' ') + '\n';
+    };
+    console.error = console.log;
+
+    try {
+      // Wrap the code in a function and call it with the input
+      const fn = new Function('input', `${code}\nreturn solve(input);`);
+      const result = fn(input);
+
+      // If the function returns a value, include it in the output
+      if (result !== undefined) {
+        output +=
+          '\n' +
+          (typeof result === 'object'
+            ? JSON.stringify(result)
+            : String(result));
+      }
+    } catch (e) {
+      error = e instanceof Error ? e.message : String(e);
+    } finally {
+      // Restore original console methods
+      console.log = originalConsole.log;
+      console.error = originalConsole.error;
+    }
+
+    return { output: output.trim(), error };
+  };
+
   const handleRun = useCallback(async () => {
     try {
       if (!currentUser) {
@@ -184,20 +228,37 @@ const ProblemPageContent = () => {
       setLoading(true);
       setExecutionResult(null);
 
-      // Mock implementation of code execution
-      const mockResults = testCases.map((testCase) => ({
-        testCase,
-        passed: false,
-        output: 'Not implemented',
-        error: 'Code execution not implemented',
-        executionTime: 0,
-        memoryUsage: 0,
-      }));
+      // Execute code against each test case
+      const testResults = await Promise.all(
+        testCases.map((testCase) => {
+          const startTime = performance.now();
+          const { output, error } = executeCode(code, testCase.input);
+          const executionTime = performance.now() - startTime;
+
+          // Simple comparison of stringified outputs
+          const expectedOutput =
+            typeof testCase.expectedOutput === 'string'
+              ? testCase.expectedOutput
+              : JSON.stringify(testCase.expectedOutput);
+
+          const actualOutput = output.split('\n').pop() || ''; // Get last line of output
+          const passed = actualOutput.trim() === expectedOutput.trim();
+
+          return {
+            testCase,
+            passed,
+            output: actualOutput,
+            error,
+            executionTime,
+            memoryUsage: 0, // Not measuring memory in this simplified version
+          };
+        })
+      );
 
       const result: CodeExecutionResult = {
-        output: mockResults.map((r) => r.output).join('\n'),
-        testResults: mockResults,
-        success: mockResults.every((r) => r.passed),
+        output: testResults.map((r) => r.output).join('\n'),
+        testResults,
+        success: testResults.every((r) => r.passed),
       };
 
       setExecutionResult(result);
