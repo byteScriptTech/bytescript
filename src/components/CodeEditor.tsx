@@ -1,36 +1,12 @@
 'use client';
 
-import { Timestamp } from 'firebase/firestore';
 import { useState, useRef, useEffect } from 'react';
 
-import { competitiveRuntime } from '@/services/client/competitiveRuntime';
-import type { TestCase } from '@/services/firebase/testCasesService';
-
-// Sample test cases for the code editor
-const sampleTestCases: TestCase[] = [
-  {
-    id: '1',
-    problemId: 'sample',
-    input: JSON.stringify([2, 3]),
-    expectedOutput: '5',
-    createdAt: Timestamp.now(),
-    updatedAt: Timestamp.now(),
-  },
-  {
-    id: '2',
-    problemId: 'sample',
-    input: JSON.stringify([5, 7]),
-    expectedOutput: '12',
-    createdAt: Timestamp.now(),
-    updatedAt: Timestamp.now(),
-  },
-];
-
-interface ExecutionResult {
+type ExecutionResult = {
   output: string;
   error?: string;
   executionTime?: number;
-}
+};
 
 export default function CodeEditor() {
   const [code, setCode] = useState<string>(
@@ -39,72 +15,81 @@ export default function CodeEditor() {
   const [isRunning, setIsRunning] = useState(false);
   const [result, setResult] = useState<ExecutionResult | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const outputRef = useRef<HTMLDivElement>(null);
 
-  const handleRunCode = async () => {
-    if (!code.trim()) return;
+  const executeCode = (code: string): ExecutionResult => {
+    const originalConsole = { log: console.log, error: console.error };
+    let output = '';
 
-    setIsRunning(true);
-    setResult({
-      output: 'Running tests...\n',
-      executionTime: 0,
-    });
+    console.log = (...args) => {
+      output +=
+        args
+          .map((arg) =>
+            typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+          )
+          .join(' ') + '\n';
+    };
+
+    console.error = console.log;
+
+    const startTime = performance.now();
+    let error: string | undefined;
 
     try {
-      const executionResult = await competitiveRuntime.executeCode(
-        code,
-        sampleTestCases,
-        'add' // Default function name to test
-      );
-
-      // Format the test results
-      let output = '';
-      let passedCount = 0;
-
-      executionResult.testResults.forEach((testResult, index) => {
-        const testCase = sampleTestCases[index];
-        output += `Test Case #${index + 1}: ${testResult.passed ? '✅' : '❌'}\n`;
-        output += `Input: ${testCase.input}\n`;
-        output += `Expected: ${testCase.expectedOutput}\n`;
-        output += `Got: ${testResult.output || 'undefined'}\n`;
-        output += `Execution time: ${testResult.executionTime?.toFixed(2) || 0}ms\n`;
-        if (testResult.error) {
-          output += `Error: ${testResult.error}\n`;
-        }
-        output += '\n';
-
-        if (testResult.passed) passedCount++;
-      });
-
-      output += `\n${passedCount} of ${sampleTestCases.length} test cases passed.`;
-
-      setResult({
-        output,
-        error: executionResult.error,
-        executionTime: executionResult.testResults.reduce(
-          (sum, test) => sum + (test.executionTime || 0),
-          0
-        ),
-      });
-    } catch (error) {
-      setResult({
-        output:
-          'Failed to execute tests. Please check your code for syntax errors.',
-        error:
-          error instanceof Error ? error.message : 'An unknown error occurred',
-        executionTime: 0,
-      });
+      const result = new Function(code)();
+      if (result !== undefined) {
+        output +=
+          '\n' +
+          (typeof result === 'object'
+            ? JSON.stringify(result, null, 2)
+            : String(result));
+      }
+    } catch (e) {
+      error = e instanceof Error ? e.message : String(e);
     } finally {
-      setIsRunning(false);
+      console.log = originalConsole.log;
+      console.error = originalConsole.error;
     }
+
+    return {
+      output: output.trim(),
+      error,
+      executionTime: performance.now() - startTime,
+    };
   };
 
-  // Auto-resize textarea to fit content
+  const handleRunCode = () => {
+    if (!code.trim()) return;
+    setIsRunning(true);
+
+    setTimeout(() => {
+      try {
+        const result = executeCode(code);
+        setResult(result);
+      } catch (error) {
+        setResult({
+          output: '',
+          error: error instanceof Error ? error.message : 'Unknown error',
+          executionTime: 0,
+        });
+      } finally {
+        setIsRunning(false);
+      }
+    }, 100);
+  };
+
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
     }
   }, [code]);
+
+  useEffect(() => {
+    if (outputRef.current) {
+      outputRef.current.scrollTop = outputRef.current.scrollHeight;
+    }
+  }, [result]);
 
   return (
     <div className="flex flex-col h-full gap-2 sm:gap-4">
@@ -142,20 +127,23 @@ export default function CodeEditor() {
           <div className="p-1 sm:p-2 border-b bg-gray-50">
             <h2 className="text-sm sm:text-base font-medium">Output</h2>
           </div>
-          <div className="flex-1 p-2 sm:p-4 bg-white overflow-auto">
+          <div
+            ref={outputRef}
+            className="flex-1 p-2 sm:p-4 bg-white overflow-auto text-xs sm:text-sm"
+          >
             {isRunning ? (
-              <div className="text-gray-500 text-sm">Running code...</div>
+              <div className="text-gray-500">Running code...</div>
             ) : result ? (
               <>
                 {result.error ? (
-                  <div className="text-red-600 text-sm">
+                  <div className="text-red-600">
                     <div className="font-bold">Error:</div>
                     <div className="whitespace-pre-wrap break-words">
                       {result.error}
                     </div>
                   </div>
                 ) : (
-                  <div className="text-sm">
+                  <div>
                     {result.output && (
                       <div className="whitespace-pre-wrap break-words">
                         {result.output}
@@ -170,7 +158,7 @@ export default function CodeEditor() {
                 )}
               </>
             ) : (
-              <div className="text-gray-400 text-sm">
+              <div className="text-gray-400">
                 Run some code to see the output here
               </div>
             )}
