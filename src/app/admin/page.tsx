@@ -1,34 +1,44 @@
 'use client';
 
-import { Database, Code, BookOpen, Users } from 'lucide-react';
+import { Database, Code, BookOpen, Users, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import type { ComponentType } from 'react';
 
-import AuthGuard from '@/components/misc/authGuard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { AuthProvider } from '@/context/AuthContext';
-import { ContentProvider } from '@/context/ContentContext';
-import { LanguagesProvider } from '@/context/LanguagesContext';
-import { LocalStorageProvider } from '@/context/LocalhostContext';
+import { useDataStructures } from '@/context/DataStructuresContext';
 
-export default function AdminDashboard() {
-  const stats = [
+interface StatCard {
+  title: string;
+  value: string | number;
+  icon: ComponentType<{ className?: string }>;
+  href: string;
+  loading?: boolean;
+}
+
+function AdminDashboard() {
+  const { dataStructures, loading } = useDataStructures();
+
+  const stats: StatCard[] = [
     {
       title: 'Data Structures',
-      value: '24',
+      value: loading ? '...' : dataStructures?.length || 0,
       icon: Database,
       href: '/admin/data-structures',
+      loading,
     },
     {
       title: 'Algorithms',
-      value: '45',
+      value: '0',
       icon: Code,
       href: '/admin/algorithms',
+      loading: true,
     },
     {
       title: 'Problems',
-      value: '128',
+      value: '0',
       icon: BookOpen,
       href: '/admin/problems',
+      loading: true,
     },
     {
       title: 'Active Users',
@@ -39,47 +49,48 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <AuthProvider>
-      <AuthGuard requireAuth={true}>
-        <ContentProvider>
-          <LocalStorageProvider>
-            <LanguagesProvider>
-              <div className="space-y-6">
-                <div>
-                  <h1 className="text-2xl font-bold tracking-tight">
-                    Dashboard
-                  </h1>
-                  <p className="text-muted-foreground">
-                    Welcome back! Here&apos;s what&apos;s happening with your
-                    platform.
-                  </p>
-                </div>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+        <p className="text-muted-foreground">
+          Manage your application content and settings
+        </p>
+      </div>
 
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                  {stats.map((stat) => (
-                    <Link key={stat.title} href={stat.href}>
-                      <Card className="hover:bg-accent/10 transition-colors">
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                          <CardTitle className="text-sm font-medium">
-                            {stat.title}
-                          </CardTitle>
-                          <stat.icon className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                          <div className="text-2xl font-bold">{stat.value}</div>
-                          <p className="text-xs text-muted-foreground">
-                            View all {stat.title.toLowerCase()}
-                          </p>
-                        </CardContent>
-                      </Card>
-                    </Link>
-                  ))}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {stats.map((stat) => (
+          <Link key={stat.title} href={stat.href}>
+            <Card className="hover:bg-accent/10 transition-colors h-full">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  {stat.title}
+                </CardTitle>
+                {stat.loading ? (
+                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                ) : (
+                  <stat.icon className="h-4 w-4 text-muted-foreground" />
+                )}
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {stat.loading ? (
+                    <div className="h-8 w-12 animate-pulse rounded bg-muted" />
+                  ) : (
+                    stat.value
+                  )}
                 </div>
-              </div>
-            </LanguagesProvider>
-          </LocalStorageProvider>
-        </ContentProvider>
-      </AuthGuard>
-    </AuthProvider>
+                <p className="text-xs text-muted-foreground">
+                  View all {stat.title.toLowerCase()}
+                </p>
+              </CardContent>
+            </Card>
+          </Link>
+        ))}
+      </div>
+    </div>
   );
+}
+
+export default function AdminPage() {
+  return <AdminDashboard />;
 }

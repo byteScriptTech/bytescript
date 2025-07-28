@@ -1,42 +1,119 @@
+'use client';
+
 import { Plus } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 import { DataStructuresTable } from '@/components/admin/DataStructuresTable';
 import { Button } from '@/components/ui/button';
+import { dsaService } from '@/services/firebase/dsaService';
+
+interface DSATopic {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  category: 'data-structures' | 'algorithms';
+  difficulty?: 'beginner' | 'intermediate' | 'advanced';
+  content?: string;
+  examples?: Array<{
+    input: string;
+    output: string;
+    explanation?: string;
+  }>;
+  status?: 'active' | 'deleted' | 'draft';
+  createdAt?: Date;
+  updatedAt?: Date;
+  deletedAt?: string;
+}
 
 export default function DataStructuresPage() {
-  // Mock data - replace with actual data fetching
-  const dataStructures = [
-    {
-      id: '1',
-      name: 'Array',
-      slug: 'array',
-      description: 'A collection of elements identified by index',
-      category: 'Basic',
-    },
-    {
-      id: '2',
-      name: 'Linked List',
-      slug: 'linked-list',
-      description: 'A linear collection of data elements',
-      category: 'Linear',
-    },
-    {
-      id: '3',
-      name: 'Binary Tree',
-      slug: 'binary-tree',
-      description: 'A tree data structure with at most two children',
-      category: 'Non-Linear',
-    },
-  ];
+  const [topics, setTopics] = useState<DSATopic[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    const fetchTopics = async () => {
+      try {
+        setLoading(true);
+        const data = (await dsaService.getAllTopics()) as DSATopic[];
+        setTopics(data);
+      } catch (err) {
+        console.error('Error fetching topics:', err);
+        setError('Failed to load topics. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTopics();
+  }, []);
+
+  const handleDelete = async (id: string) => {
+    try {
+      const topicToDelete = topics.find((topic) => topic.id === id);
+      if (!topicToDelete) {
+        throw new Error('Topic not found');
+      }
+
+      const updatedTopic = {
+        ...topicToDelete,
+        status: 'deleted' as const,
+        deletedAt: new Date().toISOString(),
+      };
+
+      await dsaService.saveTopic(updatedTopic, id);
+
+      setTopics((currentTopics) =>
+        currentTopics.filter((topic) => topic.id !== id)
+      );
+
+      return { success: true };
+    } catch (error) {
+      console.error('Error deleting topic:', error);
+      return {
+        success: false,
+        error:
+          error instanceof Error ? error.message : 'Failed to delete topic',
+      };
+    }
+  };
+
+  const dataStructures = topics.filter(
+    (topic) => topic.category === 'data-structures'
+  );
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading data structures...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <p className="text-red-500 mb-4">{error}</p>
+          <Button onClick={() => window.location.reload()}>Retry</Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Data Structures</h1>
           <p className="text-muted-foreground">
-            Manage all data structures in the platform
+            Manage your data structures and their content
           </p>
         </div>
         <Button asChild>
@@ -47,7 +124,23 @@ export default function DataStructuresPage() {
         </Button>
       </div>
 
-      <DataStructuresTable data={dataStructures} />
+      <div
+        className="rounded-md border
+      "
+      >
+        <DataStructuresTable
+          data={dataStructures.map((ds) => ({
+            id: ds.id,
+            name: ds.title,
+            slug: ds.slug,
+            description: ds.description,
+            difficulty: ds.difficulty || 'beginner',
+            updatedAt: ds.updatedAt?.toISOString() || new Date().toISOString(),
+          }))}
+          onDelete={handleDelete}
+          onEdit={(id) => router.push(`/admin/data-structures/edit/${id}`)}
+        />
+      </div>
     </div>
   );
 }
