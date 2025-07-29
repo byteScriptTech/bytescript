@@ -2,6 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus, X } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
@@ -184,6 +185,9 @@ const ResourceForm = ({ resources, onAdd, onRemove }: ResourceFormProps) => {
     </div>
   );
 };
+
+// Dynamically import MDEditor to avoid SSR issues
+const MDEditor = dynamic(() => import('@uiw/react-md-editor'), { ssr: false });
 
 export function DataStructureForm({
   initialData,
@@ -469,38 +473,40 @@ export function DataStructureForm({
                       </FormItem>
                     )}
                   />
+                  <FormField
+                    control={form.control}
+                    name="content"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Content</FormLabel>
+                        <div className="mt-1 mb-2">
+                          <p className="text-sm text-muted-foreground">
+                            Detailed content about the data structure (supports
+                            markdown)
+                          </p>
+                        </div>
+                        <FormControl>
+                          <div className="mt-2" data-color-mode="light">
+                            <MDEditor
+                              value={field.value}
+                              onChange={(value) => field.onChange(value || '')}
+                              height={400}
+                              previewOptions={{
+                                wrapperElement: {
+                                  'data-color-mode': 'light',
+                                },
+                              }}
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
               </div>
             </CardContent>
           </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Content</CardTitle>
-              <CardDescription>
-                Detailed content about the data structure (supports markdown)
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <FormField
-                control={form.control}
-                name="content"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Textarea
-                        placeholder="## Introduction\n\nDetailed content goes here..."
-                        className="min-h-[200px] font-mono text-sm"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </CardContent>
-          </Card>
-
           <Card>
             <CardHeader>
               <CardTitle>Tags & Categorization</CardTitle>
