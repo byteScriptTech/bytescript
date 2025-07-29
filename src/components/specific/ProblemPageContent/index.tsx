@@ -2,11 +2,11 @@
 
 import { useParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 import ProblemDetail from '@/components/specific/ProblemDetail';
 import ProblemEditor from '@/components/specific/ProblemEditor';
 import { useAuth } from '@/context/AuthContext';
-import { useToast } from '@/hooks/use-toast';
 import { problemsService } from '@/services/firebase/problemsService';
 import { submissionsService } from '@/services/firebase/submissionsService';
 import { testCasesService } from '@/services/firebase/testCasesService';
@@ -42,7 +42,7 @@ const ProblemPageContent = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [executionResult, setExecutionResult] =
     useState<CodeExecutionResult | null>(null);
-  const { toast } = useToast();
+
   const { currentUser } = useAuth();
 
   const loadSubmissions = useCallback(
@@ -57,14 +57,10 @@ const ProblemPageContent = () => {
         setSubmissions(problemSubmissions);
       } catch (err) {
         console.error('Error fetching submissions:', err);
-        toast({
-          title: 'Error',
-          description: 'Failed to load submissions',
-          variant: 'destructive',
-        });
+        toast.error('Failed to load problem. Please try again.');
       }
     },
-    [id, toast]
+    [id]
   );
 
   useEffect(() => {
@@ -74,11 +70,7 @@ const ProblemPageContent = () => {
       try {
         const fetchedProblem = await problemsService.getProblemById(id);
         if (!fetchedProblem) {
-          toast({
-            title: 'Error',
-            description: 'Problem not found',
-            variant: 'destructive',
-          });
+          toast.error('Problem not found');
           return;
         }
 
@@ -89,11 +81,7 @@ const ProblemPageContent = () => {
               await testCasesService.getTestCasesByProblemId(id);
           } catch (err) {
             console.error('Error fetching test cases:', err);
-            toast({
-              title: 'Warning',
-              description: 'Failed to load test cases',
-              variant: 'destructive',
-            });
+            toast.warning('Failed to load test cases');
           }
         }
 
@@ -120,18 +108,14 @@ const ProblemPageContent = () => {
         console.error('Error fetching data:', err);
         const errorMessage =
           err instanceof Error ? err.message : 'Failed to fetch data';
-        toast({
-          title: 'Error',
-          description: errorMessage,
-          variant: 'destructive',
-        });
+        toast.error(errorMessage);
       } finally {
         setLoading(false);
       }
     };
 
     fetchProblemAndTestCases();
-  }, [id, loadSubmissions, currentUser, toast]);
+  }, [id, loadSubmissions, currentUser]);
 
   useEffect(() => {
     if (!problem) {
@@ -201,27 +185,15 @@ const ProblemPageContent = () => {
   const handleRun = useCallback(async () => {
     try {
       if (!currentUser) {
-        toast({
-          title: 'Authentication Required',
-          description: 'Please sign in to run code',
-          variant: 'destructive',
-        });
+        toast.error('Authentication Required. Please sign in to run code');
         return;
       }
       if (!code || !testCases.length) {
-        toast({
-          title: 'Error',
-          description: 'Please write some code first',
-          variant: 'destructive',
-        });
+        toast.error('Please write some code first');
         return;
       }
       if (!problem) {
-        toast({
-          title: 'Error',
-          description: 'Problem not loaded',
-          variant: 'destructive',
-        });
+        toast.error('Problem not loaded');
         return;
       }
 
@@ -305,31 +277,21 @@ const ProblemPageContent = () => {
       console.error('Error executing code:', err);
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to execute code';
-      toast({
-        title: 'Error',
-        description: errorMessage,
-        variant: 'destructive',
-      });
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
-  }, [code, currentUser, loadSubmissions, problem, testCases, toast]);
+  }, [code, currentUser, loadSubmissions, problem, testCases]);
 
   const handleSubmit = useCallback(async () => {
     if (!currentUser) {
-      toast({
-        title: 'Authentication Required',
-        description: 'Please sign in to submit your solution',
-        variant: 'destructive',
-      });
+      toast.error(
+        'Authentication Required. Please sign in to submit your solution'
+      );
       return;
     }
     if (!problem || !executionResult) {
-      toast({
-        title: 'Error',
-        description: 'Problem or execution result not available',
-        variant: 'destructive',
-      });
+      toast.error('Problem or execution result not available');
       return;
     }
 
@@ -379,24 +341,16 @@ const ProblemPageContent = () => {
         await loadSubmissions(currentUser.uid);
       }
 
-      toast({
-        title: 'Success',
-        description: 'Your solution has been submitted!',
-        variant: 'default',
-      });
+      toast.success('Your solution has been submitted!');
     } catch (err) {
       console.error('Error submitting solution:', err);
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to submit solution';
-      toast({
-        title: 'Error',
-        description: errorMessage,
-        variant: 'destructive',
-      });
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
-  }, [currentUser, code, executionResult, loadSubmissions, problem, toast]);
+  }, [currentUser, code, executionResult, loadSubmissions, problem]);
 
   if (loading) {
     return (

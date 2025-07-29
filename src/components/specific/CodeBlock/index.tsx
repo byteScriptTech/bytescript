@@ -1,10 +1,10 @@
 import * as Tooltip from '@radix-ui/react-tooltip';
 import React from 'react';
 import { IoClipboardOutline } from 'react-icons/io5';
+import { toast } from 'sonner';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import { useToast } from '@/hooks/use-toast';
 
 interface CodeBlockProps {
   title?: string;
@@ -12,13 +12,9 @@ interface CodeBlockProps {
 }
 
 const CodeBlock: React.FC<CodeBlockProps> = ({ title, code }) => {
-  const { toast } = useToast();
-
   const copyToClipboard = () => {
     navigator.clipboard.writeText(code);
-    toast({
-      description: 'Code copied to the clipboard',
-    });
+    toast.success('Code copied to the clipboard');
   };
 
   return (

@@ -1,4 +1,11 @@
-import { collection, doc, getDocs, setDoc } from 'firebase/firestore';
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  setDoc,
+  Timestamp,
+} from 'firebase/firestore';
 
 import { db } from '@/firebase/config';
 
@@ -8,15 +15,35 @@ export interface DSATopic {
   slug: string;
   description: string;
   category: 'data-structures' | 'algorithms';
+  subcategory?: string;
   difficulty?: 'beginner' | 'intermediate' | 'advanced';
   content?: string; // Can be markdown or HTML
+  timeComplexity?: string;
+  spaceComplexity?: string;
+  tags?: string[];
+  prerequisites?: string[];
+  operations?: Array<{
+    name: string;
+    description: string;
+    timeComplexity: string;
+    spaceComplexity: string;
+  }>;
+  useCases?: string[];
+  resources?: Array<{
+    title: string;
+    url: string;
+    type: 'article' | 'video' | 'interactive' | 'other';
+  }>;
   examples?: Array<{
     input: string;
     output: string;
     explanation?: string;
   }>;
-  createdAt: Date;
-  updatedAt: Date;
+  status?: 'active' | 'deleted' | 'draft';
+  createdAt: Date | Timestamp;
+  updatedAt: Date | Timestamp;
+  deletedAt?: string | Date | Timestamp;
+  lastUpdated?: Date | Timestamp;
 }
 
 const DSA_TOPICS_COLLECTION = 'dsa-topics';
@@ -49,6 +76,21 @@ export const dsaService = {
     } as DSATopic;
   },
 
+  // Get a single DSA topic by ID
+  async getTopicById(id: string): Promise<DSATopic | null> {
+    const docRef = doc(db, DSA_TOPICS_COLLECTION, id);
+    const docSnap = await getDoc(docRef);
+
+    if (!docSnap.exists()) return null;
+
+    return {
+      id: docSnap.id,
+      ...docSnap.data(),
+      createdAt: docSnap.data().createdAt?.toDate(),
+      updatedAt: docSnap.data().updatedAt?.toDate(),
+    } as DSATopic;
+  },
+
   // Create or update a DSA topic
   async saveTopic(
     topic: Omit<DSATopic, 'id' | 'createdAt' | 'updatedAt'>,
@@ -70,6 +112,24 @@ export const dsaService = {
     );
 
     return topicRef.id;
+  },
+
+  // Update an existing DSA topic
+  async updateTopic(
+    id: string,
+    updates: Partial<Omit<DSATopic, 'id' | 'createdAt'>>
+  ): Promise<void> {
+    const docRef = doc(db, DSA_TOPICS_COLLECTION, id);
+    const now = new Date();
+
+    await setDoc(
+      docRef,
+      {
+        ...updates,
+        updatedAt: now,
+      },
+      { merge: true }
+    );
   },
 
   // Initialize default DSA topics

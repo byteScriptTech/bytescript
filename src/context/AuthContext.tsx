@@ -8,9 +8,9 @@ import {
   useEffect,
   useState,
 } from 'react';
+import { toast } from 'sonner';
 
 import { db, githubProvider, googleProvider } from '@/firebase/config';
-import { useToast } from '@/hooks/use-toast';
 
 export interface AuthContextType {
   currentUser: any;
@@ -39,7 +39,7 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const router = useRouter();
-  const { toast } = useToast();
+
   const auth = getAuth();
 
   useEffect(() => {
@@ -87,10 +87,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       await saveUser(importantUserInfo);
       router.push('/dashboard');
     } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        description: error.message,
-      });
+      toast.error(error.message);
       console.error('Google Sign In Error:', error);
     }
   };
@@ -117,10 +114,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
       }
     } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        description: error.message,
-      });
+      toast.error(error.message);
       console.error('Github Sign In Error:', error);
     }
   };
@@ -131,10 +125,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setCurrentUser(null);
       router.push('/');
     } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        description: error.message,
-      });
+      toast.error(error.message);
       console.error('Sign Out Error:', error);
     }
   };
