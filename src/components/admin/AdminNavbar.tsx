@@ -1,16 +1,25 @@
 'use client';
 
 import { signOut } from 'firebase/auth';
-import { useRouter } from 'next/navigation';
+import { ArrowLeft } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
 import React from 'react';
 
 import UserDropDown from '@/components/specific/UserDropDown';
+import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
 import { auth } from '@/firebase/config';
 
 export function AdminNavbar() {
   const router = useRouter();
+  const pathname = usePathname();
   const { currentUser } = useAuth();
+
+  const isDashboard = pathname === '/admin';
+
+  const handleBack = () => {
+    router.back();
+  };
 
   const handleSignOut = async () => {
     await signOut(auth);
@@ -30,7 +39,20 @@ export function AdminNavbar() {
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <h1 className="text-xl font-bold text-gray-900">Admin Panel</h1>
+            {!isDashboard && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleBack}
+                className="mr-2"
+                aria-label="Go back"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+            )}
+            <h1 className="text-xl font-bold text-gray-900">
+              {isDashboard ? 'Admin Panel' : 'Back to Dashboard'}
+            </h1>
           </div>
 
           {currentUser && (
