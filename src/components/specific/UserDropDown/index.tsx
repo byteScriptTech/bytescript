@@ -1,4 +1,11 @@
-import { LucideUser } from 'lucide-react';
+import {
+  LucideUser,
+  LayoutDashboard,
+  Settings,
+  LogOut,
+  User as UserIcon,
+} from 'lucide-react';
+import Link from 'next/link';
 import React from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -15,13 +22,19 @@ type UserDropDownProps = {
   handleSignOut?: () => void;
   handleMyAccountClick?: () => void;
   handleSettingsClick?: () => void;
+  userId?: string | null;
 };
+
+const ADMIN_USER_ID = process.env.NEXT_PUBLIC_FIREBASE_ADMIN_ACCOUNT_ID || '';
 
 function UserDropDown({
   handleSignOut,
   handleMyAccountClick,
   handleSettingsClick,
+  userId,
 }: UserDropDownProps) {
+  const isAdmin = userId === ADMIN_USER_ID;
+  console.log(isAdmin, userId, ADMIN_USER_ID, 'userId');
   return (
     <div>
       <DropdownMenu>
@@ -35,16 +48,41 @@ function UserDropDown({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuLabel onClick={handleMyAccountClick}>
-            My Account
-          </DropdownMenuLabel>
+          <DropdownMenuLabel>Account</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+
+          <DropdownMenuItem
+            onClick={handleMyAccountClick}
+            className="cursor-pointer"
+          >
+            <UserIcon className="mr-2 h-4 w-4" />
+            <span>My Account</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={handleSettingsClick}
+            className="cursor-pointer"
+          >
+            <Settings className="mr-2 h-4 w-4" />
+            <span>Settings</span>
+          </DropdownMenuItem>
+
+          {isAdmin && (
+            <Link href="/admin">
+              <DropdownMenuItem className="cursor-pointer">
+                <LayoutDashboard className="mr-2 h-4 w-4" />
+                <span>Admin Panel</span>
+              </DropdownMenuItem>
+            </Link>
+          )}
 
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handleSettingsClick}>
-            Settings
+          <DropdownMenuItem
+            onClick={handleSignOut}
+            className="cursor-pointer text-red-600 hover:!text-red-700 hover:!bg-red-50"
+          >
+            <LogOut className="mr-2 h-4 w-4" />
+            <span>Logout</span>
           </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handleSignOut}>Logout</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

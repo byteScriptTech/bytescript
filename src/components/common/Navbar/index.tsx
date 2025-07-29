@@ -87,6 +87,7 @@ const Navbar = () => {
               handleSignOut,
               handleMyAccountClick,
               handleSettingsClick,
+              userId: currentUser?.uid,
             }}
           />
         </div>
