@@ -2,10 +2,11 @@
 
 import { Database, Code, BookOpen, Users, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import type { ComponentType } from 'react';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useDataStructures } from '@/context/DataStructuresContext';
+import { dsaService } from '@/services/firebase/dsaService';
 
 interface StatCard {
   title: string;
@@ -16,7 +17,23 @@ interface StatCard {
 }
 
 function AdminDashboard() {
-  const { dataStructures, loading } = useDataStructures();
+  const [loading, setLoading] = useState(true);
+  const [dataStructures, setDataStructures] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const topics = await dsaService.getAllTopics();
+        setDataStructures(topics);
+      } catch (error) {
+        console.error('Error fetching data structures:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const stats: StatCard[] = [
     {
