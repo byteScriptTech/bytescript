@@ -134,6 +134,7 @@ export default function DataStructuresPage() {
             description: ds.description,
             difficulty: ds.difficulty || 'beginner',
             updatedAt: ds.updatedAt?.toISOString() || new Date().toISOString(),
+            category: ds.category,
           }))}
           onDelete={handleDelete}
           onEdit={(id) => router.push(`/admin/dsa/edit/${id}`)}

@@ -22,6 +22,7 @@ interface DataStructuresTableProps {
     name: string;
     slug: string;
     description: string;
+    category: string;
     difficulty: 'beginner' | 'intermediate' | 'advanced';
     status?: 'active' | 'deleted' | 'draft';
     updatedAt: string;
@@ -82,6 +83,7 @@ export function DataStructuresTable({
           <TableRow>
             <TableHead className="min-w-[200px]">Name</TableHead>
             <TableHead>Slug</TableHead>
+            <TableHead>Category</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Difficulty</TableHead>
             <TableHead>Last Updated</TableHead>
@@ -101,6 +103,9 @@ export function DataStructuresTable({
               </TableCell>
               <TableCell className="text-muted-foreground">
                 {item.slug}
+              </TableCell>
+              <TableCell className="capitalize">
+                {item.category?.replace('-', ' ')}
               </TableCell>
               <TableCell>
                 <span
