@@ -81,10 +81,6 @@ export default function DataStructuresPage() {
     }
   };
 
-  const dataStructures = topics.filter(
-    (topic) => topic.category === 'data-structures'
-  );
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -111,13 +107,15 @@ export default function DataStructuresPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Data Structures</h1>
+          <h1 className="text-2xl font-bold tracking-tight">
+            Data Structures & Algorithms
+          </h1>
           <p className="text-muted-foreground">
             Manage your data structures and their content
           </p>
         </div>
         <Button asChild>
-          <Link href="/admin/data-structures/new">
+          <Link href="/admin/dsa/new">
             <Plus className="mr-2 h-4 w-4" />
             Add Data Structure
           </Link>
@@ -129,16 +127,17 @@ export default function DataStructuresPage() {
       "
       >
         <DataStructuresTable
-          data={dataStructures.map((ds) => ({
+          data={topics.map((ds) => ({
             id: ds.id,
             name: ds.title,
             slug: ds.slug,
             description: ds.description,
             difficulty: ds.difficulty || 'beginner',
             updatedAt: ds.updatedAt?.toISOString() || new Date().toISOString(),
+            category: ds.category,
           }))}
           onDelete={handleDelete}
-          onEdit={(id) => router.push(`/admin/data-structures/edit/${id}`)}
+          onEdit={(id) => router.push(`/admin/dsa/edit/${id}`)}
         />
       </div>
     </div>

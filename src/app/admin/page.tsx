@@ -1,6 +1,6 @@
 'use client';
 
-import { Database, Code, BookOpen, Users, Loader2 } from 'lucide-react';
+import { Database, BookOpen, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import type { ComponentType } from 'react';
@@ -37,18 +37,11 @@ function AdminDashboard() {
 
   const stats: StatCard[] = [
     {
-      title: 'Data Structures',
+      title: 'Data Structures & Algorithms',
       value: loading ? '...' : dataStructures?.length || 0,
       icon: Database,
-      href: '/admin/data-structures',
+      href: '/admin/dsa',
       loading,
-    },
-    {
-      title: 'Algorithms',
-      value: '0',
-      icon: Code,
-      href: '/admin/algorithms',
-      loading: true,
     },
     {
       title: 'Problems',
@@ -56,12 +49,6 @@ function AdminDashboard() {
       icon: BookOpen,
       href: '/admin/problems',
       loading: true,
-    },
-    {
-      title: 'Active Users',
-      value: '1.2K',
-      icon: Users,
-      href: '/admin/users',
     },
   ];
 
