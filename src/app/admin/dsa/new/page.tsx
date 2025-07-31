@@ -17,7 +17,7 @@ export default function NewDataStructurePage() {
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       toast.success('Data structure created successfully!');
-      router.push('/admin/data-structures');
+      router.push('/admin/dsa');
     } catch (error) {
       console.error('Error creating data structure:', error);
       toast.error('Failed to create data structure. Please try again.');
