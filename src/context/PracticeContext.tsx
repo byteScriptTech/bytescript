@@ -1,15 +1,26 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
+import { practiceQuestionsService } from '@/services/firebase/practiceQuestionsService';
 import { practiceTopicsService } from '@/services/firebase/practiceTopicsService';
 import { PracticeTopic } from '@/types/practice';
+import { PracticeQuestion } from '@/types/practiceQuestion';
 
 interface PracticeContextType {
+  // Topics
   topics: PracticeTopic[];
   loading: boolean;
   error: string | null;
   fetchTopics: () => Promise<void>;
   fetchTopicsByCategory: (category: string) => Promise<PracticeTopic[]>;
   getTopic: (id: string) => Promise<PracticeTopic | undefined>;
+
+  // Questions
+  getQuestionsByTopicId: (topicId: string) => Promise<PracticeQuestion[]>;
+  getQuestionById: (id: string) => Promise<PracticeQuestion>;
+  getQuestionsByType: (
+    topicId: string,
+    type: 'mcq' | 'coding'
+  ) => Promise<PracticeQuestion[]>;
 }
 
 const PracticeContext = createContext<PracticeContextType | undefined>(
@@ -70,6 +81,40 @@ export const PracticeProvider = ({
     fetchTopics();
   }, []);
 
+  // Question methods
+  const getQuestionsByTopicId = async (topicId: string) => {
+    try {
+      return await practiceQuestionsService.getQuestionsByTopicId(topicId);
+    } catch (err) {
+      console.error('Error fetching questions:', err);
+      setError('Failed to load questions');
+      return [];
+    }
+  };
+
+  const getQuestionById = async (id: string) => {
+    try {
+      return await practiceQuestionsService.getQuestionById(id);
+    } catch (err) {
+      console.error(`Error fetching question ${id}:`, err);
+      setError('Failed to load question');
+      throw err;
+    }
+  };
+
+  const getQuestionsByType = async (
+    topicId: string,
+    type: 'mcq' | 'coding'
+  ) => {
+    try {
+      return await practiceQuestionsService.getQuestionsByType(topicId, type);
+    } catch (err) {
+      console.error(`Error fetching ${type} questions:`, err);
+      setError(`Failed to load ${type} questions`);
+      return [];
+    }
+  };
+
   return (
     <PracticeContext.Provider
       value={{
@@ -79,6 +124,9 @@ export const PracticeProvider = ({
         fetchTopics,
         fetchTopicsByCategory,
         getTopic,
+        getQuestionsByTopicId,
+        getQuestionById,
+        getQuestionsByType,
       }}
     >
       {children}

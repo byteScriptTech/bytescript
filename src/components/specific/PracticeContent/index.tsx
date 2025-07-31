@@ -32,7 +32,6 @@ const PracticeContent: React.FC<PracticeContentProps> = ({
   const topicId = searchParams.get('id');
 
   const { topics, loading, error, fetchTopicsByCategory } = usePractice();
-
   useEffect(() => {
     const filterTopics = async () => {
       setIsLoading(true);

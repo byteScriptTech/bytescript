@@ -13,8 +13,8 @@ const db = admin.firestore();
 
 const samplePracticeTopics: Omit<PracticeTopic, 'id'>[] = [
   {
-    name: 'Two Sum',
-    description: 'Find two numbers that add up to a target value',
+    name: 'Array and Hash Table',
+    description: 'Problems involving arrays and hash table operations',
     difficulty: 'Easy' as Difficulty,
     category: 'problems',
     order: 1,
@@ -22,8 +22,8 @@ const samplePracticeTopics: Omit<PracticeTopic, 'id'>[] = [
     updatedAt: new Date(),
   },
   {
-    name: 'Valid Parentheses',
-    description: 'Check if the input string has valid parentheses',
+    name: 'Stack Operations',
+    description: 'Problems that can be solved using stack data structure',
     difficulty: 'Easy' as Difficulty,
     category: 'problems',
     order: 2,
@@ -31,8 +31,8 @@ const samplePracticeTopics: Omit<PracticeTopic, 'id'>[] = [
     updatedAt: new Date(),
   },
   {
-    name: 'Palindrome Check',
-    description: 'Determine if a string is a palindrome',
+    name: 'String Manipulation',
+    description: 'Problems involving string operations and manipulations',
     difficulty: 'Easy' as Difficulty,
     category: 'problems',
     order: 3,
