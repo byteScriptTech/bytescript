@@ -2,7 +2,9 @@
 
 import Navbar from '@/components/common/Navbar';
 import AuthGuard from '@/components/misc/authGuard';
+import { Leaderboard } from '@/components/specific/Leaderboard';
 import { Problems } from '@/components/specific/Problems';
+import { Submissions } from '@/components/specific/Submissions';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AuthProvider } from '@/context/AuthContext';
 import { ContentProvider } from '@/context/ContentContext';
@@ -38,10 +40,10 @@ export default function CompetitiveProgrammingPage() {
                         <Problems />
                       </TabsContent>
                       <TabsContent value="submissions">
-                        Submissions content
+                        <Submissions />
                       </TabsContent>
                       <TabsContent value="leaderboard">
-                        Leaderboard content
+                        <Leaderboard />
                       </TabsContent>
                     </Tabs>
                   </div>
