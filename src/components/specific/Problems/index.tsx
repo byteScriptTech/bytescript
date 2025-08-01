@@ -64,11 +64,11 @@ export const Problems = () => {
   return (
     <div className="space-y-3">
       {/* Difficulty Filter */}
-      <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-4">
+      <div className="flex flex-wrap gap-2 mb-4">
         {[
           { value: null, label: 'All', count: difficultyCounts.all },
           { value: 'easy', label: 'Easy', count: difficultyCounts.easy },
-          { value: 'medium', label: 'Med', count: difficultyCounts.medium },
+          { value: 'medium', label: 'Medium', count: difficultyCounts.medium },
           { value: 'hard', label: 'Hard', count: difficultyCounts.hard },
         ].map(({ value, label, count }) => (
           <button
@@ -77,15 +77,13 @@ export const Problems = () => {
               setCurrentPage(1);
               setDifficultyFilter(value);
             }}
-            className={`px-2.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium rounded-full transition-colors whitespace-nowrap ${
+            className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
               difficultyFilter === value
                 ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-400'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
             }`}
           >
-            <span className="hidden xs:inline">{label}</span>
-            <span className="xs:hidden">{label.charAt(0)}</span>
-            {count > 0 && <span className="ml-0.5">({count})</span>}
+            {label} {count > 0 && `(${count})`}
           </button>
         ))}
       </div>
@@ -116,34 +114,32 @@ export const Problems = () => {
               key={problem.id}
               className="group bg-white dark:bg-gray-800 rounded-lg p-3 sm:p-4 shadow-sm hover:shadow-md transition-all duration-200 border border-gray-100 dark:border-gray-700 hover:border-blue-100 dark:hover:border-blue-900/50"
             >
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4">
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-sm sm:text-base font-medium text-gray-900 dark:text-gray-100 truncate">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">
                     {problem.title}
                   </h3>
-                  <div className="flex flex-wrap items-center gap-1.5 mt-1">
-                    <span
-                      className={`px-2 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold ${
-                        problem.difficulty === 'Easy'
-                          ? 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                          : problem.difficulty === 'Medium'
-                            ? 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
-                            : 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                      }`}
-                    >
-                      {problem.difficulty}
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                      problem.difficulty === 'Easy'
+                        ? 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                        : problem.difficulty === 'Medium'
+                          ? 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+                          : 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                    }`}
+                  >
+                    {problem.difficulty}
+                  </span>
+                  {problem.solved && (
+                    <span className="px-2 py-1 rounded-full bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400 text-xs font-medium">
+                      Solved
                     </span>
-                    {problem.solved && (
-                      <span className="px-2 py-0.5 sm:py-1 rounded-full bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400 text-[10px] sm:text-xs font-medium">
-                        Solved
-                      </span>
-                    )}
-                  </div>
+                  )}
                 </div>
                 <Button
                   variant="outline"
                   size="sm"
-                  className="w-full sm:w-auto justify-center mt-1 sm:mt-0 shadow-sm hover:shadow transition-colors text-xs sm:text-sm"
+                  className="shadow-sm hover:shadow"
                   onClick={() => handlePractice(problem.id)}
                 >
                   Practice
