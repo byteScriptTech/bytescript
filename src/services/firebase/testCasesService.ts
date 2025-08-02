@@ -9,17 +9,32 @@ import {
   query,
   where,
   Timestamp,
+  DocumentData,
 } from 'firebase/firestore';
 
 import { db } from '@/firebase/config';
 
-export interface TestCase {
+type TimestampObject = {
+  seconds: number;
+  nanoseconds: number;
+};
+
+const convertTimestamp = (
+  timestamp: Timestamp | TimestampObject | Date | undefined
+): Date | undefined => {
+  if (!timestamp) return undefined;
+  if (timestamp instanceof Date) return timestamp;
+  if ('toDate' in timestamp) return timestamp.toDate();
+  return new Timestamp(timestamp.seconds, timestamp.nanoseconds).toDate();
+};
+
+export interface TestCase extends DocumentData {
   id: string;
   problemId: string;
   input: string;
   expectedOutput: string;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export const testCasesService = {
@@ -29,13 +44,19 @@ export const testCasesService = {
       where('problemId', '==', problemId)
     );
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(
-      (doc) =>
-        ({
-          id: doc.id,
-          ...doc.data(),
-        }) as TestCase
-    );
+    return querySnapshot.docs.map((doc) => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        createdAt:
+          convertTimestamp(data.createdAt as Timestamp | undefined) ||
+          new Date(),
+        updatedAt:
+          convertTimestamp(data.updatedAt as Timestamp | undefined) ||
+          new Date(),
+      } as TestCase;
+    });
   },
 
   async addTestCase(
@@ -51,10 +72,14 @@ export const testCasesService = {
       createdAt: now,
       updatedAt: now,
     };
+
     const docRef = await addDoc(collection(db, 'testCases'), testCaseData);
+
     return {
       id: docRef.id,
       ...testCaseData,
+      createdAt: convertTimestamp(now) || new Date(),
+      updatedAt: convertTimestamp(now) || new Date(),
     } as TestCase;
   },
 
@@ -67,14 +92,20 @@ export const testCasesService = {
       ...updates,
       updatedAt: Timestamp.now(),
     });
-    const docSnap = await getDoc(testCaseRef);
-    if (docSnap.exists()) {
-      return {
-        id: docSnap.id,
-        ...docSnap.data(),
-      } as TestCase;
+    const docRef = await getDoc(doc(db, 'testCases', id));
+    if (!docRef.exists()) {
+      return null;
     }
-    return null;
+
+    const data = docRef.data();
+    return {
+      id: docRef.id,
+      ...data,
+      createdAt:
+        convertTimestamp(data.createdAt as Timestamp | undefined) || new Date(),
+      updatedAt:
+        convertTimestamp(data.updatedAt as Timestamp | undefined) || new Date(),
+    } as TestCase;
   },
 
   async deleteTestCase(id: string): Promise<void> {

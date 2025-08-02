@@ -1,19 +1,20 @@
-import { Timestamp } from 'firebase/firestore';
 import { NextResponse } from 'next/server';
 
 import { competitiveRuntime } from '@/services/client/competitiveRuntime';
+import type { TestCase } from '@/services/firebase/testCasesService';
 
 // Simple health check endpoint for the competitive runtime
 export async function POST() {
   try {
     // Basic test case for the competitive runtime
-    const testCase = {
+    const now = new Date();
+    const testCase: TestCase = {
       id: 'health-check',
       problemId: 'health-check',
       input: JSON.stringify([2, 3]),
       expectedOutput: '5',
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now(),
+      createdAt: now,
+      updatedAt: now,
     };
 
     const result = await competitiveRuntime.executeCode(
