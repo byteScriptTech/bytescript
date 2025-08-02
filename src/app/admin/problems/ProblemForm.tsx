@@ -12,6 +12,8 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import * as z from 'zod';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { TestCasesTab } from './TestCasesTab';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -158,164 +160,189 @@ export function ProblemForm({ problem }: ProblemFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <div className="space-y-4">
-        <div>
-          <Label htmlFor="title">Title</Label>
-          <Input
-            id="title"
-            {...register('title')}
-            placeholder="Enter problem title"
-          />
-          {errors.title && (
-            <p className="text-sm text-red-500">{errors.title.message}</p>
+    <div className="space-y-6">
+      <Tabs defaultValue="problem">
+        <TabsList>
+          <TabsTrigger value="problem">Problem Details</TabsTrigger>
+          {problem?.id && (
+            <TabsTrigger value="test-cases">Test Cases</TabsTrigger>
           )}
-        </div>
+        </TabsList>
 
-        <div>
-          <Label htmlFor="description">Description</Label>
-          <Textarea
-            id="description"
-            {...register('description')}
-            placeholder="Enter problem description"
-            rows={5}
-          />
-          {errors.description && (
-            <p className="text-sm text-red-500">{errors.description.message}</p>
-          )}
-        </div>
+        <TabsContent value="problem">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="title">Title</Label>
+                <Input
+                  id="title"
+                  {...register('title')}
+                  placeholder="Enter problem title"
+                />
+                {errors.title && (
+                  <p className="text-sm text-red-500">{errors.title.message}</p>
+                )}
+              </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="difficulty">Difficulty</Label>
-            <Select
-              onValueChange={(value) => setValue('difficulty', value as any)}
-              defaultValue={problem?.difficulty || 'Medium'}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select difficulty" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Easy">Easy</SelectItem>
-                <SelectItem value="Medium">Medium</SelectItem>
-                <SelectItem value="Hard">Hard</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+              <div>
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  {...register('description')}
+                  placeholder="Enter problem description"
+                  rows={5}
+                />
+                {errors.description && (
+                  <p className="text-sm text-red-500">
+                    {errors.description.message}
+                  </p>
+                )}
+              </div>
 
-          <div>
-            <Label htmlFor="category">Category</Label>
-            <Input
-              id="category"
-              {...register('category')}
-              placeholder="e.g., Array, String, Dynamic Programming"
-            />
-            {errors.category && (
-              <p className="text-sm text-red-500">{errors.category.message}</p>
-            )}
-          </div>
-        </div>
-
-        <div>
-          <Label htmlFor="tags">Tags (comma separated)</Label>
-          <Input
-            id="tags"
-            {...register('tags')}
-            placeholder="e.g., array, sorting, two-pointers"
-          />
-          {errors.tags && (
-            <p className="text-sm text-red-500">{errors.tags.message}</p>
-          )}
-        </div>
-
-        <div>
-          <Label htmlFor="constraints">Constraints (one per line)</Label>
-          <Textarea
-            id="constraints"
-            {...register('constraints')}
-            placeholder="1 <= nums.length <= 10^4\n-10^9 <= nums[i] <= 10^9"
-            rows={3}
-          />
-        </div>
-
-        <div>
-          <div className="flex justify-between items-center">
-            <Label>Examples</Label>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={addExample}
-            >
-              Add Example
-            </Button>
-          </div>
-
-          <div className="space-y-4 mt-2">
-            {examples.map((example, index) => (
-              <div key={index} className="border p-4 rounded-md relative">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute top-2 right-2"
-                  onClick={() => removeExample(index)}
-                >
-                  Remove
-                </Button>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label>Input</Label>
-                    <Input
-                      value={example.input}
-                      onChange={(e) =>
-                        updateExample(index, 'input', e.target.value)
-                      }
-                      placeholder="Input"
-                    />
-                  </div>
-                  <div>
-                    <Label>Output</Label>
-                    <Input
-                      value={example.output}
-                      onChange={(e) =>
-                        updateExample(index, 'output', e.target.value)
-                      }
-                      placeholder="Output"
-                    />
-                  </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="difficulty">Difficulty</Label>
+                  <Select
+                    onValueChange={(value) =>
+                      setValue('difficulty', value as any)
+                    }
+                    defaultValue={problem?.difficulty || 'Medium'}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select difficulty" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Easy">Easy</SelectItem>
+                      <SelectItem value="Medium">Medium</SelectItem>
+                      <SelectItem value="Hard">Hard</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
-                <div className="mt-2">
-                  <Label>Explanation</Label>
-                  <Textarea
-                    value={example.explanation}
-                    onChange={(e) =>
-                      updateExample(index, 'explanation', e.target.value)
-                    }
-                    placeholder="Explanation"
-                    rows={2}
+                <div>
+                  <Label htmlFor="category">Category</Label>
+                  <Input
+                    id="category"
+                    {...register('category')}
+                    placeholder="e.g., Array, String, Dynamic Programming"
                   />
+                  {errors.category && (
+                    <p className="text-sm text-red-500">
+                      {errors.category.message}
+                    </p>
+                  )}
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-      </div>
 
-      <div className="flex justify-end space-x-4">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => router.push('/admin/problems')}
-        >
-          Cancel
-        </Button>
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Saving...' : 'Save Problem'}
-        </Button>
-      </div>
-    </form>
+              <div>
+                <Label htmlFor="tags">Tags (comma separated)</Label>
+                <Input
+                  id="tags"
+                  {...register('tags')}
+                  placeholder="e.g., array, sorting, two-pointers"
+                />
+                {errors.tags && (
+                  <p className="text-sm text-red-500">{errors.tags.message}</p>
+                )}
+              </div>
+
+              <div>
+                <Label htmlFor="constraints">Constraints (one per line)</Label>
+                <Textarea
+                  id="constraints"
+                  {...register('constraints')}
+                  placeholder="1 <= nums.length <= 10^4\n-10^9 <= nums[i] <= 10^9"
+                  rows={3}
+                />
+              </div>
+
+              <div>
+                <div className="flex justify-between items-center">
+                  <Label>Examples</Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={addExample}
+                  >
+                    Add Example
+                  </Button>
+                </div>
+
+                <div className="space-y-4 mt-2">
+                  {examples.map((example, index) => (
+                    <div key={index} className="border p-4 rounded-md relative">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute top-2 right-2"
+                        onClick={() => removeExample(index)}
+                      >
+                        Remove
+                      </Button>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <Label>Input</Label>
+                          <Input
+                            value={example.input}
+                            onChange={(e) =>
+                              updateExample(index, 'input', e.target.value)
+                            }
+                            placeholder="Input"
+                          />
+                        </div>
+                        <div>
+                          <Label>Output</Label>
+                          <Input
+                            value={example.output}
+                            onChange={(e) =>
+                              updateExample(index, 'output', e.target.value)
+                            }
+                            placeholder="Output"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="mt-2">
+                        <Label>Explanation</Label>
+                        <Textarea
+                          value={example.explanation}
+                          onChange={(e) =>
+                            updateExample(index, 'explanation', e.target.value)
+                          }
+                          placeholder="Explanation"
+                          rows={2}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-4 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => router.push('/admin/problems')}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? 'Saving...' : 'Save Problem'}
+              </Button>
+            </div>
+          </form>
+        </TabsContent>
+
+        {problem?.id && (
+          <TabsContent value="test-cases" className="mt-6">
+            <TestCasesTab problemId={problem.id} />
+          </TabsContent>
+        )}
+      </Tabs>
+    </div>
   );
 }

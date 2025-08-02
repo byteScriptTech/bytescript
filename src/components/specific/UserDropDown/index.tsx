@@ -34,7 +34,7 @@ function UserDropDown({
   userId,
 }: UserDropDownProps) {
   const isAdmin = userId === ADMIN_USER_ID;
-  console.log(isAdmin, userId, ADMIN_USER_ID, 'userId');
+
   return (
     <div>
       <DropdownMenu>
