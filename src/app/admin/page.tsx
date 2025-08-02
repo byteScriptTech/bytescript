@@ -7,6 +7,7 @@ import type { ComponentType } from 'react';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { dsaService } from '@/services/firebase/dsaService';
+import { problemsService } from '@/services/firebase/problemsService';
 
 interface StatCard {
   title: string;
@@ -19,14 +20,19 @@ interface StatCard {
 function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [dataStructures, setDataStructures] = useState<any[]>([]);
+  const [problemsCount, setProblemsCount] = useState<number>(0);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const topics = await dsaService.getAllTopics();
+        const [topics, problems] = await Promise.all([
+          dsaService.getAllTopics(),
+          problemsService.getAllProblems(),
+        ]);
         setDataStructures(topics);
+        setProblemsCount(problems.length);
       } catch (error) {
-        console.error('Error fetching data structures:', error);
+        console.error('Error fetching data:', error);
       } finally {
         setLoading(false);
       }
@@ -45,10 +51,10 @@ function AdminDashboard() {
     },
     {
       title: 'Problems',
-      value: '0',
+      value: loading ? '...' : problemsCount || 0,
       icon: BookOpen,
       href: '/admin/problems',
-      loading: true,
+      loading,
     },
   ];
 
