@@ -72,7 +72,7 @@ export default function ProblemDetail({ problem }: ProblemDetailProps) {
                     key={index}
                     className="p-3 sm:p-4 bg-white border border-gray-100 rounded-lg shadow-xs"
                   >
-                    <div className="font-medium text-sm sm:text-base text-gray-900 mb-2 sm:mb-3">
+                    <div className="mb-2 font-medium text-sm text-gray-900 sm:mb-3 sm:text-base">
                       Example {index + 1}
                     </div>
                     <div className="space-y-2 sm:space-y-3">
@@ -80,7 +80,7 @@ export default function ProblemDetail({ problem }: ProblemDetailProps) {
                         <span className="text-xs sm:text-sm font-medium text-gray-600">
                           Input:
                         </span>
-                        <pre className="whitespace-pre-wrap bg-gray-50 p-2 sm:p-3 rounded text-xs sm:text-sm font-mono text-gray-800 border border-gray-100 overflow-x-auto">
+                        <pre className="whitespace-pre-wrap overflow-x-auto rounded border border-gray-100 bg-gray-50 p-2 font-mono text-xs text-gray-800 sm:p-3 sm:text-sm">
                           {JSON.stringify(example.input)}
                         </pre>
                       </div>
@@ -88,7 +88,7 @@ export default function ProblemDetail({ problem }: ProblemDetailProps) {
                         <span className="text-xs sm:text-sm font-medium text-gray-600">
                           Output:
                         </span>
-                        <pre className="whitespace-pre-wrap bg-gray-50 p-2 sm:p-3 rounded text-xs sm:text-sm font-mono text-gray-800 border border-gray-100 overflow-x-auto">
+                        <pre className="whitespace-pre-wrap overflow-x-auto rounded border border-gray-100 bg-gray-50 p-2 font-mono text-xs text-gray-800 sm:p-3 sm:text-sm">
                           {JSON.stringify(example.output)}
                         </pre>
                       </div>
@@ -97,7 +97,7 @@ export default function ProblemDetail({ problem }: ProblemDetailProps) {
                           <span className="text-xs sm:text-sm font-medium text-gray-600">
                             Explanation:
                           </span>
-                          <div className="text-xs sm:text-sm text-gray-700 bg-blue-50 p-2 sm:p-3 rounded border border-blue-100">
+                          <div className="rounded border border-blue-100 bg-blue-50 p-2 text-xs text-gray-700 sm:p-3 sm:text-sm">
                             {example.explanation}
                           </div>
                         </div>

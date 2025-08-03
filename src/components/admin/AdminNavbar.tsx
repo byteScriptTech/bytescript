@@ -27,11 +27,11 @@ export function AdminNavbar() {
   };
 
   const handleMyAccountClick = () => {
-    router.push('/my-account');
+    router.push('my-account');
   };
 
   const handleSettingsClick = () => {
-    router.push('/settings');
+    router.push('settings');
   };
 
   return (
