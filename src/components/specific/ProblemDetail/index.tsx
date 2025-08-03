@@ -1,19 +1,12 @@
-import { formatDistanceToNow } from 'date-fns';
-import { Timestamp } from 'firebase/firestore';
-
 import Markdown from '@/components/common/Markdown';
 
-import type { Problem, Submission } from '../../../types/problem';
+import type { Problem } from '../../../types/problem';
 
 interface ProblemDetailProps {
-  problem: Problem & { lastAttempted?: Timestamp | Date | null };
-  submissions?: Submission[];
+  problem: Problem;
 }
 
-export default function ProblemDetail({
-  problem,
-  submissions = [],
-}: ProblemDetailProps) {
+export default function ProblemDetail({ problem }: ProblemDetailProps) {
   return (
     <div className="w-full h-full flex flex-col">
       <div className="space-y-4 sm:space-y-5">
@@ -21,25 +14,6 @@ export default function ProblemDetail({
           <h1 className="text-xl sm:text-2xl font-bold text-gray-900 leading-tight">
             {problem.title}
           </h1>
-          <div className="mt-1 text-xs sm:text-sm text-gray-500">
-            <p>
-              Last attempted:{' '}
-              {problem.lastAttempted
-                ? formatDistanceToNow(
-                    problem.lastAttempted instanceof Timestamp
-                      ? problem.lastAttempted.toDate()
-                      : problem.lastAttempted,
-                    { addSuffix: true }
-                  )
-                : 'Never'}
-              {submissions.length > 0 && (
-                <span className="ml-2">
-                  • {submissions.length} submission
-                  {submissions.length !== 1 ? 's' : ''}
-                </span>
-              )}
-            </p>
-          </div>
         </div>
 
         {/* Basic Problem Info */}

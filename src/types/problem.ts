@@ -35,6 +35,7 @@ export interface TestResult {
   };
   passed: boolean;
   output: string;
+  consoleOutput?: string;
   error?: string;
   executionTime: number;
   memoryUsage: number;

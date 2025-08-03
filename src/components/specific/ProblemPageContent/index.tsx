@@ -8,20 +8,22 @@ import ProblemDetail from '@/components/specific/ProblemDetail';
 import ProblemEditor from '@/components/specific/ProblemEditor';
 import { useAuth } from '@/context/AuthContext';
 import { problemsService } from '@/services/firebase/problemsService';
-import { submissionsService } from '@/services/firebase/submissionsService';
 import { testCasesService } from '@/services/firebase/testCasesService';
-import type { Problem, TestCase, Submission } from '@/types/problem';
+import type { Problem, TestCase } from '@/types/problem';
+
+interface TestResult {
+  testCase: TestCase;
+  passed: boolean;
+  output: string;
+  consoleOutput: string;
+  error?: string;
+  executionTime: number;
+  memoryUsage: number;
+}
 
 interface CodeExecutionResult {
   output: string;
-  testResults: Array<{
-    testCase: TestCase;
-    passed: boolean;
-    output: string;
-    error?: string;
-    executionTime: number;
-    memoryUsage: number;
-  }>;
+  testResults: TestResult[];
   success: boolean;
 }
 
@@ -38,30 +40,11 @@ const ProblemPageContent = () => {
   );
   const [testCases, setTestCases] = useState<TestCase[]>([]);
   const [code, setCode] = useState<string>('');
-  const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [executionResult, setExecutionResult] =
     useState<CodeExecutionResult | null>(null);
 
   const { currentUser } = useAuth();
-
-  const loadSubmissions = useCallback(
-    async (userId: string) => {
-      if (!id) return;
-      try {
-        const allSubmissions =
-          await submissionsService.getUserSubmissions(userId);
-        const problemSubmissions = allSubmissions.filter(
-          (submission: Submission) => submission.problemId === id
-        );
-        setSubmissions(problemSubmissions);
-      } catch (err) {
-        console.error('Error fetching submissions:', err);
-        toast.error('Failed to load problem. Please try again.');
-      }
-    },
-    [id]
-  );
 
   useEffect(() => {
     const fetchProblemAndTestCases = async () => {
@@ -100,10 +83,6 @@ const ProblemPageContent = () => {
 
         setProblem(problemWithDefaultStarterCode);
         setTestCases(fetchedTestCases);
-
-        if (currentUser?.uid) {
-          await loadSubmissions(currentUser.uid);
-        }
       } catch (err) {
         console.error('Error fetching data:', err);
         const errorMessage =
@@ -115,61 +94,209 @@ const ProblemPageContent = () => {
     };
 
     fetchProblemAndTestCases();
-  }, [id, loadSubmissions, currentUser]);
+  }, [id, currentUser]);
 
   useEffect(() => {
-    if (!problem) {
-      setCode('// Write your solution here');
+    if (!problem || !problem.examples?.[0]) {
+      setCode(`// Write your solution here`);
       return;
     }
 
-    const example = problem.examples?.[0];
-    const input = example ? JSON.stringify(example.input, null, 2) : '';
-    const output = example ? JSON.stringify(example.output, null, 2) : '';
+    const example = problem.examples[0];
+    const inputStr =
+      typeof example.input === 'string' ? example.input : String(example.input);
 
-    let template = `// Write your solution here`;
+    // New regex: if a value starts with '[', grab until the closing ']',
+    // otherwise grab up to the next comma or end.
+    const paramPattern = /(\w+)\s*=\s*(\[[^\]]*\]|[^,]+)(?:,\s*|$)/g;
+    const matches = [...inputStr.matchAll(paramPattern)];
 
-    if (problem.category === 'Arrays') {
-      template = `function solve(arr) {\n  // Your code here\n  return;\n}\n\n// Test\nconsole.log(solve(${input})); // Expected: ${output}`;
-    } else if (problem.category === 'Strings') {
-      template = `function solve(str) {\n  // Your code here\n  return;\n}\n\n// Test\nconsole.log(solve(${input})); // Expected: ${output}`;
+    if (matches.length < 2) {
+      setCode(`// Write your solution here`);
+      return;
     }
+
+    const paramNames = matches.map((m) => m[1].trim()); // ["nums", "target"]
+
+    const template = `function solve(${paramNames.join(', ')}) {
+  // Your code here
+  // Return the result instead of using console.log
+}`;
 
     setCode(template);
   }, [problem]);
 
-  // Simple function to run code and capture output
   const executeCode = (
     code: string,
     input: unknown
-  ): { output: string; error?: string } => {
-    const originalConsole = { log: console.log, error: console.error };
+  ): { output: string; consoleOutput: string; error?: string } => {
+    const originalConsole = {
+      log: console.log,
+      error: console.error,
+      warn: console.warn,
+    } as const;
     let output = '';
+    let consoleOutput = '';
     let error: string | undefined;
 
     // Override console methods to capture output
     console.log = (...args) => {
-      output +=
-        args
-          .map((arg) =>
-            typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
-          )
-          .join(' ') + '\n';
+      const message = args
+        .map((arg) =>
+          typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
+        )
+        .join(' ');
+      consoleOutput += message + '\n';
+      originalConsole.log.apply(console, args);
     };
-    console.error = console.log;
+
+    console.error = (...args) => {
+      const message = args
+        .map((arg) =>
+          typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
+        )
+        .join(' ');
+      consoleOutput += '[ERROR] ' + message + '\n';
+      originalConsole.error.apply(console, args);
+    };
 
     try {
-      // Wrap the code in a function and call it with the input
-      const fn = new Function('input', `${code}\nreturn solve(input);`);
-      const result = fn(input);
+      // Parse the input and handle different input formats
+      let fnArgs: unknown[] = [];
 
-      // If the function returns a value, include it in the output
+      if (Array.isArray(input)) {
+        // If input is already an array, use it as arguments
+        fnArgs = input;
+      } else if (typeof input === 'string') {
+        try {
+          // Try to parse as JSON array or object first
+          if (input.trim().startsWith('[') || input.trim().startsWith('{')) {
+            const parsed = JSON.parse(input);
+            fnArgs = Array.isArray(parsed) ? parsed : [parsed];
+          } else {
+            // Handle the format "nums = [1,2,3], target = 9"
+            const params: Record<string, any> = {};
+            const paramRegex =
+              /(\w+)\s*=\s*((?:\[.*?\])|(?:\{.*?\})|[^,]+)(?:,|$)/g;
+            let match;
+
+            while ((match = paramRegex.exec(input)) !== null) {
+              let [, key, value] = match;
+              key = key.trim();
+              value = value.trim();
+
+              // Remove any surrounding quotes
+              if (
+                (value.startsWith('"') && value.endsWith('"')) ||
+                (value.startsWith("'") && value.endsWith("'"))
+              ) {
+                value = value.slice(1, -1);
+              }
+
+              try {
+                // Try to parse as JSON first
+                params[key] = value ? JSON.parse(value) : value;
+              } catch (e) {
+                // If not valid JSON, try to parse as number/boolean
+                if (/^\d+$/.test(value)) {
+                  params[key] = parseInt(value, 10);
+                } else if (/^\d*\.\d+$/.test(value)) {
+                  params[key] = parseFloat(value);
+                } else if (value === 'true') {
+                  params[key] = true;
+                } else if (value === 'false') {
+                  params[key] = false;
+                } else if (value === 'null') {
+                  params[key] = null;
+                } else {
+                  params[key] = value;
+                }
+              }
+            }
+
+            if (Object.keys(params).length > 0) {
+              // If we successfully parsed named parameters, convert to array
+              if ('nums' in params) fnArgs.push(params.nums);
+              if ('target' in params) fnArgs.push(params.target);
+            } else {
+              // Fallback to simple parsing if no named parameters found
+              fnArgs = input.split(',').map((arg) => {
+                const trimmedArg = arg.trim();
+                // Try to parse as JSON
+                try {
+                  return JSON.parse(trimmedArg);
+                } catch (parseError) {
+                  // If not valid JSON, try to parse as number/boolean
+                  if (/^\d+$/.test(trimmedArg)) return parseInt(trimmedArg, 10);
+                  if (/^\d*\.\d+$/.test(trimmedArg))
+                    return parseFloat(trimmedArg);
+                  if (trimmedArg === 'true') return true;
+                  if (trimmedArg === 'false') return false;
+                  if (trimmedArg === 'null') return null;
+                  // Remove surrounding quotes if present
+                  return trimmedArg.replace(/^['"](.*)['"]$/, '$1');
+                }
+              });
+            }
+          }
+        } catch (e) {
+          console.error('Error parsing input:', e);
+          // If parsing fails, use the input as is
+          fnArgs = [input];
+        }
+      } else {
+        // For any other type of input, wrap it in an array
+        fnArgs = [input];
+      }
+
+      // Create the function with the correct number of parameters
+      const paramNames = fnArgs.map((_, i) => `arg${i}`);
+
+      // Create a wrapper function that will execute the user's code
+      const wrapperFn = `
+        // First, define the solve function from the user's code
+        ${code}
+        
+        try {
+          // Debug: Log the input parameters
+          console.log('=== DEBUG: Input to solve() ===');
+          const params = [${paramNames.join(', ')}];
+          console.log('Number of parameters:', params.length);
+          
+          // Log the parameters
+          params.forEach((param, i) => {
+            const type = Array.isArray(param) ? 'array' : typeof param;
+            console.log(\`Param \${i + 1} (\${type}):\`, JSON.stringify(param));
+          });
+          
+          // Execute the solve function with provided arguments
+          const result = solve(${paramNames.join(', ')});
+          
+          // Debug: Log the result
+          console.log('=== DEBUG: Output from solve() ===');
+          console.log('Type:', typeof result);
+          console.log('Value:', result);
+          
+          // Convert the result to a string representation
+          if (result === undefined) return '';
+          if (result === null) return 'null';
+          if (Array.isArray(result) || typeof result === 'object') {
+            return JSON.stringify(result);
+          }
+          return String(result);
+        } catch (e) {
+          console.error('=== DEBUG: Error in solve() ===', e);
+          return 'Error: ' + (e instanceof Error ? e.message : String(e));
+        }
+      `;
+
+      // Create and execute the function
+      const fn = new Function(...paramNames, wrapperFn);
+      const result = fn(...fnArgs);
+
+      // If we have a result, use it as output
       if (result !== undefined) {
-        output +=
-          '\n' +
-          (typeof result === 'object'
-            ? JSON.stringify(result)
-            : String(result));
+        output = String(result);
       }
     } catch (e) {
       error = e instanceof Error ? e.message : String(e);
@@ -179,7 +306,11 @@ const ProblemPageContent = () => {
       console.error = originalConsole.error;
     }
 
-    return { output: output.trim(), error };
+    return {
+      output: output.trim(),
+      consoleOutput: consoleOutput.trim(),
+      error,
+    };
   };
 
   const handleRun = useCallback(async () => {
@@ -204,22 +335,42 @@ const ProblemPageContent = () => {
       const testResults = await Promise.all(
         testCases.map((testCase) => {
           const startTime = performance.now();
-          const { output, error } = executeCode(code, testCase.input);
+          const { output, consoleOutput, error } = executeCode(
+            code,
+            testCase.input
+          );
           const executionTime = performance.now() - startTime;
 
-          // Simple comparison of stringified outputs
-          const expectedOutput =
-            typeof testCase.expectedOutput === 'string'
-              ? testCase.expectedOutput
-              : JSON.stringify(testCase.expectedOutput);
+          // Parse the expected and actual outputs for comparison
+          let parsedExpected;
+          try {
+            parsedExpected =
+              typeof testCase.expectedOutput === 'string'
+                ? JSON.parse(testCase.expectedOutput)
+                : testCase.expectedOutput;
+          } catch (e) {
+            parsedExpected = testCase.expectedOutput;
+          }
 
-          const actualOutput = output.split('\n').pop() || ''; // Get last line of output
-          const passed = actualOutput.trim() === expectedOutput.trim();
+          // Convert both to strings for comparison
+          const expectedStr =
+            typeof parsedExpected === 'object'
+              ? JSON.stringify(parsedExpected)
+              : String(parsedExpected);
+
+          const outputStr = output ? output.trim() : '';
+
+          // Check if the output matches the expected result
+          const isEqual = expectedStr === outputStr;
+
+          // Format the actual output for display
+          const displayOutput = outputStr || 'No output';
 
           return {
             testCase,
-            passed,
-            output: actualOutput,
+            passed: isEqual,
+            output: displayOutput,
+            consoleOutput: consoleOutput || 'No console output',
             error,
             executionTime,
             memoryUsage: 0, // Not measuring memory in this simplified version
@@ -234,45 +385,6 @@ const ProblemPageContent = () => {
       };
 
       setExecutionResult(result);
-
-      // Save the submission
-      const submissionData = {
-        userId: currentUser.uid,
-        problemId: problem.id,
-        code,
-        result: {
-          output: result.output,
-          testResults: result.testResults.map((r) => ({
-            testCase: {
-              id: r.testCase.id,
-              problemId: r.testCase.problemId,
-              input: r.testCase.input,
-              expectedOutput: r.testCase.expectedOutput,
-            },
-            passed: r.passed,
-            output: r.output,
-            error: r.error,
-            executionTime: r.executionTime,
-            memoryUsage: r.memoryUsage,
-          })),
-          success: result.success,
-        },
-        status: result.success ? ('passed' as const) : ('failed' as const),
-        executionTime: result.testResults.reduce(
-          (sum, r) => sum + r.executionTime,
-          0
-        ),
-        memoryUsage: result.testResults.reduce(
-          (sum, r) => sum + r.memoryUsage,
-          0
-        ),
-        submittedAt: new Date(),
-      };
-
-      await submissionsService.addSubmission(submissionData);
-      if (currentUser?.uid) {
-        await loadSubmissions(currentUser.uid);
-      }
     } catch (err) {
       console.error('Error executing code:', err);
       const errorMessage =
@@ -281,7 +393,7 @@ const ProblemPageContent = () => {
     } finally {
       setLoading(false);
     }
-  }, [code, currentUser, loadSubmissions, problem, testCases]);
+  }, [code, currentUser, problem, testCases]);
 
   const handleSubmit = useCallback(async () => {
     if (!currentUser) {
@@ -297,50 +409,6 @@ const ProblemPageContent = () => {
 
     setLoading(true);
     try {
-      const status: 'passed' | 'failed' = executionResult.testResults.every(
-        (result) => result.passed
-      )
-        ? 'passed'
-        : 'failed';
-
-      const submissionData = {
-        userId: currentUser.uid,
-        problemId: problem.id,
-        code,
-        result: {
-          output: executionResult.output,
-          testResults: executionResult.testResults.map((result) => ({
-            testCase: {
-              id: result.testCase.id,
-              problemId: result.testCase.problemId,
-              input: result.testCase.input,
-              expectedOutput: result.testCase.expectedOutput,
-            },
-            passed: result.passed,
-            output: result.output,
-            error: result.error,
-            executionTime: result.executionTime,
-            memoryUsage: result.memoryUsage,
-          })),
-          success: Boolean(executionResult.success),
-        } as const,
-        status,
-        executionTime: executionResult.testResults.reduce(
-          (sum, result) => sum + result.executionTime,
-          0
-        ),
-        memoryUsage: executionResult.testResults.reduce(
-          (sum, result) => sum + result.memoryUsage,
-          0
-        ),
-        submittedAt: new Date(),
-      };
-
-      await submissionsService.addSubmission(submissionData);
-      if (currentUser?.uid) {
-        await loadSubmissions(currentUser.uid);
-      }
-
       toast.success('Your solution has been submitted!');
     } catch (err) {
       console.error('Error submitting solution:', err);
@@ -350,7 +418,7 @@ const ProblemPageContent = () => {
     } finally {
       setLoading(false);
     }
-  }, [currentUser, code, executionResult, loadSubmissions, problem]);
+  }, [currentUser, code, executionResult, problem]);
 
   if (loading) {
     return (
@@ -378,7 +446,7 @@ const ProblemPageContent = () => {
           {/* Left Column - Problem Description */}
           <div className="w-full lg:w-[48%] xl:w-[45%] 2xl:w-[42%] h-full flex flex-col bg-white rounded-xl overflow-hidden">
             <div className="flex-1 overflow-y-auto p-5 sm:p-6 md:p-7 lg:p-8">
-              <ProblemDetail problem={problem} submissions={submissions} />
+              <ProblemDetail problem={problem} />
             </div>
 
             {/* Subtle gradient at bottom to indicate scrollability */}
@@ -397,7 +465,6 @@ const ProblemPageContent = () => {
                 error={null}
                 executionResult={executionResult}
                 testCases={testCases}
-                submissions={submissions}
               />
             </div>
           </div>

@@ -44,7 +44,7 @@ export default function EditProblemPage() {
   if (!problem) {
     return <div>Problem not found</div>;
   }
-
+  console.log(problem, 'problem');
   return (
     <div className="container mx-auto py-10">
       <h1 className="text-2xl font-bold mb-6">Edit Problem</h1>
