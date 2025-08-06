@@ -100,10 +100,6 @@ const Navbar = () => {
     router.push('/');
   };
 
-  const handleMyAccountClick = () => {
-    router.push('my-account');
-  };
-
   const handleSettingsClick = () => {
     router.push('settings');
   };
@@ -133,7 +129,6 @@ const Navbar = () => {
           {currentUser && (
             <UserDropDown
               handleSignOut={handleSignOut}
-              handleMyAccountClick={handleMyAccountClick}
               handleSettingsClick={handleSettingsClick}
               userId={currentUser?.uid}
             />
@@ -160,7 +155,6 @@ const Navbar = () => {
               <div className="ml-1">
                 <UserDropDown
                   handleSignOut={handleSignOut}
-                  handleMyAccountClick={handleMyAccountClick}
                   handleSettingsClick={handleSettingsClick}
                   userId={currentUser?.uid}
                 />
