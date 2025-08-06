@@ -1,8 +1,11 @@
 'use client';
 
+import { Sun, Moon, Monitor } from 'lucide-react';
 import * as React from 'react';
 
+import { Button } from '@/components/ui/button';
 import { useTheme } from '@/context/theme-provider';
+import { cn } from '@/lib/utils';
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
@@ -10,45 +13,43 @@ export function ThemeToggle() {
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-medium">Theme</h3>
-      <div className="grid grid-cols-3 gap-2">
-        <button
+      <div className="flex items-center gap-2">
+        <Button
+          variant="outline"
+          size="icon"
           onClick={() => setTheme('light')}
-          className={`flex flex-col items-center justify-center p-4 rounded-lg border-2 transition-colors ${
-            theme === 'light'
-              ? 'border-primary bg-primary/10'
-              : 'border-border hover:bg-accent/50'
-          }`}
+          className={cn(
+            'h-10 w-10',
+            theme === 'light' && 'bg-primary/10 border-primary'
+          )}
+          aria-label="Light theme"
         >
-          <div className="w-full aspect-square bg-white rounded mb-2 border" />
-          <span className="text-sm">Light</span>
-        </button>
-
-        <button
+          <Sun className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
           onClick={() => setTheme('dark')}
-          className={`flex flex-col items-center justify-center p-4 rounded-lg border-2 transition-colors ${
-            theme === 'dark'
-              ? 'border-primary bg-primary/10'
-              : 'border-border hover:bg-accent/50'
-          }`}
+          className={cn(
+            'h-10 w-10',
+            theme === 'dark' && 'bg-primary/10 border-primary'
+          )}
+          aria-label="Dark theme"
         >
-          <div className="w-full aspect-square bg-gray-900 rounded mb-2 border border-gray-800" />
-          <span className="text-sm">Dark</span>
-        </button>
-
-        <button
+          <Moon className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
           onClick={() => setTheme('system')}
-          className={`flex flex-col items-center justify-center p-4 rounded-lg border-2 transition-colors ${
-            theme === 'system'
-              ? 'border-primary bg-primary/10'
-              : 'border-border hover:bg-accent/50'
-          }`}
+          className={cn(
+            'h-10 w-10',
+            theme === 'system' && 'bg-primary/10 border-primary'
+          )}
+          aria-label="System theme"
         >
-          <div className="w-full aspect-square rounded mb-2 overflow-hidden border">
-            <div className="h-1/2 bg-white dark:bg-gray-900 w-full" />
-            <div className="h-1/2 bg-gray-100 dark:bg-gray-800 w-full" />
-          </div>
-          <span className="text-sm">System</span>
-        </button>
+          <Monitor className="h-4 w-4" />
+        </Button>
       </div>
     </div>
   );

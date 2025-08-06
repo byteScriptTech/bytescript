@@ -1,22 +1,95 @@
 'use client';
 
-import { Settings as SettingsIcon, User, Bell, Shield } from 'lucide-react';
-import React from 'react';
+import {
+  Settings as SettingsIcon,
+  User,
+  Bell,
+  Shield,
+  ChevronRight,
+  ChevronLeft,
+} from 'lucide-react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useState } from 'react';
 
 import { ThemeToggle } from '@/components/settings/theme-toggle';
 import { Separator } from '@/components/ui/separator';
+import { cn } from '@/lib/utils';
 
-const SettingsPage = () => {
+const settingsNav = [
+  {
+    title: 'Profile',
+    href: '/settings',
+    icon: User,
+  },
+];
+
+function SettingsPage() {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const pathname = usePathname();
+
   return (
-    <div className="container mx-auto py-6 max-w-3xl">
-      <div className="space-y-4">
-        <div>
+    <div className="flex flex-col md:flex-row min-h-[calc(100vh-4rem)]">
+      <div
+        className={cn(
+          'w-full md:w-64 border-r bg-background transition-all duration-300 ease-in-out',
+          isCollapsed ? 'md:w-20' : 'md:w-64'
+        )}
+      >
+        <div className="flex items-center justify-between p-4 border-b">
+          <h2
+            className={cn(
+              'text-lg font-semibold',
+              isCollapsed ? 'hidden' : 'block'
+            )}
+          >
+            Settings
+          </h2>
+          <button
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="p-2 rounded-md hover:bg-accent"
+            aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            {isCollapsed ? <ChevronRight /> : <ChevronLeft />}
+          </button>
+        </div>
+        <nav className="p-2">
+          <ul className="space-y-1">
+            {settingsNav.map((item) => {
+              const isActive = pathname === item.href;
+              const Icon = item.icon;
+              return (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    className={cn(
+                      'flex items-center gap-3 p-2 rounded-md text-sm font-medium',
+                      isActive
+                        ? 'bg-accent text-accent-foreground'
+                        : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
+                      isCollapsed ? 'justify-center' : 'px-3'
+                    )}
+                  >
+                    <Icon className="h-4 w-4" />
+                    <span className={cn(isCollapsed ? 'hidden' : 'block')}>
+                      {item.title}
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+      </div>
+
+      <div className="flex-1 p-6">
+        <div className="mb-8">
           <h1 className="text-2xl font-bold flex items-center gap-2">
-            <SettingsIcon className="h-5 w-5" />
+            <SettingsIcon className="h-6 w-6" />
             Settings
           </h1>
-          <p className="text-sm text-muted-foreground">
-            Customize your application preferences
+          <p className="text-muted-foreground mt-1">
+            Manage your account settings and preferences
           </p>
         </div>
 
@@ -137,6 +210,6 @@ const SettingsPage = () => {
       </div>
     </div>
   );
-};
+}
 
 export default SettingsPage;
