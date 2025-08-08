@@ -29,18 +29,22 @@ const NavLink = ({
 );
 
 // Mobile Navigation Link Component
+interface MobileNavLinkProps {
+  href: string;
+  children: React.ReactNode;
+  onClick: () => void;
+  className?: string;
+}
+
 const MobileNavLink = ({
   href,
   children,
   onClick,
-}: {
-  href: string;
-  children: React.ReactNode;
-  onClick: () => void;
-}) => (
+  className,
+}: MobileNavLinkProps) => (
   <Link
     href={href}
-    className="block px-3 py-2 rounded-md text-base font-medium text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+    className={`block px-3 py-2 rounded-md text-base font-medium text-foreground hover:bg-accent hover:text-accent-foreground transition-colors ${className}`}
     onClick={onClick}
   >
     {children}
@@ -120,7 +124,25 @@ const Navbar = () => {
           <Logo />
           <div className="flex items-center gap-2">
             <NavLink href="/dashboard">Dashboard</NavLink>
-            <NavLink href="/learn">Learn</NavLink>
+            <div className="relative group">
+              <NavLink href="/learn">Learn</NavLink>
+              <div className="absolute left-0 mt-1 w-48 bg-popover border rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                <div className="py-1">
+                  <Link
+                    href="/learn"
+                    className="block px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
+                  >
+                    All Topics
+                  </Link>
+                  <Link
+                    href="/learn/python"
+                    className="block px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
+                  >
+                    Python
+                  </Link>
+                </div>
+              </div>
+            </div>
             <NavLink href="/practice">Practice</NavLink>
           </div>
         </div>
@@ -197,12 +219,21 @@ const Navbar = () => {
             >
               Dashboard
             </MobileNavLink>
-            <MobileNavLink
-              href="/learn"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Learn
-            </MobileNavLink>
+            <div className="pl-4">
+              <MobileNavLink
+                href="/learn"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                All Topics
+              </MobileNavLink>
+              <MobileNavLink
+                href="/learn/python"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="pl-6"
+              >
+                Python
+              </MobileNavLink>
+            </div>
             <MobileNavLink
               href="/practice"
               onClick={() => setIsMobileMenuOpen(false)}
