@@ -1,7 +1,7 @@
 'use client';
 
 import { Play, RotateCcw } from 'lucide-react';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -32,7 +32,44 @@ export function PythonCodeEditor({
   const [output, setOutput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isResizing, setIsResizing] = useState(false);
+  const [panelHeight, setPanelHeight] = useState('50%');
   const pyodideRef = useRef<any>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const startResize = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizing(true);
+  };
+
+  const resize = useCallback(
+    (e: MouseEvent) => {
+      if (!isResizing || !containerRef.current) return;
+
+      const containerRect = containerRef.current.getBoundingClientRect();
+      const newHeight =
+        ((e.clientY - containerRect.top) / containerRect.height) * 100;
+
+      // Limit the height between 20% and 80% of container
+      const clampedHeight = Math.min(Math.max(newHeight, 20), 80);
+      setPanelHeight(`${clampedHeight}%`);
+    },
+    [isResizing]
+  );
+
+  const stopResize = () => {
+    setIsResizing(false);
+  };
+
+  useEffect(() => {
+    window.addEventListener('mousemove', resize);
+    window.addEventListener('mouseup', stopResize);
+
+    return () => {
+      window.removeEventListener('mousemove', resize);
+      window.removeEventListener('mouseup', stopResize);
+    };
+  }, [isResizing, resize]);
 
   // Load Pyodide from CDN
   const loadPyodide = async () => {
@@ -163,8 +200,15 @@ export function PythonCodeEditor({
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row h-[400px] overflow-hidden">
-        <div className="flex-1 border-r overflow-auto">
+      <div
+        ref={containerRef}
+        className="relative flex flex-col h-[400px] overflow-hidden border rounded-md"
+      >
+        {/* Code Editor */}
+        <div
+          className="overflow-auto"
+          style={{ height: `calc(${panelHeight} - 8px)` }}
+        >
           <textarea
             value={code}
             onChange={handleCodeChange}
@@ -175,7 +219,21 @@ export function PythonCodeEditor({
           />
         </div>
 
-        <div className="flex-1 overflow-auto bg-muted/50 p-4">
+        {/* Resize Handle */}
+        <button
+          type="button"
+          className="h-2 w-full bg-gray-100 dark:bg-gray-800 cursor-row-resize flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+          onMouseDown={startResize}
+          aria-label="Resize panels"
+        >
+          <div className="w-16 h-1 bg-gray-300 dark:bg-gray-600 rounded-full" />
+        </button>
+
+        {/* Output Panel */}
+        <div
+          className="flex-1 overflow-auto bg-muted/50 p-4"
+          style={{ height: `calc(100% - ${panelHeight} - 8px)` }}
+        >
           <div className="text-sm font-mono whitespace-pre-wrap break-words">
             {error ? (
               <div className="text-destructive">{error}</div>
