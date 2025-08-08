@@ -1,7 +1,9 @@
 'use client';
 
-import { Lightbulb } from 'lucide-react';
-import React, { useState } from 'react';
+import { Code as CodeIcon } from 'lucide-react';
+import { useState } from 'react';
+
+import { PythonCodeEditor } from '@/components/common/PythonCodeEditor';
 
 // Dummy data for Python topics
 const pythonTopics = [
@@ -391,47 +393,49 @@ const PythonLearnContent = () => {
             {content.title}
           </h1>
 
-          {content.sections.map((section: any, index: number) => (
-            <div key={index} className="mb-8">
-              {section.type === 'text' && (
-                <div className="mb-6">
-                  <h2 className="text-xl font-semibold text-foreground mb-3">
-                    {section.title}
-                  </h2>
-                  <p className="text-foreground/90 leading-relaxed">
-                    {section.content}
-                  </p>
-                </div>
-              )}
-
-              {section.type === 'code' && (
-                <div className="mb-6">
-                  <h3 className="text-lg font-medium text-foreground mb-2">
-                    {section.title}
-                  </h3>
-                  <div className="bg-muted rounded-lg p-4 overflow-x-auto">
-                    <pre className="text-sm font-mono text-foreground">
-                      <code>{section.content}</code>
-                    </pre>
+          {content.sections.map((section: any, index: number) => {
+            switch (section.type) {
+              case 'code':
+                return (
+                  <div key={index} className="my-6">
+                    <PythonCodeEditor
+                      initialCode={section.content}
+                      className="w-full"
+                    />
                   </div>
-                </div>
-              )}
-
-              {section.type === 'tip' && (
-                <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 rounded-r-md mb-6">
-                  <div className="flex">
-                    <Lightbulb className="flex-shrink-0 h-5 w-5 text-blue-500 mr-2" />
-                    <div>
-                      <p className="text-sm text-blue-700 dark:text-blue-300">
-                        <span className="font-semibold">Tip:</span>{' '}
-                        {section.content}
-                      </p>
+                );
+              case 'text':
+                return (
+                  <div key={index} className="mb-6">
+                    <h2 className="text-xl font-semibold text-foreground mb-3">
+                      {section.title}
+                    </h2>
+                    <p className="text-foreground/90 leading-relaxed">
+                      {section.content}
+                    </p>
+                  </div>
+                );
+              case 'tip':
+                return (
+                  <div
+                    key={index}
+                    className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 rounded-r-md mb-6"
+                  >
+                    <div className="flex">
+                      <CodeIcon className="flex-shrink-0 h-5 w-5 text-blue-500 mr-2" />
+                      <div>
+                        <p className="text-sm text-blue-700 dark:text-blue-300">
+                          <span className="font-semibold">Tip:</span>{' '}
+                          {section.content}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
-            </div>
-          ))}
+                );
+              default:
+                return null;
+            }
+          })}
 
           <div className="mt-8 pt-6 border-t border-border">
             <div className="flex justify-between">
