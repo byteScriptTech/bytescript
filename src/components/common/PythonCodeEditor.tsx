@@ -21,12 +21,14 @@ type PythonCodeEditorProps = {
   initialCode: string;
   className?: string;
   onCodeChange?: (code: string) => void;
+  readOnly?: boolean;
 };
 
 export function PythonCodeEditor({
   initialCode,
   className,
   onCodeChange,
+  readOnly = false,
 }: PythonCodeEditorProps) {
   const [code, setCode] = useState(initialCode);
   const [output, setOutput] = useState('');
@@ -212,10 +214,11 @@ export function PythonCodeEditor({
           <textarea
             value={code}
             onChange={handleCodeChange}
-            className="w-full h-full p-4 font-mono text-sm focus:outline-none resize-none"
+            className={`w-full h-full p-2 font-mono text-sm bg-transparent border-0 focus:outline-none resize-none ${
+              readOnly ? 'cursor-default' : ''
+            }`}
             spellCheck="false"
-            style={{ tabSize: 4 }}
-            disabled={isLoading}
+            readOnly={readOnly || isLoading}
           />
         </div>
 

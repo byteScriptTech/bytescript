@@ -110,28 +110,70 @@ const ContentSections: React.FC<ContentSectionsProps> = ({
     case 'challenges':
       return (
         <section id="challenges">
-          {courseContent?.challenges?.length && <b>Challenges:</b>}
-          {courseContent?.challenges?.map((challenge, i) => (
-            <div key={i} className="py-2">
-              <p>
-                <span className="font-bold">Question:</span>{' '}
-                {challenge.question}
-              </p>
-              {challenge.code && (
-                <React.Fragment>
-                  <p className="mt-2 font-bold">Code:</p>
-                  <CodeBlock code={`${decodeEntities(challenge.code)}`} />
-                </React.Fragment>
-              )}
-              <p className="font-bold mt-2">Answer:</p>
-              {challenge.answer?.length &&
-                challenge.answer?.map((answer, i) => (
-                  <React.Fragment key={i}>
-                    <CodeBlock code={`${decodeEntities(answer)}`} />
-                  </React.Fragment>
-                ))}
+          {courseContent?.challenges?.length ? (
+            <div className="space-y-6">
+              <h3 className="text-xl font-semibold">Practice Challenges</h3>
+              {courseContent.challenges.map((challenge, i) => (
+                <Card key={i} className="p-4">
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="font-medium text-lg mb-1">
+                        {challenge.title}
+                      </h4>
+                      {challenge.difficulty && (
+                        <span className="inline-block px-2 py-0.5 text-xs font-medium rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200 mb-2">
+                          {challenge.difficulty}
+                        </span>
+                      )}
+                      <p className="text-muted-foreground">
+                        {challenge.description}
+                      </p>
+                    </div>
+
+                    {challenge.requirements &&
+                      challenge.requirements.length > 0 && (
+                        <div>
+                          <h5 className="font-medium text-sm text-muted-foreground mb-1">
+                            Requirements:
+                          </h5>
+                          <ul className="list-disc pl-5 space-y-1">
+                            {challenge.requirements.map((req, idx) => (
+                              <li key={idx} className="text-sm">
+                                {req}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                    {challenge.example && (
+                      <div>
+                        <h5 className="font-medium text-sm text-muted-foreground mb-1">
+                          Example:
+                        </h5>
+                        <div className="text-sm">
+                          <CodeBlock code={challenge.example} />
+                        </div>
+                      </div>
+                    )}
+
+                    {challenge.solution && (
+                      <details>
+                        <summary className="text-sm font-medium text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
+                          Show Solution
+                        </summary>
+                        <div className="mt-2">
+                          <div className="text-sm">
+                            <CodeBlock code={challenge.solution} />
+                          </div>
+                        </div>
+                      </details>
+                    )}
+                  </div>
+                </Card>
+              ))}
             </div>
-          ))}
+          ) : null}
         </section>
       );
     case 'best_practices':

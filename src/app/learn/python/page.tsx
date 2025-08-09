@@ -4,6 +4,7 @@ import React from 'react';
 
 import Navbar from '@/components/common/Navbar';
 import { AuthProvider } from '@/context/AuthContext';
+import { ContentProvider } from '@/context/ContentContext';
 import { LanguagesProvider } from '@/context/LanguagesContext';
 import { LocalStorageProvider } from '@/context/LocalhostContext';
 
@@ -16,14 +17,16 @@ export default function PythonLearnPage() {
     <AuthProvider>
       <LocalStorageProvider>
         <LanguagesProvider>
-          <div className="flex min-h-screen w-full flex-col bg-background">
-            <div className="flex flex-col flex-1">
-              <Navbar />
-              <main className="flex-1">
-                <PythonLearnContent />
-              </main>
+          <ContentProvider>
+            <div className="flex min-h-screen w-full flex-col bg-background">
+              <div className="flex flex-col flex-1">
+                <Navbar />
+                <main className="flex-1">
+                  <PythonLearnContent />
+                </main>
+              </div>
             </div>
-          </div>
+          </ContentProvider>
         </LanguagesProvider>
       </LocalStorageProvider>
     </AuthProvider>

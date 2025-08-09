@@ -21,6 +21,7 @@ describe('LearnTopicCard', () => {
     id: 'test-topic',
     name: 'JavaScript',
     slug: 'javascript',
+    challenges: [],
   };
 
   const mockRouter = {
