@@ -1,4 +1,4 @@
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
 
 import { db } from '@/firebase/config';
 import type { Challenge, LanguageContent, Topic } from '@/types/content';
@@ -24,6 +24,167 @@ export const getPythonContent = async (): Promise<LanguageContent | null> => {
     console.error('Error fetching Python content:', error);
     throw error;
   }
+};
+
+export const pythonService = {
+  async getAllTopics() {
+    try {
+      const docRef = doc(db, PYTHON_CONTENT_COLLECTION, PYTHON_CONTENT_ID);
+      const docSnap = await getDoc(docRef);
+
+      if (!docSnap.exists()) {
+        console.error('Python content not found');
+        return [];
+      }
+
+      const data = docSnap.data();
+      // Return the topics array or empty array if it doesn't exist
+      return data.topics || [];
+    } catch (error) {
+      console.error('Error getting Python topics:', error);
+      throw error;
+    }
+  },
+
+  // Get a single Python topic by ID
+  async getTopicById(id: string) {
+    try {
+      const docRef = doc(db, PYTHON_CONTENT_COLLECTION, PYTHON_CONTENT_ID);
+      const docSnap = await getDoc(docRef);
+
+      if (!docSnap.exists()) {
+        console.error('Python content not found');
+        return null;
+      }
+
+      const data = docSnap.data();
+      const topics: Topic[] = data.topics || [];
+      return topics.find((topic) => topic.id === id) || null;
+    } catch (error) {
+      console.error('Error getting Python topic:', error);
+      throw error;
+    }
+  },
+
+  // Create a new Python topic
+  async createTopic(topicData: Omit<Topic, 'id'>) {
+    try {
+      const docRef = doc(db, PYTHON_CONTENT_COLLECTION, PYTHON_CONTENT_ID);
+      const docSnap = await getDoc(docRef);
+
+      if (!docSnap.exists()) {
+        throw new Error('Python content not found');
+      }
+
+      const data = docSnap.data();
+      const topics: Topic[] = data.topics || [];
+      const newTopic = {
+        ...topicData,
+        id: Date.now().toString(), // Simple ID generation
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      await updateDoc(docRef, {
+        topics: [...topics, newTopic],
+        updatedAt: new Date().toISOString(),
+      });
+
+      return newTopic;
+    } catch (error) {
+      console.error('Error creating Python topic:', error);
+      throw error;
+    }
+  },
+
+  // Update an existing Python topic
+  async updateTopic(id: string, topicData: Partial<Omit<Topic, 'id'>>) {
+    try {
+      const docRef = doc(db, PYTHON_CONTENT_COLLECTION, PYTHON_CONTENT_ID);
+      const docSnap = await getDoc(docRef);
+
+      if (!docSnap.exists()) {
+        throw new Error('Python content not found');
+      }
+
+      const data = docSnap.data();
+      const topics: Topic[] = data.topics || [];
+      const topicIndex = topics.findIndex((topic) => topic.id === id);
+
+      if (topicIndex === -1) {
+        throw new Error('Topic not found');
+      }
+
+      const updatedTopic = {
+        ...topics[topicIndex],
+        ...topicData,
+        updatedAt: new Date().toISOString(),
+      };
+
+      const updatedTopics = [...topics];
+      updatedTopics[topicIndex] = updatedTopic;
+
+      await updateDoc(docRef, {
+        topics: updatedTopics,
+        updatedAt: new Date().toISOString(),
+      });
+
+      return updatedTopic;
+    } catch (error) {
+      console.error('Error updating Python topic:', error);
+      throw error;
+    }
+  },
+
+  // Delete a Python topic
+  async deleteTopic(id: string) {
+    try {
+      const docRef = doc(db, PYTHON_CONTENT_COLLECTION, PYTHON_CONTENT_ID);
+      const docSnap = await getDoc(docRef);
+
+      if (!docSnap.exists()) {
+        throw new Error('Python content not found');
+      }
+
+      const data = docSnap.data();
+      const topics: Topic[] = data.topics || [];
+      const filteredTopics = topics.filter((topic) => topic.id !== id);
+
+      if (topics.length === filteredTopics.length) {
+        throw new Error('Topic not found');
+      }
+
+      await updateDoc(docRef, {
+        topics: filteredTopics,
+        updatedAt: new Date().toISOString(),
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Error deleting Python topic:', error);
+      throw error;
+    }
+  },
+
+  // Get Python topics by difficulty
+  async getTopicsByDifficulty(difficulty: string) {
+    try {
+      const docRef = doc(db, PYTHON_CONTENT_COLLECTION, PYTHON_CONTENT_ID);
+      const docSnap = await getDoc(docRef);
+
+      if (!docSnap.exists()) {
+        console.error('Python content not found');
+        return [];
+      }
+
+      const data = docSnap.data();
+      const topics: Topic[] = data.topics || [];
+      return topics.filter((topic) => topic.difficulty === difficulty);
+    } catch (error) {
+      console.error('Error getting Python topics by difficulty:', error);
+      throw error;
+    }
+  },
 };
 
 /**

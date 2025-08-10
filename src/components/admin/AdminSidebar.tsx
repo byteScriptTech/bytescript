@@ -1,6 +1,6 @@
 'use client';
 
-import { Home, Database, BookOpen, Settings, Users } from 'lucide-react';
+import { Home, Database, BookOpen, Settings, Users, Code } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -13,6 +13,11 @@ export function AdminSidebar() {
       name: 'Data Structures',
       href: '/admin/dsa',
       icon: Database,
+    },
+    {
+      name: 'Python',
+      href: '/admin/python',
+      icon: Code,
     },
     { name: 'Problems', href: '/admin/problems', icon: BookOpen },
     { name: 'Users', href: '/admin/users', icon: Users },

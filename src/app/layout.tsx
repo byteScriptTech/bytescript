@@ -19,8 +19,11 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: 'Home - biteScript',
+  title: 'biteScript',
   description: 'code like a pro!',
+  icons: {
+    icon: [{ url: '/favicon.png', sizes: 'any' }],
+  },
 };
 
 export default function RootLayout({
