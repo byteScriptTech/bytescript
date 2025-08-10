@@ -1,30 +1,139 @@
-interface Challenge {
-  code: string;
-  answer: string[];
-  level?: string;
-  question?: string;
+export interface Challenge {
+  id: string;
+  title: string;
+  description: string;
+  difficulty?: 'Beginner' | 'Intermediate' | 'Advanced';
+  requirements?: string[];
+  example?: string;
+  solution?: string;
+  constraints?: string[];
+  testCases?: Array<{
+    input: string;
+    output: string;
+  }>;
+  hints?: string[];
+  topicId?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
-interface Example {
+export interface Example {
   code: string;
-  description: string;
-  language: string;
+  description?: string;
+  language?: string;
 }
 
 interface RelatedTopic {
   name: string;
   description: string;
+  category?: string;
+}
+
+export interface Subtopic {
+  name: string;
+  recommended_resources: Array<{
+    title: string;
+    url: string;
+    type: 'documentation' | 'video' | 'article';
+    description?: string;
+    author?: string;
+  }>;
+  exercises?: Array<{
+    id: string;
+    title: string;
+    prompt: string;
+    difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
+  }>;
+  estimated_time_minutes?: number;
+  description?: string;
+  id: string;
+  content?: string;
+  examples?: Array<{
+    code: string;
+    description?: string;
+  }>;
 }
 
 export interface Topic {
+  challenges?: any;
   name: string;
   id: string;
   slug: string;
+  description?: string;
+  content?: string;
+  difficulty?: string;
+  timeToComplete?: number;
+  learningObjectives?: string[];
+  commonMistakes?: string[];
+  resources?: Array<{
+    title: string;
+    url: string;
+    type: 'documentation' | 'video' | 'article';
+    description?: string;
+  }>;
+  sections?: Array<{
+    type: 'text' | 'code' | 'exercise' | 'quiz';
+    title?: string;
+    content?: string;
+    explanation?: string;
+    keyPoints?: string[];
+    task?: string;
+    hint?: string;
+    solution?: string;
+    question?: string;
+    options?: string[];
+    correctAnswer?: number;
+  }>;
+  examples?: Array<{
+    id: string;
+    code: string;
+    description?: string;
+    language?: string;
+  }>;
+  subtopics?: Subtopic[];
+  exercises?: Array<{
+    id: string;
+    title: string;
+    prompt: string;
+    difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
+    hint?: string;
+  }>;
+  quizzes?: Array<{
+    id: string;
+    question: string;
+    options: string[];
+    answer_index: number;
+  }>;
+  recommended_resources?: Array<{
+    title: string;
+    url: string;
+    type: 'documentation' | 'video' | 'article';
+    description?: string;
+    author?: string;
+  }>;
+  projects?: Array<{
+    id: string;
+    title: string;
+    description: string;
+    difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
+  }>;
+  estimated_time_hours?: number;
+  learning_objectives?: string[];
 }
 
 interface BestPracticesAndCommonMistakes {
-  common_mistakes: { text: string; code?: string }[];
-  best_practices: { text: string; code?: string }[];
+  common_mistakes: {
+    text: string;
+    code?: string;
+    example?: string;
+    explanation?: string;
+    fix?: string;
+  }[];
+  best_practices: {
+    text: string;
+    code?: string;
+    example?: string;
+  }[];
 }
 
 interface Introduction {
@@ -39,13 +148,30 @@ export interface LanguageContent {
   id: string;
   name: string;
   tag: string;
+  description?: string;
   applications: string[];
   explanation: string[];
   best_practices_and_common_mistakes: BestPracticesAndCommonMistakes;
   related_topics: RelatedTopic[];
   topics: Topic[];
-  introduction: Introduction;
-  examples: Example[];
   challenges: Challenge[];
+  resources?: Array<{
+    id: string;
+    title: string;
+    url: string;
+    type:
+      | 'documentation'
+      | 'video'
+      | 'article'
+      | 'course'
+      | 'book'
+      | 'cheatsheet';
+    description?: string;
+    author?: string;
+  }>;
+  introduction?: Introduction;
+  examples: Example[];
+  createdAt?: Date;
+  updatedAt?: Date;
   [key: string]: any;
 }

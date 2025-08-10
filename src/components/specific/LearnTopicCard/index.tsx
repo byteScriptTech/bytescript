@@ -28,6 +28,8 @@ export const LearnTopicCard: React.FC<LearnTopicCardProps> = ({
         router.push('/competitive-programming');
       } else if (name === 'data-structures-&-algorithms') {
         router.push('/data-structures');
+      } else if (name === 'python') {
+        router.push('/learn/python');
       } else {
         router.push(
           `/lang?name=${encodeURIComponent(topic.name.toLowerCase())}&id=${topic.id}`
