@@ -1,10 +1,4 @@
-import {
-  LucideUser,
-  LayoutDashboard,
-  Settings,
-  LogOut,
-  User as UserIcon,
-} from 'lucide-react';
+import { LucideUser, LayoutDashboard, Settings, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import React from 'react';
 
@@ -20,7 +14,6 @@ import {
 
 type UserDropDownProps = {
   handleSignOut?: () => void;
-  handleMyAccountClick?: () => void;
   handleSettingsClick?: () => void;
   userId?: string | null;
 };
@@ -29,7 +22,6 @@ const ADMIN_USER_ID = process.env.NEXT_PUBLIC_FIREBASE_ADMIN_ACCOUNT_ID || '';
 
 function UserDropDown({
   handleSignOut,
-  handleMyAccountClick,
   handleSettingsClick,
   userId,
 }: UserDropDownProps) {
@@ -50,14 +42,6 @@ function UserDropDown({
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Account</DropdownMenuLabel>
           <DropdownMenuSeparator />
-
-          <DropdownMenuItem
-            onClick={handleMyAccountClick}
-            className="cursor-pointer"
-          >
-            <UserIcon className="mr-2 h-4 w-4" />
-            <span>My Account</span>
-          </DropdownMenuItem>
           <DropdownMenuItem
             onClick={handleSettingsClick}
             className="cursor-pointer"

@@ -1,0 +1,22 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "📝 Validating commit message..."
+
+# Check if commitlint is installed
+if ! command -v npx &> /dev/null || ! npx commitlint --version &> /dev/null; then
+  echo "⚠️  commitlint not found. Installing..."
+  npm install --save-dev @commitlint/{config-conventional,cli}
+fi
+
+# Validate commit message
+npx commitlint --edit "$1"
+
+if [ $? -ne 0 ]; then
+  echo "❌ Commit message validation failed. Please follow the conventional commit format."
+  echo "   Example: feat: add new feature"
+  echo "   See https://www.conventionalcommits.org/ for more details."
+  exit 1
+fi
+
+echo "✅ Commit message is valid!"
