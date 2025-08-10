@@ -31,7 +31,22 @@ interface RelatedTopic {
 
 export interface Subtopic {
   name: string;
+  recommended_resources: Array<{
+    title: string;
+    url: string;
+    type: 'documentation' | 'video' | 'article';
+    description?: string;
+    author?: string;
+  }>;
+  exercises?: Array<{
+    id: string;
+    title: string;
+    prompt: string;
+    difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
+  }>;
+  estimated_time_minutes?: number;
   description?: string;
+  id: string;
   content?: string;
   examples?: Array<{
     code: string;
@@ -40,7 +55,7 @@ export interface Subtopic {
 }
 
 export interface Topic {
-  challenges: any;
+  challenges?: any;
   name: string;
   id: string;
   slug: string;
@@ -70,11 +85,40 @@ export interface Topic {
     correctAnswer?: number;
   }>;
   examples?: Array<{
+    id: string;
     code: string;
     description?: string;
     language?: string;
   }>;
   subtopics?: Subtopic[];
+  exercises?: Array<{
+    id: string;
+    title: string;
+    prompt: string;
+    difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
+    hint?: string;
+  }>;
+  quizzes?: Array<{
+    id: string;
+    question: string;
+    options: string[];
+    answer_index: number;
+  }>;
+  recommended_resources?: Array<{
+    title: string;
+    url: string;
+    type: 'documentation' | 'video' | 'article';
+    description?: string;
+    author?: string;
+  }>;
+  projects?: Array<{
+    id: string;
+    title: string;
+    description: string;
+    difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
+  }>;
+  estimated_time_hours?: number;
+  learning_objectives?: string[];
 }
 
 interface BestPracticesAndCommonMistakes {
@@ -125,7 +169,7 @@ export interface LanguageContent {
     description?: string;
     author?: string;
   }>;
-  introduction: Introduction;
+  introduction?: Introduction;
   examples: Example[];
   createdAt?: Date;
   updatedAt?: Date;
