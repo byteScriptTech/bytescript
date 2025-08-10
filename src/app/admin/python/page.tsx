@@ -35,11 +35,12 @@ export default function PythonContentPage() {
 
   const fetchContent = async () => {
     try {
+      setLoading(true);
       const data = await pythonService.getAllTopics();
-      setTopics(data as PythonTopic[]);
       setTopics(data as PythonTopic[]);
     } catch (error) {
       console.error('Error fetching Python content:', error);
+      // Consider adding a toast notification here for better UX
     } finally {
       setLoading(false);
     }
@@ -57,9 +58,14 @@ export default function PythonContentPage() {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+        <span className="ml-2">Loading topics...</span>
+      </div>
+    );
   }
-  console.log(topics, 'topics');
+
   return (
     <div className="container mx-auto py-10">
       <div className="flex justify-between items-center mb-6">
