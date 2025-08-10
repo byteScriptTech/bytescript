@@ -8,11 +8,11 @@ import { ContentProvider } from '@/context/ContentContext';
 import { LanguagesProvider } from '@/context/LanguagesContext';
 import { LocalStorageProvider } from '@/context/LocalhostContext';
 
-import PythonLearnContent from './PythonLearnContent';
+import LearnContent from './LearnContent';
 
 export const dynamic = 'force-dynamic';
 
-export default function PythonLearnPage() {
+export default function LearnPage() {
   return (
     <AuthProvider>
       <LocalStorageProvider>
@@ -22,7 +22,7 @@ export default function PythonLearnPage() {
               <div className="flex flex-col flex-1">
                 <Navbar />
                 <main className="flex-1">
-                  <PythonLearnContent />
+                  <LearnContent />
                 </main>
               </div>
             </div>

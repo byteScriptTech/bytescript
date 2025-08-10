@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { getPythonContent } from '@/services/pythonService';
 import type { LanguageContent } from '@/types/content';
 
-const PythonLearnContent = () => {
+const LearnContent = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [content, setContent] = useState<LanguageContent | null>(null);
@@ -470,4 +470,4 @@ const PythonLearnContent = () => {
   );
 };
 
-export default PythonLearnContent;
+export default LearnContent;
