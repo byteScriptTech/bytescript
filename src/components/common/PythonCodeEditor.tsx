@@ -208,7 +208,7 @@ export function PythonCodeEditor({
       >
         {/* Code Editor */}
         <div
-          className="overflow-auto"
+          className="overflow-hidden"
           style={{ height: `calc(${panelHeight} - 8px)` }}
         >
           <textarea
