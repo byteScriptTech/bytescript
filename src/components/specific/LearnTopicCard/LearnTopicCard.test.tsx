@@ -47,9 +47,7 @@ describe('LearnTopicCard', () => {
     const card = screen.getByRole('button');
     fireEvent.click(card);
 
-    expect(mockRouter.push).toHaveBeenCalledWith(
-      '/lang?name=javascript&id=test-topic'
-    );
+    expect(mockRouter.push).toHaveBeenCalledWith('/learn/javascript');
   });
 
   it('navigates to competitive programming when topic is competitive-programming', () => {
