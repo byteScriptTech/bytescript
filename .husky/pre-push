@@ -1,0 +1,18 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🧪 Running all tests before push..."
+npm test -- --watchAll=false
+
+if [ $? -ne 0 ]; then
+  echo "❌ Tests failed. Please fix the failing tests before pushing."
+  exit 1
+fi
+
+echo "🏗️  Running build check..."
+npm run build -- --no-lint
+
+if [ $? -ne 0 ]; then
+  echo "❌ Build failed. Please fix the build before pushing."
+  exit 1
+fi
