@@ -103,9 +103,11 @@ export const Content: React.FC<ContentProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">{currentTopic.name}</h1>
+    <div className="w-full">
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-3xl font-bold tracking-tight">
+          {currentTopic.name}
+        </h1>
         <ShowToggle
           handleIsCompleted={handleIsCompleted}
           topicId={topicId}
@@ -114,10 +116,13 @@ export const Content: React.FC<ContentProps> = ({
         />
       </div>
 
-      <div className="prose dark:prose-invert max-w-none flex-1 overflow-auto">
+      <div className="prose dark:prose-invert max-w-none w-full">
         {currentTopic.content && (
-          <div className="mb-8">
-            <div dangerouslySetInnerHTML={{ __html: currentTopic.content }} />
+          <div className="mb-10">
+            <div
+              className="prose-lg"
+              dangerouslySetInnerHTML={{ __html: currentTopic.content }}
+            />
           </div>
         )}
 
@@ -125,18 +130,27 @@ export const Content: React.FC<ContentProps> = ({
           <div
             key={subtopic.id}
             id={`subtopic-${subtopic.id}`}
-            className="mb-8 pt-2 -mt-2"
+            className="mb-12 scroll-mt-20"
           >
-            <h2 className="text-2xl font-semibold mb-4">{subtopic.name}</h2>
+            <h2 className="text-2xl font-bold mb-6 pb-2 border-b border-border">
+              {subtopic.name}
+            </h2>
             {subtopic.content && (
-              <div className="mb-4">
-                <div dangerouslySetInnerHTML={{ __html: subtopic.content }} />
+              <div className="mb-6 prose-p:leading-relaxed">
+                <div
+                  className="prose-p:mb-4 last:prose-p:mb-0"
+                  dangerouslySetInnerHTML={{ __html: subtopic.content }}
+                />
               </div>
             )}
             {subtopic.examples && subtopic.examples.length > 0 && (
-              <div className="mt-6">
-                <h3 className="text-lg font-medium mb-3">Examples</h3>
-                {renderExamples(subtopic.examples)}
+              <div className="mt-8">
+                <h3 className="text-xl font-semibold mb-4 text-foreground">
+                  Examples
+                </h3>
+                <div className="space-y-6">
+                  {renderExamples(subtopic.examples)}
+                </div>
               </div>
             )}
           </div>

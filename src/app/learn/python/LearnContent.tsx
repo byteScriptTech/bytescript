@@ -299,21 +299,33 @@ const LearnContentInner = ({
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-auto">
-        <Content
-          topicId={activeTopic || ''}
-          subtopicId={activeSubtopic || ''}
-          content={currentTopic}
-          onTopicClick={(topicId) => {
-            setActiveTopic(topicId);
-            setActiveSubtopic(null);
-          }}
-          onSubtopicClick={(subtopicId) => {
-            setActiveSubtopic(subtopicId);
-            scrollToSubtopic(subtopicId);
-          }}
-          renderExamples={renderExamples}
-        />
+      <div className="flex-1 overflow-auto p-4 md:p-8">
+        <div className="max-w-4xl mx-auto">
+          {error ? (
+            <div className="bg-destructive/10 border border-destructive text-destructive px-4 py-3 rounded-md mb-6">
+              {error}
+            </div>
+          ) : (
+            <div className="space-y-8">
+              {currentTopic && (
+                <Content
+                  topicId={activeTopic || ''}
+                  subtopicId={activeSubtopic || ''}
+                  content={currentTopic}
+                  onTopicClick={(topicId) => {
+                    setActiveTopic(topicId);
+                    setActiveSubtopic(null);
+                  }}
+                  onSubtopicClick={(subtopicId) => {
+                    setActiveSubtopic(subtopicId);
+                    scrollToSubtopic(subtopicId);
+                  }}
+                  renderExamples={renderExamples}
+                />
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
