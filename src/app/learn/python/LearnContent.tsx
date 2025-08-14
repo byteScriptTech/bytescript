@@ -1,9 +1,10 @@
 'use client';
 
-import { ChevronLeft, ChevronRight, Menu, X } from 'lucide-react';
-import { useEffect, useState, useCallback } from 'react';
+import { ChevronLeft, ChevronRight, Menu } from 'lucide-react';
+import React, { useEffect, useState, useCallback } from 'react';
 
 import { PythonCodeEditor } from '@/components/common/PythonCodeEditor';
+import { Content } from '@/components/specific/LearnContent/Content';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
@@ -16,7 +17,19 @@ import { cn } from '@/lib/utils';
 import { getPythonContent } from '@/services/pythonService';
 import type { LanguageContent } from '@/types/content';
 
-const LearnContent = () => {
+interface LearnContentInnerProps {
+  initialTopicId?: string | null;
+  initialSubtopicId?: string | null;
+  children?: React.ReactNode;
+}
+
+// These props are passed from the URL but not currently used
+const LearnContentInner = ({
+  // These props are intentionally unused for now
+  // They're kept for future implementation
+  initialTopicId: _initialTopicId = null,
+  initialSubtopicId: _initialSubtopicId = null,
+}: LearnContentInnerProps) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [content, setContent] = useState<LanguageContent | null>(null);
@@ -122,7 +135,7 @@ const LearnContent = () => {
 
   if (error) {
     return (
-      <div className="flex justify-center items-center min-h-[calc(100vh-64px)]">
+      <div className="flex min-h-[calc(100vh-64px)] items-center justify-center">
         <div className="text-red-500">{error}</div>
       </div>
     );
@@ -136,7 +149,7 @@ const LearnContent = () => {
     );
   }
 
-  const renderMarkdownContent = (content: string) => (
+  const _renderMarkdownContent = (content: string) => (
     <div
       className="prose dark:prose-invert max-w-none"
       dangerouslySetInnerHTML={{ __html: content }}
@@ -165,18 +178,19 @@ const LearnContent = () => {
   );
 
   return (
-    <div className="flex h-[calc(100vh-64px)] overflow-hidden relative">
+    <div className="flex h-screen bg-background">
       {/* Mobile menu button */}
-      <Button
-        id="python-menu-button"
-        onClick={() => setSidebarOpen(!sidebarOpen)}
-        className="fixed bottom-4 left-4 z-50 md:hidden p-3 rounded-full bg-primary text-primary-foreground shadow-lg"
-        aria-label="Toggle menu"
-        variant="default"
-        size="icon"
+      <button
+        type="button"
+        className={cn(
+          'fixed left-4 top-4 z-50 rounded-md p-2 text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary md:hidden',
+          isMobile && sidebarOpen && 'hidden'
+        )}
+        onClick={() => setSidebarOpen(true)}
       >
-        {sidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-      </Button>
+        <span className="sr-only">Open sidebar</span>
+        <Menu className="h-6 w-6" />
+      </button>
 
       {/* Mobile overlay */}
       {isMobile && sidebarOpen && (
@@ -286,57 +300,38 @@ const LearnContent = () => {
 
       {/* Main Content */}
       <div className="flex-1 overflow-auto">
-        <div className="container py-8 max-w-4xl mx-auto px-4">
-          <div className="space-y-8">
-            <div>
-              <h1 className="text-3xl font-bold mb-2">{currentTopic.name}</h1>
-              {currentTopic.description && (
-                <p className="text-lg text-muted-foreground mb-6">
-                  {currentTopic.description}
-                </p>
-              )}
-
-              <div className="prose dark:prose-invert max-w-none">
-                {currentTopic.content && (
-                  <div className="mb-8">
-                    {renderMarkdownContent(currentTopic.content)}
-                  </div>
-                )}
-
-                {currentTopic.subtopics?.map((subtopic) => (
-                  <div
-                    key={subtopic.id}
-                    id={`subtopic-${subtopic.id}`}
-                    className="mb-8 pt-2 -mt-2"
-                  >
-                    <h2 className="text-2xl font-semibold mb-4">
-                      {subtopic.name}
-                    </h2>
-                    {subtopic.content && (
-                      <div className="mb-4">
-                        {renderMarkdownContent(subtopic.content)}
-                      </div>
-                    )}
-                    {subtopic.examples && subtopic.examples.length > 0 && (
-                      <div className="mt-6">
-                        <h3 className="text-lg font-medium mb-3">Examples</h3>
-                        {renderExamples(
-                          subtopic.examples as {
-                            code: string;
-                            description: string;
-                          }[]
-                        )}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
+        <Content
+          topicId={activeTopic || ''}
+          subtopicId={activeSubtopic || ''}
+          content={currentTopic}
+          onTopicClick={(topicId) => {
+            setActiveTopic(topicId);
+            setActiveSubtopic(null);
+          }}
+          onSubtopicClick={(subtopicId) => {
+            setActiveSubtopic(subtopicId);
+            scrollToSubtopic(subtopicId);
+          }}
+          renderExamples={renderExamples}
+        />
       </div>
     </div>
   );
 };
 
-export default LearnContent;
+// This is the inner component that doesn't use useSearchParams directly
+export default function LearnContent({
+  initialTopicId = null,
+  initialSubtopicId = null,
+}: {
+  initialTopicId?: string | null;
+  initialSubtopicId?: string | null;
+}) {
+  // Rest of the component implementation
+  return (
+    <LearnContentInner
+      initialTopicId={initialTopicId}
+      initialSubtopicId={initialSubtopicId}
+    />
+  );
+}

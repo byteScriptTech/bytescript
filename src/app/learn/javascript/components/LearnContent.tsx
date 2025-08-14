@@ -1,10 +1,10 @@
 'use client';
 
 import { CheckCircle2, ChevronLeft, ChevronRight, Menu, X } from 'lucide-react';
-import { useSearchParams } from 'next/navigation';
 import React, { useEffect, useState, useCallback } from 'react';
 
 import { JavaScriptCodeEditor } from '@/components/common/JavaScriptCodeEditor';
+import { Content } from '@/components/specific/LearnContent/Content';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -24,13 +24,18 @@ interface Example {
   description?: string;
 }
 
-// Main component that doesn't use search params directly
-export interface LearnContentProps {
+interface LearnContentInnerProps {
   initialTopicId?: string | null;
+  initialSubtopicId?: string | null;
+  children?: React.ReactNode;
 }
 
-const LearnContent: React.FC<LearnContentProps> = ({
-  initialTopicId = null,
+// These props are passed from the URL but not currently used
+const LearnContentInner: React.FC<LearnContentInnerProps> = ({
+  // These props are intentionally unused for now
+  // They're kept for future implementation
+  initialTopicId: _initialTopicId = null,
+  initialSubtopicId: _initialSubtopicId = null,
 }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -101,13 +106,7 @@ const LearnContent: React.FC<LearnContentProps> = ({
       const data = await getJavascriptContent();
       setContent(data);
       if (data?.topics?.length) {
-        // Use initialTopicId if provided and valid, otherwise default to first topic
-        const topicToSet = data.topics.some(
-          (topic) => topic.id === initialTopicId
-        )
-          ? initialTopicId
-          : data.topics[0].id;
-        setActiveTopic(topicToSet);
+        setActiveTopic(data.topics[0].id);
       }
       return data;
     } catch (err) {
@@ -119,7 +118,7 @@ const LearnContent: React.FC<LearnContentProps> = ({
       console.error('Error fetching JavaScript content:', err);
       throw err;
     }
-  }, [initialTopicId]);
+  }, []);
 
   useEffect(() => {
     const loadContent = async () => {
@@ -142,7 +141,7 @@ const LearnContent: React.FC<LearnContentProps> = ({
     }
   }, [content, activeTopic]);
 
-  const renderMarkdownContent = (text: string) => (
+  const _renderMarkdownContent = (text: string) => (
     <div
       className="prose dark:prose-invert max-w-none"
       dangerouslySetInnerHTML={{ __html: text }}
@@ -336,6 +335,14 @@ const LearnContent: React.FC<LearnContentProps> = ({
     content.topics?.find((topic) => topic.id === activeTopic) ||
     content.topics?.[0];
 
+  if (!content) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-[calc(100vh-64px)] overflow-hidden relative">
       {/* Mobile menu button */}
@@ -466,49 +473,20 @@ const LearnContent: React.FC<LearnContentProps> = ({
           ) : (
             <div className="space-y-8">
               {currentTopic && (
-                <div>
-                  <h1 className="text-3xl font-bold mb-2">
-                    {currentTopic.name}
-                  </h1>
-                  {currentTopic.description && (
-                    <p className="text-lg text-muted-foreground mb-6">
-                      {currentTopic.description}
-                    </p>
-                  )}
-
-                  <div className="prose dark:prose-invert max-w-none">
-                    {currentTopic.content && (
-                      <div className="mb-8">
-                        {renderMarkdownContent(currentTopic.content)}
-                      </div>
-                    )}
-
-                    {currentTopic.subtopics?.map((subtopic) => (
-                      <div
-                        key={subtopic.id}
-                        id={`subtopic-${subtopic.id}`}
-                        className="mb-8 pt-2 -mt-2"
-                      >
-                        <h2 className="text-2xl font-semibold mb-4">
-                          {subtopic.name}
-                        </h2>
-                        {subtopic.content && (
-                          <div className="mb-4">
-                            {renderMarkdownContent(subtopic.content)}
-                          </div>
-                        )}
-                        {subtopic.examples && subtopic.examples.length > 0 && (
-                          <div className="mt-6">
-                            <h3 className="text-lg font-medium mb-3">
-                              Examples
-                            </h3>
-                            {renderExamples(subtopic.examples)}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                <Content
+                  topicId={activeTopic || ''}
+                  subtopicId={activeSubtopic || ''}
+                  content={currentTopic}
+                  onTopicClick={(topicId) => {
+                    setActiveTopic(topicId);
+                    setActiveSubtopic(null);
+                  }}
+                  onSubtopicClick={(subtopicId) => {
+                    setActiveSubtopic(subtopicId);
+                    scrollToSubtopic(subtopicId);
+                  }}
+                  renderExamples={renderExamples}
+                />
               )}
 
               <Tabs defaultValue="resources" className="w-full">
@@ -633,12 +611,19 @@ const LearnContent: React.FC<LearnContentProps> = ({
   );
 };
 
-// Component that uses search params
-const LearnContentWithSearchParams = () => {
-  const searchParams = useSearchParams();
-  const topicId = searchParams.get('topic');
-  return <LearnContent initialTopicId={topicId} />;
-};
-
-export { LearnContent };
-export default LearnContentWithSearchParams;
+// This is the inner component that doesn't use useSearchParams directly
+export default function LearnContent({
+  initialTopicId = null,
+  initialSubtopicId = null,
+}: {
+  initialTopicId?: string | null;
+  initialSubtopicId?: string | null;
+}) {
+  // Rest of the component implementation
+  return (
+    <LearnContentInner
+      initialTopicId={initialTopicId}
+      initialSubtopicId={initialSubtopicId}
+    />
+  );
+}

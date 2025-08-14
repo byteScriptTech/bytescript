@@ -1,7 +1,6 @@
 import { collection, getDocs } from 'firebase/firestore';
 import { debounce } from 'lodash';
-import { useSearchParams } from 'next/navigation';
-import {
+import React, {
   createContext,
   ReactNode,
   useContext,
@@ -12,14 +11,14 @@ import {
 import { db } from '@/firebase/config';
 import { LanguageContent } from '@/types/content';
 
-interface LanguagesContextProps {
+interface ContentContextProps {
   content: LanguageContent[] | undefined;
   fetchContent: (topicName: string) => void;
   loading: boolean;
   scrollToList: { views: { name: string; id: string }[]; id: string }[];
 }
 
-const ContentContext = createContext<LanguagesContextProps | undefined>(
+const ContentContext = createContext<ContentContextProps | undefined>(
   undefined
 );
 
@@ -31,11 +30,15 @@ export const useContentContext = () => {
   return context;
 };
 
-export const ContentProvider = ({ children }: { children: ReactNode }) => {
-  const searchParams = useSearchParams();
-  const topicNameArray = searchParams.getAll('name');
-  const topicName = topicNameArray[0];
+interface ContentProviderProps {
+  children: ReactNode;
+  topicName?: string;
+}
 
+export const ContentProvider: React.FC<ContentProviderProps> = ({
+  children,
+  topicName = '',
+}) => {
   const [content, setContent] = useState<LanguageContent[] | undefined>();
   const [loading, setLoading] = useState<boolean>(true);
   const [scrollToList, setScrollToList] = useState<
@@ -106,7 +109,7 @@ export const ContentProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     fetchContent(topicName);
     fetchScrollToViewList();
-  }, [topicName]);
+  }, [topicName, fetchContent, fetchScrollToViewList]);
 
   return (
     <ContentContext.Provider

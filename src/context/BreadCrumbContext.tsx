@@ -1,5 +1,5 @@
-import { useSearchParams } from 'next/navigation';
 import React, { createContext, useContext, useEffect, useState } from 'react';
+
 interface DataItem {
   name: string;
   id: string;
@@ -23,21 +23,26 @@ export const useBreadcrumbContext = () => {
   return context;
 };
 
-export const BreadcrumbProvider: React.FC<{ children: React.ReactNode }> = ({
+interface BreadcrumbProviderProps {
+  children: React.ReactNode;
+  topicNames?: string[];
+  topicIds?: string[];
+}
+
+export const BreadcrumbProvider: React.FC<BreadcrumbProviderProps> = ({
   children,
+  topicNames = [],
+  topicIds = [],
 }) => {
-  const searchParams = useSearchParams();
-  const topicNameArray = searchParams.getAll('name');
-  const topicIdArray = searchParams.getAll('id');
   const [data, setData] = useState<DataItem[]>([]);
 
   useEffect(() => {
-    const items = topicNameArray.map((name, index) => ({
+    const items = topicNames.map((name, index) => ({
       name,
-      id: topicIdArray[index],
+      id: topicIds[index] || '',
     }));
     setData(items);
-  }, []);
+  }, [topicNames, topicIds]);
   const addItem = (item: DataItem) => {
     setData((prevData) => {
       if (prevData.length > 1) {

@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { Suspense } from 'react';
 
 import Navbar from '@/components/common/Navbar';
 import { AuthProvider } from '@/context/AuthContext';
@@ -8,9 +8,13 @@ import { ContentProvider } from '@/context/ContentContext';
 import { LanguagesProvider } from '@/context/LanguagesContext';
 import { LocalStorageProvider } from '@/context/LocalhostContext';
 
-import LearnContent from './components/LearnContent';
+import LearnContentWrapper from './components/LearnContentWrapper';
 
 export const dynamic = 'force-dynamic';
+
+function LearnJavascriptPageContent() {
+  return <LearnContentWrapper />;
+}
 
 export default function LearnJavascriptPage() {
   return (
@@ -22,7 +26,15 @@ export default function LearnJavascriptPage() {
               <div className="flex flex-col flex-1">
                 <Navbar />
                 <main className="flex-1">
-                  <LearnContent />
+                  <Suspense
+                    fallback={
+                      <div className="flex items-center justify-center min-h-[calc(100vh-64px)]">
+                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+                      </div>
+                    }
+                  >
+                    <LearnJavascriptPageContent />
+                  </Suspense>
                 </main>
               </div>
             </div>

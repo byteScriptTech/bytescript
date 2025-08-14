@@ -1,4 +1,3 @@
-import { useSearchParams } from 'next/navigation';
 import React, { useEffect } from 'react';
 
 import { Card } from '@/components/ui/card';
@@ -6,15 +5,17 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useContentContext } from '@/context/ContentContext';
 import { useLocalStorage } from '@/context/LocalhostContext';
 
-type ScrollToTopicProps = {
+export type ScrollToTopicProps = {
   loading: boolean;
+  lastVisitedSubTopic?: string | null;
 };
 
-const ScrollToTopic: React.FC<ScrollToTopicProps> = ({ loading }) => {
+const ScrollToTopic: React.FC<ScrollToTopicProps> = ({
+  loading,
+  lastVisitedSubTopic = null,
+}) => {
   const { scrollToList } = useContentContext();
   const { setItem } = useLocalStorage();
-  const searchParams = useSearchParams();
-  const lastVisitedSubTopic = searchParams.get('lvt_sub');
   const handleScrollToTopic = (id: string) => {
     const element = document.getElementById(id);
     setItem('lvt_sub', id);

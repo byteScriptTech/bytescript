@@ -23,8 +23,13 @@
         "args": "after-used",
         "ignoreRestSiblings": true,
         "caughtErrors": "none",
-        "argsIgnorePattern": "^_"
+        "argsIgnorePattern": "^_",
+        "destructuredArrayIgnorePattern": "^_"
       }
+    ],
+    "no-unused-vars": [
+      "error",
+      { "varsIgnorePattern": "^_", "argsIgnorePattern": "^_" }
     ],
     "prettier/prettier": [
       "error",

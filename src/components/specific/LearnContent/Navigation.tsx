@@ -1,19 +1,19 @@
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import React, { useEffect } from 'react';
 
 import { Skeleton } from '@/components/ui/skeleton';
 import { useBreadcrumbContext } from '@/context/BreadCrumbContext';
 import { useLocalStorage } from '@/context/LocalhostContext';
 
-type Topic = {
-  id: string;
-  name: string;
-};
-interface NavigationProps {
+import type { Topic } from './types';
+
+export interface NavigationProps {
   topics?: Topic[];
   ctid: string | undefined;
   setCurrentTopic: (topic: Topic) => void;
   loading: boolean;
+  topicName?: string | null;
+  topicId?: string | null;
 }
 
 const Navigation: React.FC<NavigationProps> = ({
@@ -21,31 +21,39 @@ const Navigation: React.FC<NavigationProps> = ({
   ctid,
   setCurrentTopic,
   loading,
+  topicName = null,
+  topicId = null,
 }) => {
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const { data, addItem } = useBreadcrumbContext();
   const { setItem } = useLocalStorage();
 
+  // Update current topic when ctid or topics change
   useEffect(() => {
-    const datalen = data && data.length;
-    if (datalen) {
-      data[datalen - 1] && setCurrentTopic(data[data.length - 1]);
+    if (topics && topics.length > 0 && ctid) {
+      const currentTopic = topics.find((topic) => topic.id === ctid);
+      if (currentTopic) {
+        setCurrentTopic(currentTopic);
+      }
     }
-  }, [data]);
+  }, [ctid, topics, setCurrentTopic]);
 
   useEffect(() => {
-    setItem('lvt', `${pathname}?${searchParams.toString()}`);
+    const params = new URLSearchParams();
+    if (topicName) params.append('name', topicName);
+    if (topicId) params.append('id', topicId);
+    setItem('lvt', `${pathname}?${params.toString()}`);
     setItem('lvt_name', data[data.length - 1]?.name);
-  }, [searchParams, setItem, data, pathname]);
+  }, [topicName, topicId, setItem, data, pathname]);
 
   const handleTopicClick = (topic: Topic) => {
-    const name = searchParams.get('name');
-    const id = searchParams.get('id');
-    router.push(
-      `${pathname}?name=${name}&id=${id}&name=${topic.name}&id=${topic.id}`
-    );
+    const params = new URLSearchParams();
+    if (topicName) params.append('name', topicName);
+    if (topicId) params.append('id', topicId);
+    params.append('name', topic.name);
+    params.append('id', topic.id);
+    router.push(`${pathname}?${params.toString()}`);
 
     setCurrentTopic(topic);
     addItem(topic);
