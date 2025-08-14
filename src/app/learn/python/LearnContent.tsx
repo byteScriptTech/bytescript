@@ -6,6 +6,12 @@ import { useEffect, useState, useCallback } from 'react';
 import { PythonCodeEditor } from '@/components/common/PythonCodeEditor';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { getPythonContent } from '@/services/pythonService';
 import type { LanguageContent } from '@/types/content';
@@ -145,26 +151,42 @@ const LearnContent = () => {
           <div className="p-4 space-y-2">
             {content.topics?.map((topic) => (
               <div key={topic.id} className="space-y-1">
-                <Button
-                  variant={activeTopic === topic.id ? 'secondary' : 'ghost'}
-                  className={cn(
-                    'w-full justify-start text-left',
-                    !sidebarOpen &&
-                      'justify-center px-0 w-10 h-10 rounded-full mx-auto'
-                  )}
-                  onClick={() => {
-                    setActiveTopic(topic.id);
-                    setActiveSubtopic(null);
-                  }}
-                >
-                  {sidebarOpen ? (
-                    topic.name
-                  ) : (
-                    <span className="text-sm font-medium">
-                      {topic.name.charAt(0)}
-                    </span>
-                  )}
-                </Button>
+                {!sidebarOpen ? (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant={
+                            activeTopic === topic.id ? 'secondary' : 'ghost'
+                          }
+                          className="justify-center px-0 w-10 h-10 rounded-full mx-auto"
+                          onClick={() => {
+                            setActiveTopic(topic.id);
+                            setActiveSubtopic(null);
+                          }}
+                        >
+                          <span className="text-sm font-medium">
+                            {topic.name.charAt(0)}
+                          </span>
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="right" sideOffset={10}>
+                        <p>{topic.name}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                ) : (
+                  <Button
+                    variant={activeTopic === topic.id ? 'secondary' : 'ghost'}
+                    className="w-full justify-start text-left"
+                    onClick={() => {
+                      setActiveTopic(topic.id);
+                      setActiveSubtopic(null);
+                    }}
+                  >
+                    {topic.name}
+                  </Button>
+                )}
                 {activeTopic === topic.id && topic.subtopics && sidebarOpen && (
                   <div className="ml-4 mt-1 space-y-1">
                     {topic.subtopics.map((subtopic) => (
