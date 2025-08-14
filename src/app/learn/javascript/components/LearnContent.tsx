@@ -1,44 +1,96 @@
 'use client';
 
-import { CheckCircle2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
+import React, { useEffect, useState, useCallback } from 'react';
 
-import { PythonCodeEditor } from '@/components/common/PythonCodeEditor';
+import { JavaScriptCodeEditor } from '@/components/common/JavaScriptCodeEditor';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { cn } from '@/lib/utils';
 import { getJavascriptContent } from '@/services/javascriptService';
 import type { LanguageContent } from '@/types/content';
 
-const LearnContent = () => {
+interface Example {
+  code: string;
+  description?: string;
+}
+
+// Main component that doesn't use search params directly
+export interface LearnContentProps {
+  initialTopicId?: string | null;
+}
+
+const LearnContent: React.FC<LearnContentProps> = ({
+  initialTopicId = null,
+}) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [content, setContent] = useState<LanguageContent | null>(null);
-  const [activeTab, setActiveTab] = useState('topics');
   const [activeTopic, setActiveTopic] = useState<string | null>(null);
+  const [activeSubtopic, setActiveSubtopic] = useState<string | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  const scrollToSubtopic = useCallback((subtopicId: string) => {
+    setActiveSubtopic(subtopicId);
+    // Use a small timeout to ensure the DOM is updated
+    setTimeout(() => {
+      const element = document.getElementById(`subtopic-${subtopicId}`);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Small offset to account for fixed header
+        window.scrollBy(0, -20);
+      }
+    }, 0);
+  }, []);
+
+  const fetchContent = useCallback(async () => {
+    try {
+      const data = await getJavascriptContent();
+      setContent(data);
+      if (data?.topics?.length) {
+        // Use initialTopicId if provided and valid, otherwise default to first topic
+        const topicToSet = data.topics.some(
+          (topic) => topic.id === initialTopicId
+        )
+          ? initialTopicId
+          : data.topics[0].id;
+        setActiveTopic(topicToSet);
+      }
+      return data;
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : 'Failed to load JavaScript content';
+      setError(`Error: ${errorMessage}. Please try again later.`);
+      console.error('Error fetching JavaScript content:', err);
+      throw err;
+    }
+  }, [initialTopicId]);
 
   useEffect(() => {
-    const fetchContent = async () => {
+    const loadContent = async () => {
       try {
-        const data = await getJavascriptContent();
-        setContent(data);
-        if (data?.topics?.length) {
-          setActiveTopic(data.topics[0].id);
-        }
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error
-            ? err.message
-            : 'Failed to load JavaScript content';
-        setError(`Error: ${errorMessage}. Please try again later.`);
-        console.error('Error fetching JavaScript content:', err);
+        await fetchContent();
+      } catch (error) {
+        // Error is already handled in fetchContent
       } finally {
         setLoading(false);
       }
     };
 
-    fetchContent();
-  }, []);
+    loadContent();
+  }, [fetchContent]);
+
+  // Handle initial content load and set the first topic as active
+  useEffect(() => {
+    if (content && content.topics?.length > 0 && !activeTopic) {
+      setActiveTopic(content.topics[0].id);
+    }
+  }, [content, activeTopic]);
 
   const renderMarkdownContent = (text: string) => (
     <div
@@ -47,247 +99,450 @@ const LearnContent = () => {
     />
   );
 
-  const renderExamples = (
-    examples: Array<{
-      code: string;
-      description: string;
-    }>
-  ) => {
-    return (
-      <div className="space-y-4 mt-4">
-        {examples.map((example, idx) => (
-          <div key={idx} className="border rounded-lg overflow-hidden">
-            <div className="bg-gray-50 dark:bg-gray-800 px-4 py-2 border-b">
-              <span className="text-sm font-mono text-muted-foreground">
-                {example.description || 'Example'}
-              </span>
-            </div>
-            <div className="p-2 bg-white dark:bg-gray-900">
-              <PythonCodeEditor
-                initialCode={example.code}
-                className="text-sm border-0 rounded-none"
-                readOnly={true}
-              />
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  };
+  // Track the state of each code block by its index
+  const [codeStates, setCodeStates] = useState<
+    Record<number, { output: string; isRunning: boolean; key?: string }>
+  >({});
 
-  const renderSubtopic = (subtopic: any, index: number) => (
-    <div key={index} className="space-y-4 mb-8">
-      <h3 className="text-xl font-semibold text-primary">{subtopic.name}</h3>
-      {subtopic.content && (
-        <div className="prose dark:prose-invert max-w-none">
-          {renderMarkdownContent(subtopic.content)}
+  const runCode = useCallback(async (code: string, index: number) => {
+    // Generate a unique key for this code block based on its content and index
+    const blockKey = `${index}_${code.length}`;
+
+    // Update state for this specific code block
+    setCodeStates((prev) => {
+      const currentState = prev[index] || { output: '', isRunning: false };
+      return {
+        ...prev,
+        [index]: {
+          ...currentState,
+          isRunning: true,
+          output: 'Running...',
+          key: blockKey, // Add the key to track the current execution
+        },
+      };
+    });
+
+    try {
+      const result = await new Promise<string>((resolve) => {
+        try {
+          const logs: string[] = [];
+          const safeConsole = {
+            log: (...args: unknown[]) => {
+              const logMessage = args
+                .map((arg) => {
+                  try {
+                    return typeof arg === 'object'
+                      ? JSON.stringify(arg, null, 2)
+                      : String(arg);
+                  } catch {
+                    return String(arg);
+                  }
+                })
+                .join(' ');
+              logs.push(logMessage);
+              return logMessage;
+            },
+          };
+          const executeCode = new Function(
+            'console',
+            `
+              try {
+                ${code.includes('return ') ? '' : 'return '}${code}
+              } catch (e) {
+                return 'Error: ' + (e instanceof Error ? e.message : String(e));
+              }
+            `
+          );
+          const executionResult = executeCode(safeConsole);
+          if (logs.length > 0) {
+            resolve(logs.join('\n'));
+          } else if (executionResult !== undefined) {
+            resolve(String(executionResult));
+          } else {
+            resolve('Code executed successfully (no output)');
+          }
+        } catch (error) {
+          resolve(
+            'Error: ' +
+              (error instanceof Error ? error.message : 'Unknown error')
+          );
+        }
+      });
+
+      // Update only this code block's output if the key hasn't changed
+      setCodeStates((prev) => {
+        // Only update if this is still the same code block (prevent race conditions)
+        if (prev[index]?.key === blockKey) {
+          return {
+            ...prev,
+            [index]: {
+              ...prev[index],
+              output: result,
+              isRunning: false,
+            },
+          };
+        }
+        return prev;
+      });
+    } catch (error) {
+      setCodeStates((prev) => ({
+        ...prev,
+        [index]: {
+          ...prev[index],
+          output:
+            'Error: ' +
+            (error instanceof Error ? error.message : 'Unknown error'),
+          isRunning: false,
+        },
+      }));
+    }
+  }, []);
+
+  const renderExamples = useCallback(
+    (examples: Example[] = []) => {
+      // Create a stable reference to the examples array
+      return (
+        <div className="space-y-6">
+          {examples.map((example, index) => {
+            // Get the current state for this specific code block
+            const blockState = codeStates[index] || {};
+
+            return (
+              <div key={`example-${index}`} className="space-y-2">
+                {example.description && (
+                  <p className="text-sm text-muted-foreground">
+                    {example.description}
+                  </p>
+                )}
+                <div className="relative">
+                  <JavaScriptCodeEditor
+                    key={`editor-${index}`}
+                    initialCode={example.code}
+                    readOnly={false}
+                    onRun={async (code) => runCode(code, index)}
+                    className="w-full h-64"
+                  />
+                  {blockState.isRunning && (
+                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+                    </div>
+                  )}
+                </div>
+                {blockState.output && (
+                  <div className="mt-2 p-3 bg-gray-100 dark:bg-gray-800 rounded-md">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-mono text-muted-foreground">
+                        Output:
+                      </span>
+                      <button
+                        onClick={() => {
+                          setCodeStates((prev) => ({
+                            ...prev,
+                            [index]: { ...prev[index], output: '' },
+                          }));
+                        }}
+                        className="text-xs text-muted-foreground hover:text-foreground"
+                        title="Clear output"
+                      >
+                        Clear
+                      </button>
+                    </div>
+                    <pre className="font-mono text-sm whitespace-pre-wrap break-words">
+                      {blockState.output}
+                    </pre>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
-      )}
-      {subtopic.examples && subtopic.examples.length > 0 && (
-        <div className="mt-4">
-          <h4 className="text-lg font-medium mb-3">Examples</h4>
-          {renderExamples(subtopic.examples)}
-        </div>
-      )}
-    </div>
+      );
+    },
+    [codeStates, runCode]
   );
 
-  const renderTopicContent = () => {
-    if (!content || !activeTopic) return null;
-
-    const topic = content.topics.find((t) => t.id === activeTopic);
-    if (!topic) return null;
-
-    return (
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="text-2xl">{topic.name}</CardTitle>
-          {topic.description && (
-            <p className="text-muted-foreground">{topic.description}</p>
-          )}
-        </CardHeader>
-        <CardContent>
-          {topic.subtopics?.map((subtopic, idx) =>
-            renderSubtopic(subtopic, idx)
-          )}
-        </CardContent>
-      </Card>
-    );
-  };
-
-  const renderTopicsList = () => {
-    if (!content?.topics?.length) return null;
-
-    return (
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {content.topics.map((topic) => (
-          <Card
-            key={topic.id}
-            className={`cursor-pointer transition-colors ${
-              activeTopic === topic.id
-                ? 'border-primary'
-                : 'hover:border-primary/50'
-            }`}
-            onClick={() => setActiveTopic(topic.id)}
-          >
-            <CardHeader>
-              <CardTitle className="text-lg">{topic.name}</CardTitle>
-              {topic.description && (
-                <p className="text-sm text-muted-foreground">
-                  {topic.description}
-                </p>
-              )}
-            </CardHeader>
-          </Card>
-        ))}
-      </div>
-    );
-  };
-
-  const renderResources = () => {
-    if (!content?.resources?.length) return null;
-
-    return (
-      <div className="space-y-4">
-        {content.resources.map((resource, idx) => (
-          <Card key={idx}>
-            <CardHeader>
-              <CardTitle className="text-lg">{resource.title}</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                {resource.type} • {resource.author}
-              </p>
-            </CardHeader>
-            <CardContent>
-              <p className="mb-4">{resource.description}</p>
-              <Button asChild variant="outline">
-                <a
-                  href={resource.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Open Resource
-                </a>
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    );
-  };
+  // Removed unused _renderObjectives function
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 text-red-700 dark:text-red-300">
-        {error}
+      <div className="flex h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading JavaScript content...</p>
+        </div>
       </div>
     );
   }
 
   if (!content) {
     return (
-      <div className="text-center py-8">
-        <h2 className="text-2xl font-bold mb-2">No content available</h2>
-        <p className="text-muted-foreground">
-          We couldn&apos;t find any JavaScript content to display.
-        </p>
+      <div className="flex items-center justify-center h-64">
+        <p>No content available</p>
       </div>
     );
   }
 
+  const currentTopic =
+    content.topics?.find((topic) => topic.id === activeTopic) ||
+    content.topics?.[0];
+
   return (
-    <div className="container py-8">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold tracking-tight mb-2">
-          {content.name}
-        </h1>
-        <p className="text-lg text-muted-foreground">
-          {content.short_description}
-        </p>
+    <div className="flex h-[calc(100vh-64px)] overflow-hidden">
+      {/* Sidebar */}
+      <div
+        className={cn(
+          'fixed inset-y-0 left-0 z-40 w-72 border-r bg-background transition-transform duration-300 ease-in-out md:relative md:translate-x-0',
+          !sidebarOpen && '-translate-x-full md:translate-x-0 md:w-16',
+          'flex flex-col h-full'
+        )}
+      >
+        <div className="flex items-center justify-between p-4 border-b">
+          {sidebarOpen && (
+            <h2 className="text-lg font-semibold">JavaScript Topics</h2>
+          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="ml-auto"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+          >
+            {sidebarOpen ? (
+              <ChevronLeft className="h-4 w-4" />
+            ) : (
+              <ChevronRight className="h-4 w-4" />
+            )}
+          </Button>
+        </div>
+        <ScrollArea className="flex-1">
+          <div className="p-4 space-y-2">
+            {content.topics?.map((topic) => (
+              <div key={topic.id} className="space-y-1">
+                <Button
+                  variant={activeTopic === topic.id ? 'secondary' : 'ghost'}
+                  className={cn(
+                    'w-full justify-start text-left',
+                    !sidebarOpen &&
+                      'justify-center px-0 w-10 h-10 rounded-full mx-auto'
+                  )}
+                  onClick={() => {
+                    setActiveTopic(topic.id);
+                    setActiveSubtopic(null);
+                  }}
+                >
+                  {sidebarOpen ? (
+                    topic.name
+                  ) : (
+                    <span className="text-sm font-medium">
+                      {topic.name.charAt(0)}
+                    </span>
+                  )}
+                </Button>
+                {activeTopic === topic.id && topic.subtopics && sidebarOpen && (
+                  <div className="ml-4 mt-1 space-y-1">
+                    {topic.subtopics.map((subtopic) => (
+                      <Button
+                        key={subtopic.id}
+                        variant={
+                          activeSubtopic === subtopic.id ? 'secondary' : 'ghost'
+                        }
+                        size="sm"
+                        className="w-full justify-start text-muted-foreground hover:text-foreground"
+                        onClick={() => scrollToSubtopic(subtopic.id)}
+                      >
+                        {subtopic.name}
+                      </Button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </ScrollArea>
       </div>
 
-      <Tabs
-        defaultValue="topics"
-        className="w-full"
-        onValueChange={setActiveTab}
-        value={activeTab}
-      >
-        <TabsList className="grid w-full grid-cols-3 max-w-md mb-8">
-          <TabsTrigger value="topics">Topics</TabsTrigger>
-          <TabsTrigger value="resources">Resources</TabsTrigger>
-          <TabsTrigger value="about">About</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="topics" className="space-y-8">
-          {renderTopicsList()}
-          {activeTopic && renderTopicContent()}
-        </TabsContent>
-
-        <TabsContent value="resources">
-          <h2 className="text-2xl font-bold mb-6">Learning Resources</h2>
-          {renderResources()}
-        </TabsContent>
-
-        <TabsContent value="about">
-          <Card>
-            <CardHeader>
-              <CardTitle>About {content.name}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <h3 className="text-lg font-semibold mb-2">
-                  What is {content.name}?
-                </h3>
-                <div className="prose dark:prose-invert max-w-none">
-                  {content.explanation?.map((paragraph, idx) => (
-                    <p key={idx} className="mb-4">
-                      {paragraph}
+      {/* Main content */}
+      <div className="flex-1 overflow-auto p-4 md:p-8">
+        <div className="max-w-4xl mx-auto">
+          {error ? (
+            <div className="bg-destructive/10 border border-destructive text-destructive px-4 py-3 rounded-md mb-6">
+              {error}
+            </div>
+          ) : (
+            <div className="space-y-8">
+              {currentTopic && (
+                <div>
+                  <h1 className="text-3xl font-bold mb-2">
+                    {currentTopic.name}
+                  </h1>
+                  {currentTopic.description && (
+                    <p className="text-lg text-muted-foreground mb-6">
+                      {currentTopic.description}
                     </p>
-                  ))}
-                </div>
-              </div>
+                  )}
 
-              {content.applications?.length > 0 && (
-                <div>
-                  <h3 className="text-lg font-semibold mb-2">Applications</h3>
-                  <ul className="list-disc pl-6 space-y-1">
-                    {content.applications.map((app, idx) => (
-                      <li key={idx}>{app}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {content.learning_objectives?.length > 0 && (
-                <div>
-                  <h3 className="text-lg font-semibold mb-2">
-                    Learning Objectives
-                  </h3>
-                  <ul className="space-y-2">
-                    {content.learning_objectives.map(
-                      (objective: string, idx: number) => (
-                        <li key={idx} className="flex items-start">
-                          <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                          <span>{objective}</span>
-                        </li>
-                      )
+                  <div className="prose dark:prose-invert max-w-none">
+                    {currentTopic.content && (
+                      <div className="mb-8">
+                        {renderMarkdownContent(currentTopic.content)}
+                      </div>
                     )}
-                  </ul>
+
+                    {currentTopic.subtopics?.map((subtopic) => (
+                      <div
+                        key={subtopic.id}
+                        id={`subtopic-${subtopic.id}`}
+                        className="mb-8 pt-2 -mt-2"
+                      >
+                        <h2 className="text-2xl font-semibold mb-4">
+                          {subtopic.name}
+                        </h2>
+                        {subtopic.content && (
+                          <div className="mb-4">
+                            {renderMarkdownContent(subtopic.content)}
+                          </div>
+                        )}
+                        {subtopic.examples && subtopic.examples.length > 0 && (
+                          <div className="mt-6">
+                            <h3 className="text-lg font-medium mb-3">
+                              Examples
+                            </h3>
+                            {renderExamples(subtopic.examples)}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+
+              <Tabs defaultValue="resources" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 max-w-xs mb-8">
+                  <TabsTrigger value="resources">Resources</TabsTrigger>
+                  <TabsTrigger value="about">About JavaScript</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="resources" className="space-y-6">
+                  <h2 className="text-2xl font-bold">Learning Resources</h2>
+                  {content.recommended_resources?.length > 0 ? (
+                    <div className="grid gap-4">
+                      {content.recommended_resources.map(
+                        (
+                          resource: {
+                            title: string;
+                            type?: string;
+                            description?: string;
+                            url?: string;
+                          },
+                          index: number
+                        ) => (
+                          <Card key={index}>
+                            <CardHeader>
+                              <div className="flex items-center justify-between">
+                                <CardTitle className="text-lg">
+                                  {resource.title}
+                                </CardTitle>
+                                <span className="text-sm text-muted-foreground">
+                                  {resource.type || 'Resource'}
+                                </span>
+                              </div>
+                            </CardHeader>
+                            <CardContent>
+                              {resource.description && (
+                                <p className="text-sm text-muted-foreground mt-2">
+                                  {resource.description}
+                                </p>
+                              )}
+                              <Button
+                                asChild
+                                variant="link"
+                                className="p-0 h-auto"
+                              >
+                                <a
+                                  href={resource.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-primary"
+                                >
+                                  View Resource
+                                </a>
+                              </Button>
+                            </CardContent>
+                          </Card>
+                        )
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground">
+                      No resources available at the moment.
+                    </p>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="about" className="space-y-6">
+                  <h2 className="text-2xl font-bold">About JavaScript</h2>
+                  <Card>
+                    <CardContent className="pt-6 space-y-6">
+                      <div>
+                        <h3 className="text-lg font-semibold mb-2">
+                          What is JavaScript?
+                        </h3>
+                        <div className="prose dark:prose-invert max-w-none">
+                          {content.explanation?.map((paragraph, idx) => (
+                            <p key={idx} className="mb-4">
+                              {paragraph}
+                            </p>
+                          ))}
+                        </div>
+                      </div>
+
+                      {content.applications?.length > 0 && (
+                        <div>
+                          <h3 className="text-lg font-semibold mb-2">
+                            Applications
+                          </h3>
+                          <ul className="list-disc pl-6 space-y-1">
+                            {content.applications.map((app, idx) => (
+                              <li key={idx}>{app}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {content.learning_objectives?.length > 0 && (
+                        <div>
+                          <h3 className="text-lg font-semibold mb-2">
+                            Learning Objectives
+                          </h3>
+                          <ul className="space-y-2">
+                            {content.learning_objectives.map(
+                              (objective: string, idx: number) => (
+                                <li key={idx} className="flex items-start">
+                                  <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                                  <span>{objective}</span>
+                                </li>
+                              )
+                            )}
+                          </ul>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </Tabs>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
 
-export default LearnContent;
+// Component that uses search params
+const LearnContentWithSearchParams = () => {
+  const searchParams = useSearchParams();
+  const topicId = searchParams.get('topic');
+  return <LearnContent initialTopicId={topicId} />;
+};
+
+export { LearnContent };
+export default LearnContentWithSearchParams;
