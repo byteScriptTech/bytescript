@@ -1,6 +1,6 @@
 'use client';
 
-import { CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { CheckCircle2, ChevronLeft, ChevronRight, Menu, X } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import React, { useEffect, useState, useCallback } from 'react';
 
@@ -37,7 +37,51 @@ const LearnContent: React.FC<LearnContentProps> = ({
   const [content, setContent] = useState<LanguageContent | null>(null);
   const [activeTopic, setActiveTopic] = useState<string | null>(null);
   const [activeSubtopic, setActiveSubtopic] = useState<string | null>(null);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check if mobile view on component mount and window resize
+  useEffect(() => {
+    const checkIfMobile = () => {
+      setIsMobile(window.innerWidth < 768); // md breakpoint
+      if (window.innerWidth >= 768) {
+        setSidebarOpen(true);
+      } else {
+        setSidebarOpen(false);
+      }
+    };
+
+    // Initial check
+    checkIfMobile();
+
+    // Add event listener for window resize
+    window.addEventListener('resize', checkIfMobile);
+
+    // Cleanup
+    return () => window.removeEventListener('resize', checkIfMobile);
+  }, []);
+
+  // Close sidebar when clicking outside on mobile
+  useEffect(() => {
+    if (!isMobile) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      const sidebar = document.getElementById('js-sidebar');
+      const menuButton = document.getElementById('js-menu-button');
+      if (
+        sidebarOpen &&
+        sidebar &&
+        !sidebar.contains(event.target as Node) &&
+        menuButton &&
+        !menuButton.contains(event.target as Node)
+      ) {
+        setSidebarOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [sidebarOpen, isMobile]);
 
   const scrollToSubtopic = useCallback((subtopicId: string) => {
     setActiveSubtopic(subtopicId);
@@ -293,29 +337,59 @@ const LearnContent: React.FC<LearnContentProps> = ({
     content.topics?.[0];
 
   return (
-    <div className="flex h-[calc(100vh-64px)] overflow-hidden">
+    <div className="flex h-[calc(100vh-64px)] overflow-hidden relative">
+      {/* Mobile menu button */}
+      <Button
+        id="js-menu-button"
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        className="fixed bottom-4 left-4 z-50 md:hidden p-3 rounded-full bg-primary text-primary-foreground shadow-lg"
+        aria-label="Toggle menu"
+        variant="default"
+        size="icon"
+      >
+        {sidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+      </Button>
+
+      {/* Mobile overlay */}
+      {isMobile && sidebarOpen && (
+        <button
+          type="button"
+          className="fixed inset-0 z-40 bg-black/50 md:hidden cursor-default"
+          onClick={() => setSidebarOpen(false)}
+          aria-label="Close menu"
+        />
+      )}
+
       {/* Sidebar */}
       <div
+        id="js-sidebar"
         className={cn(
-          'fixed inset-y-0 left-0 z-40 w-72 border-r bg-background transition-transform duration-300 ease-in-out md:relative md:translate-x-0',
-          !sidebarOpen && '-translate-x-full md:translate-x-0 md:w-16',
-          'flex flex-col h-full'
+          'fixed inset-y-0 left-0 z-50 w-72 border-r bg-background transition-transform duration-300 ease-in-out md:relative md:z-40',
+          !sidebarOpen && '-translate-x-full md:translate-x-0 md:w-20',
+          'flex flex-col h-full shadow-lg md:shadow-none',
+          isMobile ? 'w-4/5 max-w-xs' : ''
         )}
       >
-        <div className="flex items-center justify-between p-4 border-b">
-          {sidebarOpen && (
+        <div className="flex items-center justify-between p-4 border-b h-16">
+          {sidebarOpen ? (
             <h2 className="text-lg font-semibold">JavaScript Topics</h2>
+          ) : (
+            <div className="w-6" aria-hidden="true" />
           )}
           <Button
             variant="ghost"
             size="sm"
-            className="ml-auto"
+            className={cn(
+              'ml-auto transition-opacity',
+              !sidebarOpen && 'opacity-0 md:opacity-100'
+            )}
             onClick={() => setSidebarOpen(!sidebarOpen)}
+            aria-label={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
           >
             {sidebarOpen ? (
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="h-5 w-5" />
             ) : (
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-5 w-5" />
             )}
           </Button>
         </div>
