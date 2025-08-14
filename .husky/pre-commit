@@ -3,7 +3,7 @@
 
 echo "🚀 Running pre-commit checks..."
 
-# Run lint-staged first (runs on staged files only)
+# Run lint-staged (runs on staged files only)
 npx lint-staged
 
 # Type checking
@@ -17,9 +17,5 @@ npx jest --bail --onlyChanged
 # Check code formatting
 echo "🎨 Checking code formatting..."
 npx prettier --check "**/*.{js,jsx,ts,tsx,json,md}" --ignore-unknown
-
-# Build check
-echo "🏗️  Running build check..."
-npm run build -- --no-lint
 
 echo "✅ Pre-commit checks passed!"

@@ -418,7 +418,7 @@ const ProblemPageContent = () => {
     } finally {
       setLoading(false);
     }
-  }, [currentUser, code, executionResult, problem]);
+  }, [currentUser, executionResult, problem, setLoading]);
 
   if (loading) {
     return (

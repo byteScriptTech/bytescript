@@ -211,7 +211,7 @@ export const LanguagesProvider = ({
 
   useEffect(() => {
     fetchLanguages();
-  }, []);
+  }, [fetchLanguages]);
 
   return (
     <LanguagesContext.Provider

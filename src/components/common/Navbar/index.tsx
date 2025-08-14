@@ -136,6 +136,12 @@ const Navbar = () => {
                   >
                     Python
                   </Link>
+                  <Link
+                    href="/learn/javascript"
+                    className="block px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
+                  >
+                    JavaScript
+                  </Link>
                 </div>
               </div>
             </div>

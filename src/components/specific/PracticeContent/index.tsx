@@ -1,4 +1,4 @@
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
 import { Card } from '@/components/ui/card';
@@ -18,18 +18,18 @@ interface PracticeContentProps {
   currentTopic: Topic | undefined;
   setCurrentTopic: (item: Topic) => void;
   category: string;
+  topicId?: string | null;
 }
 
 const PracticeContent: React.FC<PracticeContentProps> = ({
   setCurrentTopic,
   currentTopic,
   category,
+  topicId = null,
 }) => {
   const [filteredTopics, setFilteredTopics] = useState<Topic[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const topicId = searchParams.get('id');
 
   const { topics, loading, error, fetchTopicsByCategory } = usePractice();
   useEffect(() => {
