@@ -56,6 +56,10 @@ describe('LandingPageHeader', () => {
     expect(communityLink).toBeInTheDocument();
     expect(communityLink).toHaveAttribute('href', '/community');
     expect(communityLink).toHaveTextContent(/community/i);
+    const editorLink = menuItems[3];
+    expect(editorLink).toBeInTheDocument();
+    expect(editorLink).toHaveAttribute('href', '/editor');
+    expect(editorLink).toHaveTextContent(/editor/i);
   });
 
   it('renders get started button with correct styling', () => {
