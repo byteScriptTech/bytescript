@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import React, { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -23,7 +24,10 @@ const LandingPageHeader = ({
         data-testid="header-container"
         className="flex items-center justify-between px-4 py-3 sm:px-10 sm:py-3"
       >
-        <div className="flex items-center gap-4">
+        <Link
+          href="/"
+          className="flex items-center gap-4 hover:opacity-80 transition-opacity cursor-pointer"
+        >
           <div>
             <span className="text-md sm:text-md text-black font-bold">
               bite
@@ -32,7 +36,7 @@ const LandingPageHeader = ({
               Script.
             </span>
           </div>
-        </div>
+        </Link>
         <div
           data-testid="header-menu-container"
           className="flex flex-1 justify-end gap-8 sm:gap-4"
