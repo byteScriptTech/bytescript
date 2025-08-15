@@ -40,7 +40,7 @@ describe('LandingPageHeader', () => {
     expect(menuContainer).toBeInTheDocument();
 
     const menuItems = menuContainer.querySelectorAll('a');
-    expect(menuItems.length).toBe(3);
+    expect(menuItems.length).toBe(4);
 
     const learnLink = menuItems[0];
     expect(learnLink).toBeInTheDocument();
