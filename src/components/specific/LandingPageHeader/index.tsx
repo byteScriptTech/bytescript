@@ -14,6 +14,7 @@ const LandingPageHeader = ({
     { text: 'Learn', href: '/learn' },
     { text: 'Practice', href: '/practice' },
     { text: 'Community', href: '/community' },
+    { text: 'Editor', href: '/editor' },
   ];
 
   return (
