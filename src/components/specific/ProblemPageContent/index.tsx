@@ -11,6 +11,8 @@ import { problemsService } from '@/services/firebase/problemsService';
 import { testCasesService } from '@/services/firebase/testCasesService';
 import type { Problem, TestCase } from '@/types/problem';
 
+import styles from './ProblemPageContent.module.css';
+
 interface TestResult {
   testCase: TestCase;
   passed: boolean;
@@ -422,8 +424,8 @@ const ProblemPageContent = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div>Loading problem...</div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-foreground">Loading problem...</div>
       </div>
     );
   }
@@ -433,28 +435,30 @@ const ProblemPageContent = () => {
 
   if (!problem) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div>Problem not found</div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-foreground">Problem not found</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-3 sm:p-4 md:p-6 lg:p-8 xl:p-10 2xl:p-12">
+    <div className="min-h-screen bg-background p-3 sm:p-4 md:p-6 lg:p-8 xl:p-10 2xl:p-12">
       <div className="max-w-[2400px] mx-auto h-full">
         <div className="flex flex-col lg:flex-row gap-5 lg:gap-6 xl:gap-8 h-[calc(100vh-2rem)] sm:h-[calc(100vh-3rem)] md:h-[calc(100vh-4rem)] lg:h-[calc(100vh-6rem)] xl:h-[calc(100vh-8rem)] 2xl:h-[calc(100vh-10rem)]">
           {/* Left Column - Problem Description */}
-          <div className="w-full lg:w-[48%] xl:w-[45%] 2xl:w-[42%] h-full flex flex-col bg-white rounded-xl overflow-hidden">
-            <div className="flex-1 overflow-y-auto p-5 sm:p-6 md:p-7 lg:p-8">
+          <div className="w-full lg:w-[48%] xl:w-[45%] 2xl:w-[42%] h-full flex flex-col bg-card rounded-xl overflow-hidden border border-border shadow-sm">
+            <div
+              className={`flex-1 overflow-y-auto p-5 sm:p-6 md:p-7 lg:p-8 ${styles.scrollContainer} scrollbar-thin scrollbar-thumb-border/20 hover:scrollbar-thumb-border/30 dark:scrollbar-thumb-border/10 dark:hover:scrollbar-thumb-border/20 scrollbar-track-transparent transition-colors duration-200`}
+            >
               <ProblemDetail problem={problem} />
             </div>
 
             {/* Subtle gradient at bottom to indicate scrollability */}
-            <div className="h-8 bg-gradient-to-t from-white to-transparent sticky bottom-0 z-10 pointer-events-none" />
+            <div className="h-8 bg-gradient-to-t from-card to-transparent sticky bottom-0 z-10 pointer-events-none" />
           </div>
 
           {/* Right Column - Code Editor */}
-          <div className="w-full lg:w-[52%] xl:w-[55%] 2xl:w-[58%] h-full flex flex-col bg-white rounded-xl overflow-hidden">
+          <div className="w-full lg:w-[52%] xl:w-[55%] 2xl:w-[58%] h-full flex flex-col bg-card rounded-xl overflow-hidden border border-border shadow-sm">
             <div className="flex-1 flex flex-col min-h-0">
               <ProblemEditor
                 code={code}

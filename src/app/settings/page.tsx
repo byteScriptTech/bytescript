@@ -2,31 +2,81 @@
 
 import {
   Settings as SettingsIcon,
-  User,
+  User as UserIcon,
   Bell,
   Shield,
   ChevronRight,
   ChevronLeft,
+  Loader2,
+  User,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 import { ThemeToggle } from '@/components/settings/theme-toggle';
 import { Separator } from '@/components/ui/separator';
+import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
+import userService from '@/services/userService';
 
 const settingsNav = [
   {
     title: 'Profile',
     href: '/settings',
-    icon: User,
+    icon: UserIcon,
   },
 ];
 
 function SettingsPage() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const pathname = usePathname();
+  const { currentUser } = useAuth();
+  const [displayName, setDisplayName] = useState('');
+  const [email, setEmail] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (!currentUser?.uid) return;
+
+      try {
+        setIsLoading(true);
+        const userData = await userService.getUser(currentUser.uid);
+        if (userData) {
+          setDisplayName(userData.displayName || '');
+          setEmail(userData.email || '');
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        toast.error('Failed to load user data');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, [currentUser]);
+
+  const handleSaveProfile = async () => {
+    if (!currentUser?.uid) return;
+
+    try {
+      setIsSaving(true);
+      await userService.updateUser(currentUser.uid, {
+        displayName,
+        email,
+      });
+      toast.success('Profile updated successfully');
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      toast.error('Failed to update profile');
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <div className="flex flex-col md:flex-row min-h-[calc(100vh-4rem)]">
@@ -113,8 +163,11 @@ function SettingsPage() {
                   <input
                     id="displayName"
                     type="text"
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
                     className="w-full px-2 py-1.5 text-sm border rounded-md"
                     placeholder="Enter your display name"
+                    disabled={isLoading || isSaving}
                   />
                 </div>
                 <div>
@@ -126,10 +179,29 @@ function SettingsPage() {
                   </label>
                   <input
                     type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     className="w-full px-2 py-1.5 text-sm border rounded-md"
                     placeholder="your.email@example.com"
+                    disabled={isLoading || isSaving}
                   />
                 </div>
+              </div>
+              <div className="flex justify-end mt-4">
+                <button
+                  onClick={handleSaveProfile}
+                  disabled={isLoading || isSaving}
+                  className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    'Save Changes'
+                  )}
+                </button>
               </div>
             </div>
           </div>
@@ -143,40 +215,6 @@ function SettingsPage() {
             </div>
             <div className="space-y-4 pl-6">
               <ThemeToggle />
-
-              <div className="space-y-1.5">
-                <h3 className="text-sm font-medium">Notifications</h3>
-                <div className="space-y-1.5">
-                  <div className="flex items-center gap-2">
-                    <input
-                      id="email-notifications"
-                      type="checkbox"
-                      className="rounded"
-                      defaultChecked
-                    />
-                    <label
-                      htmlFor="email-notifications"
-                      className="cursor-pointer"
-                    >
-                      Email notifications
-                    </label>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <input
-                      id="push-notifications"
-                      type="checkbox"
-                      className="rounded"
-                      defaultChecked
-                    />
-                    <label
-                      htmlFor="push-notifications"
-                      className="cursor-pointer"
-                    >
-                      Push notifications
-                    </label>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
 
@@ -188,11 +226,6 @@ function SettingsPage() {
               <h2 className="text-lg font-semibold">Security</h2>
             </div>
             <div className="space-y-3 pl-6">
-              <div>
-                <button className="text-primary hover:underline">
-                  Change password
-                </button>
-              </div>
               <div>
                 <button className="text-destructive hover:underline">
                   Delete account

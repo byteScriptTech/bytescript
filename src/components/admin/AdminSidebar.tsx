@@ -25,9 +25,9 @@ export function AdminSidebar() {
   ];
 
   return (
-    <div className="w-64 bg-white border-r border-gray-200 h-full">
-      <div className="p-4 border-b border-gray-200">
-        <h1 className="text-xl font-bold text-gray-800">biteScript Admin</h1>
+    <div className="w-64 bg-card border-r border-border h-full">
+      <div className="p-4 border-b border-border">
+        <h1 className="text-xl font-bold text-foreground">biteScript Admin</h1>
       </div>
       <nav className="p-4 space-y-1">
         {navItems.map((item) => {
@@ -36,10 +36,10 @@ export function AdminSidebar() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center px-4 py-2 text-sm font-medium rounded-md ${
+              className={`flex items-center px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                 isActive
-                  ? 'bg-blue-50 text-blue-700'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                  ? 'bg-accent text-accent-foreground'
+                  : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
               }`}
             >
               <item.icon className="mr-3 h-5 w-5 flex-shrink-0" />

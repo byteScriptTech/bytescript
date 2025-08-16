@@ -2,6 +2,7 @@ import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { CodeEditor } from '@/components/ui/CodeEditor';
+import { useTheme } from '@/context/theme-provider';
 import type { TestCase, TestResult, Submission } from '@/types/problem';
 
 interface ProblemEditorProps {
@@ -32,19 +33,23 @@ export default function ProblemEditor({
   const [activeTab, setActiveTab] = useState<'testResults' | 'consoleOutput'>(
     'testResults'
   );
+  const { theme } = useTheme();
+  const editorTheme = theme === 'dark' ? 'vs-dark' : 'light';
+
   return (
-    <div className="w-full h-full flex flex-col bg-white rounded-xl overflow-hidden">
+    <div className="w-full h-full flex flex-col bg-card rounded-lg overflow-hidden border border-border">
       {/* Editor Header */}
-      <div className="px-4 sm:px-6 py-3 border-b border-gray-100">
+      <div className="px-4 sm:px-6 py-3 border-b border-border bg-card">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
+          <h2 className="text-lg sm:text-xl font-semibold text-foreground">
             Code Editor
           </h2>
           <div className="flex flex-wrap gap-2">
             <Button
               onClick={onRun}
               disabled={loading}
-              className="px-3 sm:px-4 py-1.5 text-xs sm:text-sm"
+              variant="outline"
+              className="px-4 py-2 text-sm h-9"
             >
               {loading ? 'Running...' : 'Run Code'}
             </Button>
@@ -55,8 +60,7 @@ export default function ProblemEditor({
                   (r: TestResult) => r.passed
                 ) || loading
               }
-              variant="outline"
-              className="px-3 sm:px-4 py-1.5 text-xs sm:text-sm"
+              className="px-4 py-2 text-sm h-9"
             >
               Submit Solution
             </Button>
@@ -65,34 +69,35 @@ export default function ProblemEditor({
       </div>
 
       {/* Code Editor */}
-      <div className="flex-1 min-h-[300px] overflow-hidden">
+      <div className="flex-1 min-h-[300px] overflow-hidden bg-background">
         <CodeEditor
           code={code}
           onCodeChange={onCodeChange}
           language="javascript"
           height="100%"
+          theme={editorTheme}
         />
       </div>
 
       {/* Error Message */}
       {error && (
-        <div className="px-4 sm:px-6 py-3 bg-red-50 text-red-600 text-sm border-t border-red-100">
+        <div className="px-4 sm:px-6 py-3 bg-destructive/10 text-destructive text-sm border-t border-destructive/20">
           {error}
         </div>
       )}
 
       {/* Test Results and Console Output */}
       {executionResult && (
-        <div className="border-t border-gray-200 bg-gray-50 overflow-auto flex-1 max-h-[40vh]">
+        <div className="border-t border-border bg-card overflow-auto flex-1 max-h-[40vh]">
           <div className="p-4 sm:p-5">
             {/* Tabs */}
-            <div className="border-b border-gray-200 mb-4">
+            <div className="border-b border-border mb-4">
               <nav className="-mb-px flex space-x-8">
                 <button
-                  className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm ${
+                  className={`whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
                     activeTab === 'testResults'
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      ? 'border-primary text-foreground'
+                      : 'border-transparent text-muted-foreground hover:text-foreground hover:border-muted-foreground/30'
                   }`}
                   onClick={() => setActiveTab('testResults')}
                 >

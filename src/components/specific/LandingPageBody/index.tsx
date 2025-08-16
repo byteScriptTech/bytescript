@@ -20,7 +20,7 @@ const LandingPageBody: React.FC<LandingPageBodyProps> = ({
             <div className="@[480px]:p-4 @[480px]:overflow-hidden">
               <div
                 data-testid="hero-section"
-                className="flex flex-col gap-6 @[480px]:gap-8 @[480px]:rounded-xl @[480px]:overflow-hidden @[480px]:shadow-lg @[480]:min-h-[480px] items-start justify-end px-4 pb-10 @[480px]:px-10 @[480px]:pb-12"
+                className="flex flex-col gap-6 @[480px]:gap-8 @[480px]:rounded-xl @[480px]:overflow-hidden @[480px]:shadow-lg @[480]:min-h-[480px] items-start justify-end px-4 pb-10 @[480px]:px-10 @[480px]:pb-12 bg-card/50"
                 style={{
                   backgroundImage: `url('/images/undraw_firmware_3fxd.svg')`,
                   backgroundSize: 'contain',
@@ -33,10 +33,10 @@ const LandingPageBody: React.FC<LandingPageBodyProps> = ({
           </div>
           <div className="flex flex-col gap-10 px-4 py-10 @container">
             <div className="flex flex-col gap-6 text-center">
-              <h1 className="text-black text-4xl font-black leading-tight tracking-[-0.033em] @[480px]:text-5xl @[480px]:font-black @[480px]:leading-tight @[480px]:tracking-[-0.033em]">
+              <h1 className="text-4xl font-black leading-tight tracking-[-0.033em] @[480px]:text-5xl @[480px]:font-black @[480px]:leading-tight @[480px]:tracking-[-0.033em]">
                 Master Programming Through Practice
               </h1>
-              <h2 className="text-black text-base font-normal leading-relaxed max-w-[600px] mx-auto @[480px]:text-xl @[480px]:font-normal @[480px]:leading-relaxed">
+              <h2 className="text-base font-normal leading-relaxed max-w-[600px] mx-auto @[480px]:text-xl @[480px]:font-normal @[480px]:leading-relaxed text-muted-foreground">
                 biteScript is an interactive platform built to make learning
                 programming easy, engaging, and effective. Whether you&apos;re
                 just starting out or looking to level up your skills, biteScript
@@ -47,10 +47,10 @@ const LandingPageBody: React.FC<LandingPageBodyProps> = ({
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full p-0">
               <div
                 data-testid="feature-card-interactive"
-                className="flex w-full gap-3 rounded-lg border border-[#dce0e5] bg-white p-4 flex-col"
+                className="flex w-full gap-3 rounded-lg border border-border bg-card p-4 flex-col hover:shadow-md transition-shadow"
               >
                 <div
-                  className="text-[#111418]"
+                  className="text-foreground"
                   data-icon="Code"
                   data-size="24px"
                   data-weight="regular"
@@ -66,10 +66,10 @@ const LandingPageBody: React.FC<LandingPageBodyProps> = ({
                   </svg>
                 </div>
                 <div className="flex flex-col gap-1">
-                  <h2 className="text-[#111418] text-base font-bold leading-tight">
+                  <h2 className="text-foreground text-base font-bold leading-tight">
                     Interactive Coding Challenges
                   </h2>
-                  <p className="text-[#637488] text-sm font-normal leading-normal">
+                  <p className="text-muted-foreground text-sm font-normal leading-normal">
                     Dive into bite‑sized exercises tailored to your level. Share
                     your solutions, get community driven feedback, and learn
                     together one challenge at a time.
@@ -78,10 +78,10 @@ const LandingPageBody: React.FC<LandingPageBodyProps> = ({
               </div>
               <div
                 data-testid="feature-card-problem-solving"
-                className="flex w-full gap-3 rounded-lg border border-[#dce0e5] bg-white p-4 flex-col"
+                className="flex w-full gap-3 rounded-lg border border-border bg-card p-4 flex-col hover:shadow-md transition-shadow"
               >
                 <div
-                  className="text-[#111418]"
+                  className="text-foreground"
                   data-icon="PuzzlePiece"
                   data-size="24px"
                   data-weight="regular"
@@ -97,10 +97,10 @@ const LandingPageBody: React.FC<LandingPageBodyProps> = ({
                   </svg>
                 </div>
                 <div className="flex flex-col gap-1">
-                  <h2 className="text-[#111418] text-base font-bold leading-tight">
+                  <h2 className="text-foreground text-base font-bold leading-tight">
                     Adaptive Problem-Solving
                   </h2>
-                  <p className="text-[#637488] text-sm font-normal leading-normal">
+                  <p className="text-muted-foreground text-sm font-normal leading-normal">
                     Tackle complex problems with adaptive learning paths,
                     designed to challenge and improve your analytical abilities.
                   </p>
@@ -108,10 +108,10 @@ const LandingPageBody: React.FC<LandingPageBodyProps> = ({
               </div>
               <div
                 data-testid="feature-card-community-collaboration"
-                className="flex w-full gap-3 rounded-lg border border-[#dce0e5] bg-white p-4 flex-col"
+                className="flex w-full gap-3 rounded-lg border border-border bg-card p-4 flex-col hover:shadow-md transition-shadow"
               >
                 <div
-                  className="text-[#111418]"
+                  className="text-foreground"
                   data-icon="UsersThree"
                   data-size="24px"
                   data-weight="regular"
@@ -127,10 +127,10 @@ const LandingPageBody: React.FC<LandingPageBodyProps> = ({
                   </svg>
                 </div>
                 <div className="flex flex-col gap-1">
-                  <h2 className="text-[#111418] text-base font-bold leading-tight">
+                  <h2 className="text-foreground text-base font-bold leading-tight">
                     Community Collaboration
                   </h2>
-                  <p className="text-[#637488] text-sm font-normal leading-normal">
+                  <p className="text-muted-foreground text-sm font-normal leading-normal">
                     Join a vibrant community of learners and experts,
                     collaborate on projects, and share your knowledge.
                   </p>
@@ -141,10 +141,10 @@ const LandingPageBody: React.FC<LandingPageBodyProps> = ({
           <div className="@container py-16 @[480px]:py-24 text-center">
             <div className="flex flex-col gap-8 @[480px]:gap-12 max-w-[720px] mx-auto">
               <div className="flex flex-col gap-4">
-                <h1 className="text-[#111418] tracking-light text-[32px] font-bold leading-tight @[480px]:text-4xl @[480px]:font-black @[480px]:leading-tight @[480px]:tracking-[-0.033em]">
+                <h1 className="text-foreground tracking-light text-[32px] font-bold leading-tight @[480px]:text-4xl @[480px]:font-black @[480px]:leading-tight @[480px]:tracking-[-0.033em]">
                   Ready to Start Your Coding Journey?
                 </h1>
-                <p className="text-[#637488] text-base font-normal leading-relaxed">
+                <p className="text-muted-foreground text-base font-normal leading-relaxed">
                   biteScript is a free, open-source platform built by
                   developers, for learners like you. Join our growing community
                   and start mastering coding, problem-solving, and AI—one step

@@ -3,9 +3,13 @@ import React from 'react';
 
 const Logo = () => {
   return (
-    <Link href="/" className="flex items-center gap-1">
-      <span className="text-black text-base font-bold">bite</span>
-      <span className="text-[#00BFA6] text-xl font-bold">Script.</span>
+    <Link href="/" className="group">
+      <span className="text-foreground text-base font-bold transition-colors group-hover:opacity-80">
+        bite
+      </span>
+      <span className="text-[#00BFA6] text-xl font-bold transition-colors group-hover:opacity-80">
+        Script.
+      </span>
     </Link>
   );
 };

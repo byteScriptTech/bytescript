@@ -1,0 +1,23 @@
+/* Mobile scrollbar styles */
+.scrollContainer {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(115, 115, 115, 0.2) transparent;
+}
+
+.scrollContainer::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.scrollContainer::-webkit-scrollbar-thumb {
+  background-color: rgba(115, 115, 115, 0.2);
+  border-radius: 2px;
+}
+
+.dark .scrollContainer::-webkit-scrollbar-thumb {
+  background-color: rgba(115, 115, 115, 0.1);
+}
+
+.scrollContainer::-webkit-scrollbar-track {
+  background: transparent;
+}

@@ -35,7 +35,7 @@ export function AdminNavbar() {
   };
 
   return (
-    <header className="border-b bg-white">
+    <header className="border-b bg-card">
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
@@ -44,15 +44,15 @@ export function AdminNavbar() {
                 variant="ghost"
                 size="icon"
                 onClick={handleBack}
-                className="mr-2"
+                className="mr-2 text-foreground hover:bg-accent/50"
                 aria-label="Go back"
               >
                 <ArrowLeft className="h-5 w-5" />
               </Button>
             )}
-            <h1 className="text-xl font-bold text-gray-900">
-              {isDashboard ? 'Admin Panel' : 'Back to Dashboard'}
-            </h1>
+            <span className="text-foreground text-xl font-bold">
+              {isDashboard ? 'Admin Dashboard' : 'Back to Dashboard'}
+            </span>
           </div>
 
           {currentUser && (
