@@ -115,9 +115,19 @@ const Navbar = () => {
       }`}
     >
       {/* Desktop Navigation - Keep original layout */}
-      <div className="hidden sm:flex items-center justify-between p-3 px-4">
+      <div className="hidden sm:flex items-center justify-between px-3 py-3 sm:px-8 sm:py-3">
         <div className="flex items-center gap-3">
-          <Logo />
+          <Link
+            href="/"
+            className="hover:opacity-80 transition-opacity cursor-pointer"
+          >
+            <span className="text-md sm:text-lg font-bold text-foreground">
+              bite
+            </span>
+            <span className="text-[#00BFA6] text-base sm:text-xl font-bold">
+              Script.
+            </span>
+          </Link>
           <div className="flex items-center gap-2">
             <NavLink href="/dashboard">Dashboard</NavLink>
             <div className="relative group">
@@ -146,14 +156,14 @@ const Navbar = () => {
               </div>
             </div>
             <NavLink href="/practice">Practice</NavLink>
+            <NavigationControls
+              canGoBack={canGoBack}
+              canGoForward={canGoForward}
+            />
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <NavigationControls
-            canGoBack={canGoBack}
-            canGoForward={canGoForward}
-          />
+        <div className="flex items-center">
           {currentUser && (
             <UserDropDown
               handleSignOut={handleSignOut}

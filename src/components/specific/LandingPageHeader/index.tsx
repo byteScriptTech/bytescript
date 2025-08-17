@@ -22,7 +22,7 @@ const LandingPageHeader = ({
     <header className="border-b border-solid border-border bg-background">
       <div
         data-testid="header-container"
-        className="flex items-center justify-between px-4 py-3 sm:px-10 sm:py-3"
+        className="flex items-center justify-between px-3 py-3 sm:px-8 sm:py-3"
       >
         <Link
           href="/"
