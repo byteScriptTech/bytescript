@@ -66,8 +66,8 @@ const LearnContent: React.FC<LearnContentProps> = ({
   return (
     <div className="mx-auto grid w-full max-w-6xl items-start gap-6 md:grid-cols-[20%_60%_20%] lg:grid-cols-[20%_60%_20%]">
       <NavigationWithSuspense
-        topics={topics}
-        ctid={currentTopic?.id}
+        topics={topics || []}
+        ctid={currentTopic?.id || null}
         setCurrentTopic={setCurrentTopic}
         loading={loading}
       />

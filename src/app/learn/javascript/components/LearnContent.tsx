@@ -1,6 +1,7 @@
 'use client';
 
 import { CheckCircle2, ChevronLeft, ChevronRight, Menu, X } from 'lucide-react';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import React, { useEffect, useState, useCallback } from 'react';
 
 import { JavaScriptCodeEditor } from '@/components/common/JavaScriptCodeEditor';
@@ -30,13 +31,13 @@ interface LearnContentInnerProps {
   children?: React.ReactNode;
 }
 
-// These props are passed from the URL but not currently used
 const LearnContentInner: React.FC<LearnContentInnerProps> = ({
-  // These props are intentionally unused for now
-  // They're kept for future implementation
   initialTopicId: _initialTopicId = null,
   initialSubtopicId: _initialSubtopicId = null,
 }) => {
+  // Use refs to store the initial values to avoid re-running effects
+  const initialTopicId = React.useRef(_initialTopicId);
+  const initialSubtopicId = React.useRef(_initialSubtopicId);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [content, setContent] = useState<LanguageContent | null>(null);
@@ -88,18 +89,33 @@ const LearnContentInner: React.FC<LearnContentInnerProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [sidebarOpen, isMobile]);
 
-  const scrollToSubtopic = useCallback((subtopicId: string) => {
-    setActiveSubtopic(subtopicId);
-    // Use a small timeout to ensure the DOM is updated
-    setTimeout(() => {
-      const element = document.getElementById(`subtopic-${subtopicId}`);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        // Small offset to account for fixed header
-        window.scrollBy(0, -20);
-      }
-    }, 0);
-  }, []);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const scrollToSubtopic = useCallback(
+    (subtopicId: string) => {
+      setActiveSubtopic(subtopicId);
+
+      // Update URL with the new subtopic
+      const params = new URLSearchParams(searchParams.toString());
+      params.set('subtopic', subtopicId);
+      router.push(`${pathname}?${params.toString()}`, { scroll: false });
+
+      // Use a small timeout to ensure the DOM is updated
+      const timer = setTimeout(() => {
+        const element = document.getElementById(`subtopic-${subtopicId}`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          // Small offset to account for fixed header
+          window.scrollBy(0, -20);
+        }
+      }, 100);
+
+      return () => clearTimeout(timer);
+    },
+    [router, pathname, searchParams, setActiveSubtopic]
+  );
 
   const fetchContent = useCallback(async () => {
     try {
@@ -134,12 +150,46 @@ const LearnContentInner: React.FC<LearnContentInnerProps> = ({
     loadContent();
   }, [fetchContent]);
 
-  // Handle initial content load and set the first topic as active
+  // Handle initial content load and set the active topic/subtopic from URL params
   useEffect(() => {
-    if (content && content.topics?.length > 0 && !activeTopic) {
+    if (!content?.topics?.length) return;
+    console.log(content, 'content');
+    // If we have an initial topic ID from URL, use it
+    if (initialTopicId.current) {
+      const topicExists = content.topics.some(
+        (topic: { id: string }) => topic.id === initialTopicId.current
+      );
+
+      if (topicExists) {
+        // Only update if the topic is different from current active topic
+        if (activeTopic !== initialTopicId.current) {
+          setActiveTopic(initialTopicId.current);
+        }
+
+        // If we also have a subtopic ID, set it and scroll to it
+        if (initialSubtopicId.current) {
+          setActiveSubtopic(initialSubtopicId.current);
+          // Small delay to ensure the DOM is updated
+          const timer = setTimeout(() => {
+            const element = document.getElementById(
+              `subtopic-${initialSubtopicId.current}`
+            );
+            if (element) {
+              element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              window.scrollBy(0, -20); // Small offset for header
+            }
+          }, 300);
+          return () => clearTimeout(timer);
+        }
+        return;
+      }
+    }
+
+    // Fallback to first topic if no valid topic ID in URL
+    if (!activeTopic && content.topics.length > 0) {
       setActiveTopic(content.topics[0].id);
     }
-  }, [content, activeTopic]);
+  }, [content, activeTopic, scrollToSubtopic]);
 
   const _renderMarkdownContent = (text: string) => (
     <div
@@ -620,6 +670,7 @@ export default function LearnContent({
   initialSubtopicId?: string | null;
 }) {
   // Rest of the component implementation
+  console.log(initialTopicId, initialSubtopicId);
   return (
     <LearnContentInner
       initialTopicId={initialTopicId}

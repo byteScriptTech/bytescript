@@ -1,3 +1,10 @@
+export interface NavigationProps {
+  topics: Topic[];
+  ctid: string | null;
+  setCurrentTopic: (topic: Topic) => void;
+  loading: boolean;
+}
+
 export type Topic = {
   id: string;
   name: string;

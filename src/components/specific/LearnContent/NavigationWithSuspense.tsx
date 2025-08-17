@@ -3,7 +3,7 @@
 import { Suspense } from 'react';
 
 import Navigation from './Navigation';
-import type { NavigationProps } from './Navigation';
+import type { NavigationProps } from './types';
 
 function NavigationSuspenseWrapper(props: NavigationProps) {
   return (

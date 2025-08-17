@@ -70,27 +70,24 @@ describe('LanguagesList Component', () => {
   });
 
   it('renders topics and handles topic click navigation', () => {
-    const fetchContentMock = jest.fn();
     (useTopics as jest.Mock).mockReturnValue({
       topics: sampleTopics,
       loading: false,
     });
     (useContentContext as jest.Mock).mockReturnValue({
       content: null,
-      fetchContent: fetchContentMock,
+      fetchContent: jest.fn(),
     });
-    mockGetItem.mockReturnValue([]);
+    mockGetItem.mockReturnValue(JSON.stringify([]));
 
     render(<LanguagesList />);
 
     const topic = screen.getByTestId('topic-javascript');
     expect(topic).toBeInTheDocument();
-
     fireEvent.click(topic);
 
-    expect(fetchContentMock).toHaveBeenCalledWith('javascript');
+    expect(mockPush).toHaveBeenCalledWith('/learn/javascript');
     expect(mockSetItem).toHaveBeenCalledWith('lvl_name', 'javascript');
-    expect(mockPush).toHaveBeenCalledWith('/lang?name=javascript&id=1');
   });
 
   it('redirects to correct custom routes for known topics', () => {
