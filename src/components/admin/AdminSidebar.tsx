@@ -19,6 +19,11 @@ export function AdminSidebar() {
       href: '/admin/python',
       icon: Code,
     },
+    {
+      name: 'JavaScript',
+      href: '/admin/javascript',
+      icon: Code,
+    },
     { name: 'Problems', href: '/admin/problems', icon: BookOpen },
     { name: 'Users', href: '/admin/users', icon: Users },
     { name: 'Settings', href: '/admin/settings', icon: Settings },

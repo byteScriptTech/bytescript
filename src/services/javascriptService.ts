@@ -1,7 +1,7 @@
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
 
 import { db } from '@/firebase/config';
-import type { LanguageContent } from '@/types/content';
+import type { LanguageContent, Topic } from '@/types/content';
 
 const JAVASCRIPT_CONTENT_COLLECTION = 'languages';
 const JAVASCRIPT_CONTENT_ID = 'javascript';
@@ -26,6 +26,118 @@ export const getJavascriptContent =
   };
 
 export const javascriptService = {
+  // Create a new JavaScript topic
+  async createTopic(topicData: Omit<Topic, 'id'>) {
+    try {
+      const docRef = doc(
+        db,
+        JAVASCRIPT_CONTENT_COLLECTION,
+        JAVASCRIPT_CONTENT_ID
+      );
+      const docSnap = await getDoc(docRef);
+
+      if (!docSnap.exists()) {
+        throw new Error('JavaScript content not found');
+      }
+
+      const data = docSnap.data();
+      const topics: Topic[] = data.topics || [];
+      const newTopic = {
+        ...topicData,
+        id: Date.now().toString(), // Simple ID generation
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      await updateDoc(docRef, {
+        topics: [...topics, newTopic],
+        updatedAt: new Date().toISOString(),
+      });
+
+      return newTopic;
+    } catch (error) {
+      console.error('Error creating JavaScript topic:', error);
+      throw error;
+    }
+  },
+
+  // Update an existing JavaScript topic
+  async updateTopic(id: string, topicData: Partial<Omit<Topic, 'id'>>) {
+    try {
+      const docRef = doc(
+        db,
+        JAVASCRIPT_CONTENT_COLLECTION,
+        JAVASCRIPT_CONTENT_ID
+      );
+      const docSnap = await getDoc(docRef);
+
+      if (!docSnap.exists()) {
+        throw new Error('JavaScript content not found');
+      }
+
+      const data = docSnap.data();
+      const topics: Topic[] = data.topics || [];
+      const topicIndex = topics.findIndex((topic) => topic.id === id);
+
+      if (topicIndex === -1) {
+        throw new Error('Topic not found');
+      }
+
+      const updatedTopic = {
+        ...topics[topicIndex],
+        ...topicData,
+        updatedAt: new Date().toISOString(),
+      };
+
+      const updatedTopics = [...topics];
+      updatedTopics[topicIndex] = updatedTopic;
+
+      await updateDoc(docRef, {
+        topics: updatedTopics,
+        updatedAt: new Date().toISOString(),
+      });
+
+      return updatedTopic;
+    } catch (error) {
+      console.error('Error updating JavaScript topic:', error);
+      throw error;
+    }
+  },
+
+  // Delete a JavaScript topic
+  async deleteTopic(id: string) {
+    try {
+      const docRef = doc(
+        db,
+        JAVASCRIPT_CONTENT_COLLECTION,
+        JAVASCRIPT_CONTENT_ID
+      );
+      const docSnap = await getDoc(docRef);
+
+      if (!docSnap.exists()) {
+        throw new Error('JavaScript content not found');
+      }
+
+      const data = docSnap.data();
+      const topics: Topic[] = data.topics || [];
+      const filteredTopics = topics.filter((topic) => topic.id !== id);
+
+      if (topics.length === filteredTopics.length) {
+        throw new Error('Topic not found');
+      }
+
+      await updateDoc(docRef, {
+        topics: filteredTopics,
+        updatedAt: new Date().toISOString(),
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Error deleting JavaScript topic:', error);
+      throw error;
+    }
+  },
+
   // Get all JavaScript topics
   getTopics: async () => {
     try {
@@ -42,7 +154,7 @@ export const javascriptService = {
       return (docSnap.data() as LanguageContent).topics || [];
     } catch (error) {
       console.error('Error getting JavaScript topics:', error);
-      return [];
+      throw error;
     }
   },
 
@@ -63,7 +175,7 @@ export const javascriptService = {
       return content.topics?.find((topic) => topic.id === topicId) || null;
     } catch (error) {
       console.error('Error getting JavaScript topic:', error);
-      return null;
+      throw error;
     }
   },
 
@@ -88,7 +200,7 @@ export const javascriptService = {
       );
     } catch (error) {
       console.error('Error getting JavaScript topics by difficulty:', error);
-      return [];
+      throw error;
     }
   },
 
@@ -100,7 +212,7 @@ export const javascriptService = {
       return content.topics.find((topic) => topic.slug === slug) || null;
     } catch (error) {
       console.error('Error getting JavaScript topic by slug:', error);
-      return null;
+      throw error;
     }
   },
 
@@ -120,7 +232,7 @@ export const javascriptService = {
       );
     } catch (error) {
       console.error('Error fetching JavaScript topics:', error);
-      return [];
+      throw error;
     }
   },
 };

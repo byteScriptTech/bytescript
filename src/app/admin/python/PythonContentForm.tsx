@@ -2,12 +2,21 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus, Trash2 } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import type { JSX } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import * as z from 'zod';
+import '@uiw/react-md-editor/markdown-editor.css';
+import '@uiw/react-markdown-preview/markdown.css';
+
+// Dynamically import the MDEditor to avoid SSR issues
+const MDEditor = dynamic(
+  () => import('@uiw/react-md-editor').then((mod) => mod.default),
+  { ssr: false }
+);
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -324,12 +333,18 @@ export function PythonContentForm({
 
       <div className="space-y-2">
         <Label htmlFor="content">Content</Label>
-        <Textarea
-          id="content"
-          {...form.register('content')}
-          placeholder="Enter topic content (Markdown supported)"
-          className="min-h-[200px]"
-        />
+        <div data-color-mode="light">
+          <MDEditor
+            value={form.watch('content') || ''}
+            onChange={(value) => form.setValue('content', value || '')}
+            textareaProps={{
+              placeholder: 'Enter topic content (Markdown supported)',
+              name: 'content',
+            }}
+            height={400}
+            className="min-h-[400px]"
+          />
+        </div>
         {form.formState.errors.content && (
           <p className="text-sm text-red-500">
             {form.formState.errors.content.message}
