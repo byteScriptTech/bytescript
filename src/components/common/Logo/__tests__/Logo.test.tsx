@@ -4,14 +4,6 @@ import '@testing-library/jest-dom';
 import Logo from '../index';
 
 describe('Logo component', () => {
-  it('renders correctly', () => {
-    render(<Logo />);
-
-    expect(screen.getByText('bite')).toBeInTheDocument();
-    expect(screen.getByText('Script.')).toBeInTheDocument();
-    expect(screen.getByRole('link')).toHaveClass('flex', 'items-center');
-  });
-
   it('links to home page', () => {
     render(<Logo />);
 
@@ -19,14 +11,32 @@ describe('Logo component', () => {
     expect(link).toHaveAttribute('href', '/');
   });
 
-  it('has correct text styling', () => {
+  it('has correct text styling with theme support', () => {
     render(<Logo />);
 
-    const biteText = screen.getByText('bite');
-    const scriptText = screen.getByText('Script.');
+    // Get the link and verify its classes
+    const link = screen.getByRole('link');
+    expect(link).toHaveClass('group');
 
-    expect(biteText).toHaveClass('text-black', 'text-base', 'font-bold');
-    expect(scriptText).toHaveClass('text-[#00BFA6]', 'text-xl', 'font-bold');
+    // Test the "bite" text styling
+    const biteText = screen.getByText('bite');
+    expect(biteText).toHaveClass(
+      'text-foreground',
+      'text-base',
+      'font-bold',
+      'transition-colors',
+      'group-hover:opacity-80'
+    );
+
+    // Test the "Script." text styling
+    const scriptText = screen.getByText('Script.');
+    expect(scriptText).toHaveClass(
+      'text-[#00BFA6]',
+      'text-xl',
+      'font-bold',
+      'transition-colors',
+      'group-hover:opacity-80'
+    );
   });
 
   it('is visible on all screen sizes', () => {
@@ -39,6 +49,25 @@ describe('Logo component', () => {
 
     // Verify the link has proper classes
     const link = screen.getByRole('link');
-    expect(link).toHaveClass('flex', 'items-center', 'gap-1');
+    expect(link).toHaveClass('group');
+
+    // Verify text elements have proper classes
+    const biteText = screen.getByText('bite');
+    const scriptText = screen.getByText('Script.');
+
+    expect(biteText).toHaveClass(
+      'text-foreground',
+      'text-base',
+      'font-bold',
+      'transition-colors',
+      'group-hover:opacity-80'
+    );
+    expect(scriptText).toHaveClass(
+      'text-[#00BFA6]',
+      'text-xl',
+      'font-bold',
+      'transition-colors',
+      'group-hover:opacity-80'
+    );
   });
 });

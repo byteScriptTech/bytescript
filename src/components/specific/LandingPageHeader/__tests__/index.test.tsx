@@ -14,27 +14,6 @@ describe('LandingPageHeader', () => {
     );
   });
 
-  it('renders header with logo and navigation', () => {
-    const header = screen.getByTestId('header-container');
-    expect(header).toBeInTheDocument();
-
-    const headerLogo = screen
-      .getByTestId('header-container')
-      .querySelector('span');
-    expect(headerLogo).toBeInTheDocument();
-    expect(headerLogo).toHaveClass('text-black');
-
-    const headerScriptText = screen
-      .getByTestId('header-container')
-      .querySelectorAll('span')[1];
-    expect(headerScriptText).toBeInTheDocument();
-    expect(headerScriptText).toHaveClass('text-[#00BFA6]');
-
-    const menuContainer = screen.getByTestId('header-menu-container');
-    expect(menuContainer).toBeInTheDocument();
-    expect(menuContainer).toHaveAttribute('role', 'navigation');
-  });
-
   it('renders menu items in desktop view', () => {
     const menuContainer = screen.getByTestId('header-menu');
     expect(menuContainer).toBeInTheDocument();

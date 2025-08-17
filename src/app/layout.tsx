@@ -6,6 +6,7 @@ import './globals.css';
 import React from 'react';
 
 import { Toaster } from '@/components/ui/toaster';
+import { ThemeProvider } from '@/context/theme-provider';
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -32,14 +33,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable}`}
-        suppressHydrationWarning
+        className={`${geistSans.variable} ${geistMono.variable} bg-background text-foreground min-h-screen`}
       >
-        <NextTopLoader />
-        {children}
-        <Toaster />
+        <ThemeProvider>
+          <NextTopLoader />
+          {children}
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );

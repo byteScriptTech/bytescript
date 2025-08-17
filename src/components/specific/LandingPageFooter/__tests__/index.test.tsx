@@ -18,7 +18,13 @@ describe('LandingPageFooter', () => {
     render(<LandingPageFooter />);
 
     const footer = screen.getByRole('contentinfo');
-    expect(footer).toHaveClass('flex', 'justify-center', 'bg-[#f8f9fa]');
+    expect(footer).toHaveClass(
+      'flex',
+      'justify-center',
+      'bg-muted/50',
+      'border-t',
+      'border-border'
+    );
 
     // Add a test id to the container div in the component
     const container = footer.querySelector(
@@ -40,7 +46,7 @@ describe('LandingPageFooter', () => {
 
     const text = screen.getByText(/All rights reserved/);
     expect(text).toHaveClass(
-      'text-[#637488]',
+      'text-muted-foreground',
       'text-base',
       'font-normal',
       'leading-normal'
