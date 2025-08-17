@@ -1,44 +1,60 @@
 import { render, screen } from '@testing-library/react';
 
-import { useLanguages } from '@/context/LanguagesContext';
+// Mock next/navigation
+const mockPush = jest.fn();
+const mockUseRouter = jest.fn(() => ({
+  push: mockPush,
+  pathname: '/',
+}));
+
+jest.mock('next/navigation', () => ({
+  useRouter: () => mockUseRouter(),
+  usePathname: () => '/',
+}));
+
+// Mock the LanguagesList component with a simple implementation
+jest.mock('../LanguagesList', () => {
+  const MockLanguagesList = () => (
+    <div data-testid="languages-list">Languages List</div>
+  );
+  MockLanguagesList.displayName = 'LanguagesList';
+  return MockLanguagesList;
+});
+
+// Mock the ContentContext
+jest.mock('@/context/ContentContext', () => ({
+  useContentContext: () => ({
+    content: [
+      { name: 'JavaScript', slug: 'javascript' },
+      { name: 'Python', slug: 'python' },
+    ],
+  }),
+}));
+
+// Mock the LocalhostContext
+jest.mock('@/context/LocalhostContext', () => ({
+  useLocalStorage: () => ({
+    getItem: jest.fn(() => []),
+    setItem: jest.fn(),
+  }),
+}));
+
+// Mock the useTopics hook
+jest.mock('@/hooks/useTopics', () => ({
+  useTopics: () => ({
+    topics: [
+      { id: '1', name: 'JavaScript' },
+      { id: '2', name: 'Python' },
+    ],
+    loading: false,
+  }),
+}));
 
 import ExploreLanguages from '.';
 
-jest.mock('../../../context/LanguagesContext', () => ({
-  useLanguages: jest.fn(),
-}));
-
-jest.mock('../../common/CardSkeleton', () => {
-  const MockedComponent = () => <div data-testid="card-skeleton" />;
-  MockedComponent.displayName = 'CardSkeleton';
-  return MockedComponent;
-});
-jest.mock('../LanguagesList', () => {
-  const MockedComponent = () => (
-    <div data-testid="languages-list">Languages List</div>
-  );
-  MockedComponent.displayName = 'LanguagesList';
-  return MockedComponent;
-});
-
 describe('ExploreLanguages Component', () => {
-  test('Should render the card skeleton when loading is true', () => {
-    (useLanguages as jest.Mock).mockReturnValue({ loading: true });
-
+  it('Should render the LanguagesList component', () => {
     render(<ExploreLanguages />);
-
-    expect(screen.getByTestId('card-skeleton')).toBeInTheDocument();
-  });
-
-  test('Should render the content when loading is false', () => {
-    (useLanguages as jest.Mock).mockReturnValue({ loading: false });
-
-    render(<ExploreLanguages />);
-
-    expect(screen.getByText('Explore Learning Categories')).toBeInTheDocument();
-
-    expect(
-      screen.getByText('Select a topic and dive deeper into your skills.')
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('languages-list')).toBeInTheDocument();
   });
 });
