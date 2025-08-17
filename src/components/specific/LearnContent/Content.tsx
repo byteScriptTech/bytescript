@@ -1,10 +1,4 @@
-import * as Toggle from '@radix-ui/react-toggle';
-import React, { useEffect, useState } from 'react';
-import { BiSolidCircleThreeQuarter } from 'react-icons/bi';
-import { FaCircle } from 'react-icons/fa6';
-
-import { useLanguages } from '@/context/LanguagesContext';
-import { useLocalStorage } from '@/context/LocalhostContext';
+import React, { useEffect } from 'react';
 
 interface _Subtopic {
   id: string;
@@ -21,46 +15,14 @@ interface ContentProps {
   onSubtopicClick: (subtopicId: string) => void;
   renderExamples: (examples: any[]) => React.ReactNode;
 }
-type Topic = {
-  name: string;
-  id: string;
-  isCompleted: boolean;
-};
-
-type ShowToggleProps = {
-  handleIsCompleted: (id: string, isCompleted: boolean) => void;
-  topicId: string;
-  currentLPTopic: Topic | null;
-  isCompleted: boolean;
-};
 
 export const Content: React.FC<ContentProps> = ({
-  topicId,
   subtopicId: _subtopicId,
   content: currentTopic,
   onTopicClick: _onTopicClick,
   onSubtopicClick: _onSubtopicClick,
   renderExamples,
 }) => {
-  const { learningProgress, updateUserLearningProgress } = useLanguages();
-  const { getItem } = useLocalStorage();
-  const user = getItem('user');
-  const [currentLPTopic, setCurrentLPTopic] = useState<Topic | null>(null);
-  const [isCompleted, setIsCompleted] = useState<boolean>(false);
-
-  // Handle learning progress updates
-  useEffect(() => {
-    if (learningProgress) {
-      const topic = learningProgress?.topics.find(
-        (topic: Topic) => topic.id === topicId
-      );
-      if (topic) {
-        setIsCompleted(topic.isCompleted);
-        setCurrentLPTopic(topic);
-      }
-    }
-  }, [learningProgress, topicId]);
-
   // Scroll to the active subtopic when it changes
   useEffect(() => {
     if (_subtopicId) {
@@ -79,41 +41,12 @@ export const Content: React.FC<ContentProps> = ({
     );
   }
 
-  const handleIsCompleted = (id: string, isCompleted: boolean) => {
-    if (!learningProgress || !user) return;
-
-    const updatedTopics = learningProgress.topics.map((topic: Topic) =>
-      topic.id === id ? { ...topic, isCompleted } : topic
-    );
-
-    const completedTopics = updatedTopics.reduce(
-      (acc: number, topic: Topic) => (topic.isCompleted ? acc + 1 : acc),
-      0
-    );
-
-    const totalTopics = updatedTopics.length;
-    const progress = Math.round((completedTopics / totalTopics) * 100);
-
-    updateUserLearningProgress(
-      user.uid,
-      currentTopic.name,
-      progress,
-      updatedTopics
-    );
-  };
-
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold tracking-tight">
           {currentTopic.name}
         </h1>
-        <ShowToggle
-          handleIsCompleted={handleIsCompleted}
-          topicId={topicId}
-          currentLPTopic={currentLPTopic}
-          isCompleted={isCompleted}
-        />
       </div>
 
       <div className="prose dark:prose-invert max-w-none w-full">
@@ -160,32 +93,4 @@ export const Content: React.FC<ContentProps> = ({
   );
 };
 
-const ShowToggle: React.FC<ShowToggleProps> = ({
-  handleIsCompleted,
-  topicId,
-  currentLPTopic: _currentLPTopic,
-  isCompleted,
-}) => {
-  return (
-    <Toggle.Root
-      className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
-      pressed={isCompleted}
-      onPressedChange={(pressed: boolean) => {
-        handleIsCompleted(topicId, pressed);
-      }}
-    >
-      {isCompleted ? (
-        <>
-          <BiSolidCircleThreeQuarter className="w-4 h-4 text-green-500" />
-          Completed
-        </>
-      ) : (
-        <>
-          <FaCircle className="w-3 h-3 text-gray-400" />
-          Mark as Complete
-        </>
-      )}
-    </Toggle.Root>
-  );
-};
 export default React.memo(Content);

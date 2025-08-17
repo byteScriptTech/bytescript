@@ -58,18 +58,18 @@ export const LanguagesList = () => {
   }, [content, topics, progress, setItem]);
 
   const getTopicColor = (topicName: string) => {
-    const colors = [
-      'bg-blue-50 hover:bg-blue-100 border-blue-200',
-      'bg-emerald-50 hover:bg-emerald-100 border-emerald-200',
-      'bg-purple-50 hover:bg-purple-100 border-purple-200',
-      'bg-amber-50 hover:bg-amber-100 border-amber-200',
-      'bg-rose-50 hover:bg-rose-100 border-rose-200',
-      'bg-indigo-50 hover:bg-indigo-100 border-indigo-200',
+    const colorVariants = [
+      'bg-blue-100/50 dark:bg-blue-900/30 hover:bg-blue-200/50 dark:hover:bg-blue-800/50 border-blue-200 dark:border-blue-800',
+      'bg-emerald-100/50 dark:bg-emerald-900/30 hover:bg-emerald-200/50 dark:hover:bg-emerald-800/50 border-emerald-200 dark:border-emerald-800',
+      'bg-purple-100/50 dark:bg-purple-900/30 hover:bg-purple-200/50 dark:hover:bg-purple-800/50 border-purple-200 dark:border-purple-800',
+      'bg-amber-100/50 dark:bg-amber-900/30 hover:bg-amber-200/50 dark:hover:bg-amber-800/50 border-amber-200 dark:border-amber-800',
+      'bg-rose-100/50 dark:bg-rose-900/30 hover:bg-rose-200/50 dark:hover:bg-rose-800/50 border-rose-200 dark:border-rose-800',
+      'bg-indigo-100/50 dark:bg-indigo-900/30 hover:bg-indigo-200/50 dark:hover:bg-indigo-800/50 border-indigo-200 dark:border-indigo-800',
     ];
     const index =
       topicName.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) %
-      colors.length;
-    return colors[index];
+      colorVariants.length;
+    return colorVariants[index];
   };
 
   return (
@@ -93,7 +93,7 @@ export const LanguagesList = () => {
             <div
               key={topic.id}
               className={cn(
-                'group relative overflow-hidden rounded-xl border-2 p-4 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 cursor-pointer',
+                'group relative overflow-hidden rounded-xl border p-4 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 cursor-pointer',
                 colorClass
               )}
               data-testid={`topic-${topic.name.toLowerCase()}`}
@@ -111,7 +111,7 @@ export const LanguagesList = () => {
             >
               <div className="flex items-center space-x-4">
                 <div className="flex-shrink-0">
-                  <div className="h-12 w-12 rounded-lg bg-white flex items-center justify-center shadow-sm">
+                  <div className="h-12 w-12 rounded-lg bg-background flex items-center justify-center shadow-sm">
                     <CourseIcon
                       language={topic.name.toLowerCase()}
                       id={topic.id}
@@ -119,16 +119,16 @@ export const LanguagesList = () => {
                   </div>
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-sm font-medium text-gray-900 truncate">
+                  <h3 className="text-sm font-medium text-foreground truncate">
                     {topic.name}
                   </h3>
-                  <p className="text-sm text-gray-500 truncate">
+                  <p className="text-sm text-muted-foreground truncate">
                     Start learning {topic.name}
                   </p>
                 </div>
                 <div className="flex-shrink-0">
                   <svg
-                    className="h-5 w-5 text-gray-400 group-hover:text-gray-700 transition-colors"
+                    className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
