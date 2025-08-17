@@ -4,7 +4,6 @@ import {
   Settings as SettingsIcon,
   User as UserIcon,
   Bell,
-  Shield,
   ChevronRight,
   ChevronLeft,
   Loader2,
@@ -219,20 +218,6 @@ function SettingsPage() {
           </div>
 
           <Separator />
-
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <Shield className="h-4 w-4 text-muted-foreground" />
-              <h2 className="text-lg font-semibold">Security</h2>
-            </div>
-            <div className="space-y-3 pl-6">
-              <div>
-                <button className="text-destructive hover:underline">
-                  Delete account
-                </button>
-              </div>
-            </div>
-          </div>
 
           <div className="pt-3 flex justify-end">
             <button className="px-3 py-1.5 text-sm bg-primary text-white rounded-md hover:bg-primary/90 transition-colors">
