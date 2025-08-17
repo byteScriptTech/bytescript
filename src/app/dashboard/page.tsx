@@ -4,7 +4,6 @@ import React from 'react';
 
 import Navbar from '@/components/common/Navbar';
 import AuthGuard from '@/components/misc/authGuard';
-import CarryOnWhereLeft from '@/components/specific/CarryOnWhereLeft';
 import ExploreLanguages from '@/components/specific/ExploreLanguages';
 import Greetings from '@/components/specific/Greetings';
 import { Notes } from '@/components/specific/Notes';
@@ -39,7 +38,6 @@ function Dashboard() {
                         <div className="grid gap-4 md:grid-cols-[1fr_250px] lg:grid-cols-3 lg:gap-8">
                           <div className="grid auto-rows-max items-start gap-4 lg:col-span-2 lg:gap-8">
                             <ExploreLanguages />
-                            <CarryOnWhereLeft />
                           </div>
                           <div className="grid auto-rows-max items-start gap-4 lg:gap-8">
                             <Notes />

@@ -10,22 +10,26 @@ import CourseIcon from '../CourseIcon';
 export const LanguagesList = () => {
   const router = useRouter();
   const { topics, loading } = useTopics();
-  const { content, fetchContent } = useContentContext();
+  const { content } = useContentContext();
   const { getItem, setItem } = useLocalStorage();
   const progress = getItem('progressCache');
 
-  const handleTopicClick = (name: string, id: string) => {
-    if (name && !content) {
-      fetchContent(name);
-    }
+  const handleTopicClick = (name: string, _id: string) => {
+    // Save the selected language to local storage
     setItem('lvl_name', name);
 
+    // Navigate to the learn page with the selected language
     if (name === 'competitive-programming') {
       router.push('/competitive-programming');
     } else if (name === 'data-structures-&-algorithms') {
       router.push('/data-structures');
+    } else if (name === 'javascript') {
+      router.push('/learn/javascript');
+    } else if (name === 'python') {
+      router.push('/learn/python');
     } else {
-      router.push(`/lang?name=${name}&id=${id}`);
+      // Default fallback for other languages
+      router.push(`/learn/${name.toLowerCase()}`);
     }
   };
 
