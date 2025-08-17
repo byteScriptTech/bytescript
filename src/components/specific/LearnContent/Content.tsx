@@ -1,9 +1,12 @@
 import React, { useEffect } from 'react';
 
+import { MarkdownRenderer } from '@/components/markdown/MarkdownRenderer';
+
 interface _Subtopic {
   id: string;
   name: string;
   content?: string;
+  content_md?: string; // Markdown content
   examples?: any[];
 }
 
@@ -49,13 +52,14 @@ export const Content: React.FC<ContentProps> = ({
         </h1>
       </div>
 
-      <div className="prose dark:prose-invert max-w-none w-full">
+      <div className="w-full">
         {currentTopic.content && (
           <div className="mb-10">
-            <div
-              className="prose-lg"
-              dangerouslySetInnerHTML={{ __html: currentTopic.content }}
-            />
+            {currentTopic.content ? (
+              <MarkdownRenderer className="prose dark:prose-invert max-w-none">
+                {currentTopic.content}
+              </MarkdownRenderer>
+            ) : null}
           </div>
         )}
 
@@ -70,10 +74,14 @@ export const Content: React.FC<ContentProps> = ({
             </h2>
             {subtopic.content && (
               <div className="mb-6 prose-p:leading-relaxed">
-                <div
-                  className="prose-p:mb-4 last:prose-p:mb-0"
-                  dangerouslySetInnerHTML={{ __html: subtopic.content }}
-                />
+                {subtopic.content_md ? (
+                  <MarkdownRenderer>{subtopic.content_md}</MarkdownRenderer>
+                ) : subtopic.content ? (
+                  <div
+                    className="prose-p:mb-4 last:prose-p:mb-0"
+                    dangerouslySetInnerHTML={{ __html: subtopic.content }}
+                  />
+                ) : null}
               </div>
             )}
             {subtopic.examples && subtopic.examples.length > 0 && (

@@ -43,7 +43,6 @@ export function QuestionHeader({
           router.push('/practice');
           return;
         }
-        console.log(topicData, 'topicData');
         setTopic(topicData);
 
         // In a real app, we would fetch questions from an API
