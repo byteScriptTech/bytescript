@@ -41,30 +41,46 @@ function Dashboard() {
                           </div>
                           <div className="grid auto-rows-max items-start gap-4 lg:gap-8">
                             <Notes />
-                            <Card
-                              className="border rounded-lg shadow-sm"
-                              x-chunk="dashboard-07-chunk-4"
-                            >
-                              <CardHeader>
-                                <CardTitle className="text-lg font-semibold text-gray-900">
-                                  Practice Problem Solving
-                                </CardTitle>
-                                <CardDescription className="text-gray-600">
-                                  Challenge yourself with new problems daily.
-                                </CardDescription>
+                            <Card className="bg-card/50 backdrop-blur-sm border-border/50">
+                              <CardHeader className="pb-3">
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <CardTitle className="text-lg font-semibold">
+                                      Practice Problem Solving
+                                    </CardTitle>
+                                    <CardDescription className="text-muted-foreground">
+                                      Challenge yourself with new problems daily
+                                    </CardDescription>
+                                  </div>
+                                  <div className="h-10 w-10 rounded-full bg-emerald-500/10 flex items-center justify-center">
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="20"
+                                      height="20"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      className="text-emerald-500"
+                                    >
+                                      <path d="M12 20h9" />
+                                      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                                    </svg>
+                                  </div>
+                                </div>
                               </CardHeader>
                               <CardContent>
-                                <div className="grid gap-4">
-                                  {/* <div className="text-gray-700">
-                                  <p>Progress: 20/50 problems completed</p>
-                                  <p>Next Topic: Dynamic Programming</p>
-                                </div> */}
-                                  <div className="text-center text-gray-500">
-                                    Coming Soon...
+                                <div className="space-y-4">
+                                  <div className="rounded-lg border border-dashed border-border p-4 text-center">
+                                    <p className="text-sm text-muted-foreground">
+                                      Coming soon with exciting new challenges
+                                    </p>
                                   </div>
                                   <Button
                                     disabled
-                                    className="w-full bg-[#00BFA6] hover:bg-[#00A38C]text-white rounded-md cursor-pointer"
+                                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white dark:bg-emerald-600/90 dark:hover:bg-emerald-700/90 transition-colors"
                                   >
                                     Start Today&apos;s Challenge
                                   </Button>

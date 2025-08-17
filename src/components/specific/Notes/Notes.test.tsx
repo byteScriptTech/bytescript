@@ -98,21 +98,61 @@ describe('Notes Component', () => {
   });
 
   it('displays note with edit and delete buttons', () => {
+    // Mock window.confirm to return true by default
+    const originalConfirm = window.confirm;
+    window.confirm = jest.fn(() => true);
+
     const note = {
       id: '1',
       content: 'Test note',
       createdAt: new Date(),
       updatedAt: new Date(),
     };
+
     (useNotes as jest.Mock).mockReturnValue(getBaseProps({ notes: [note] }));
     renderComponent();
 
+    // Test note content is displayed
     expect(screen.getByTestId('note-content')).toHaveTextContent('Test note');
 
+    // Test delete functionality
     fireEvent.click(screen.getByTestId('delete-note-btn'));
+    expect(window.confirm).toHaveBeenCalledWith(
+      'Are you sure you want to delete this note?'
+    );
     expect(mockHandleDeleteNote).toHaveBeenCalledWith('1');
 
+    // Test edit functionality
     fireEvent.click(screen.getByTestId('edit-note-btn'));
     expect(mockSetEditingNote).toHaveBeenCalledWith(note);
+
+    // Restore original confirm
+    window.confirm = originalConfirm;
+  });
+
+  it('does not delete note when confirmation is cancelled', () => {
+    // Mock window.confirm to return false
+    const originalConfirm = window.confirm;
+    window.confirm = jest.fn(() => false);
+
+    const note = {
+      id: '1',
+      content: 'Test note',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    (useNotes as jest.Mock).mockReturnValue(getBaseProps({ notes: [note] }));
+    renderComponent();
+
+    // Click delete but cancel the confirmation
+    fireEvent.click(screen.getByTestId('delete-note-btn'));
+    expect(window.confirm).toHaveBeenCalledWith(
+      'Are you sure you want to delete this note?'
+    );
+    expect(mockHandleDeleteNote).not.toHaveBeenCalled();
+
+    // Restore original confirm
+    window.confirm = originalConfirm;
   });
 });
