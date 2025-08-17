@@ -15,6 +15,8 @@ import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 import { ThemeToggle } from '@/components/settings/theme-toggle';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
@@ -94,13 +96,19 @@ function SettingsPage() {
           >
             Settings
           </h2>
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="p-2 rounded-md hover:bg-accent"
+            className="h-8 w-8"
             aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
-            {isCollapsed ? <ChevronRight /> : <ChevronLeft />}
-          </button>
+            {isCollapsed ? (
+              <ChevronRight className="h-4 w-4" />
+            ) : (
+              <ChevronLeft className="h-4 w-4" />
+            )}
+          </Button>
         </div>
         <nav className="p-2">
           <ul className="space-y-1">
@@ -159,14 +167,14 @@ function SettingsPage() {
                   >
                     Display Name
                   </label>
-                  <input
+                  <Input
                     id="displayName"
                     type="text"
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
-                    className="w-full px-2 py-1.5 text-sm border rounded-md"
                     placeholder="Enter your display name"
                     disabled={isLoading || isSaving}
+                    className="w-full"
                   />
                 </div>
                 <div>
@@ -176,21 +184,21 @@ function SettingsPage() {
                   >
                     Email
                   </label>
-                  <input
+                  <Input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-2 py-1.5 text-sm border rounded-md"
                     placeholder="your.email@example.com"
                     disabled={isLoading || isSaving}
+                    className="w-full"
                   />
                 </div>
               </div>
               <div className="flex justify-end mt-4">
-                <button
+                <Button
                   onClick={handleSaveProfile}
                   disabled={isLoading || isSaving}
-                  className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  className="gap-2"
                 >
                   {isSaving ? (
                     <>
@@ -200,7 +208,7 @@ function SettingsPage() {
                   ) : (
                     'Save Changes'
                   )}
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -220,9 +228,7 @@ function SettingsPage() {
           <Separator />
 
           <div className="pt-3 flex justify-end">
-            <button className="px-3 py-1.5 text-sm bg-primary text-white rounded-md hover:bg-primary/90 transition-colors">
-              Save Changes
-            </button>
+            <Button>Save Changes</Button>
           </div>
         </div>
       </div>

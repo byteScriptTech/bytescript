@@ -109,7 +109,7 @@ export const ContentProvider: React.FC<ContentProviderProps> = ({
   useEffect(() => {
     fetchContent(topicName);
     fetchScrollToViewList();
-  }, [topicName, fetchContent, fetchScrollToViewList]);
+  }, [topicName]);
 
   return (
     <ContentContext.Provider

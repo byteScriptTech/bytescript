@@ -1,7 +1,7 @@
 'use client';
 
 import { formatDistanceToNow } from 'date-fns';
-import { Plus, Pencil, Trash2, X } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, Save } from 'lucide-react';
 import React from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { useNotes } from '@/context/NotesContext';
-import type { EditableNote } from '@/context/NotesContext';
+import { cn } from '@/lib/utils';
 import { Note } from '@/services/firebase/notesService';
 
 export function Notes(): React.JSX.Element {
@@ -42,127 +42,159 @@ export function Notes(): React.JSX.Element {
   };
 
   return (
-    <Card x-chunk="dashboard-07-chunk-1" className="bg-white rounded-lg">
-      <CardHeader>
-        <CardTitle className="text-xl font-semibold text-gray-800">
-          Notes
-        </CardTitle>
-        <CardDescription className="text-sm text-gray-500">
-          Quick notes and reminders
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="mt-4 space-y-4">
-        <div className="flex flex-col gap-2 w-full">
-          <Textarea
-            placeholder="Write a new note..."
-            className="w-full"
-            value={newNoteContent}
-            onChange={(e) => setNewNoteContent(e.target.value)}
-            data-testid="new-note-textarea"
-          />
+    <Card className="w-full max-w-3xl mx-auto">
+      <CardHeader className="pb-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="text-2xl font-bold">Notes</CardTitle>
+            <CardDescription className="text-muted-foreground">
+              Your personal notes and reminders
+            </CardDescription>
+          </div>
           <Button
             onClick={handleCreate}
-            className="p-2"
+            size="sm"
+            className="gap-1.5"
+            disabled={!newNoteContent.trim()}
             data-testid="create-note-btn"
           >
-            <Plus className="h-4 text-white" />
+            <Plus className="h-4 w-4" />
+            <span>New Note</span>
           </Button>
         </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <Textarea
+            placeholder="Start typing a new note..."
+            className="min-h-[100px] resize-none"
+            value={newNoteContent}
+            onChange={(e) => setNewNoteContent(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleCreate();
+              }
+            }}
+            data-testid="new-note-textarea"
+          />
+        </div>
 
-        {notes.length === 0 ? (
-          <div className="text-center text-gray-500" data-testid="empty-state">
-            No notes available. Start by adding one!
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {notes.map((note) => (
-              <div
-                key={note.id}
-                className={`bg-gray-100 p-3 rounded-md shadow-sm transition-colors ${
-                  editingNote?.id === note.id
-                    ? 'bg-blue-50'
-                    : 'hover:bg-gray-200'
-                }`}
-              >
-                {editingNote?.id === note.id ? (
-                  <div className="flex flex-col gap-2">
-                    <Textarea
-                      value={note.content}
-                      onChange={(e) =>
-                        setEditingNote((prev: EditableNote | null) =>
-                          prev
-                            ? {
-                                ...prev,
-                                content: e.target.value,
-                                updatedAt: new Date(),
-                              }
-                            : null
-                        )
-                      }
-                      className="min-h-[100px]"
-                      data-testid="edit-note-textarea"
-                    />
-                    <div className="flex gap-2">
-                      <Button
-                        onClick={() => handleUpdate(note)}
-                        className="p-2 rounded-full bg-blue-50 hover:bg-blue-100"
-                        data-testid="save-note-btn"
-                      >
-                        <Pencil className="h-4 w-4 text-blue-600" />
-                      </Button>
-                      <Button
-                        onClick={() => setEditingNote(null)}
-                        className="p-2 rounded-full bg-gray-50 hover:bg-gray-100"
-                        data-testid="cancel-edit-btn"
-                      >
-                        <X className="h-4 w-4 text-gray-500" />
-                      </Button>
+        <div className="space-y-4">
+          {notes.length === 0 ? (
+            <div
+              className="text-center p-8 rounded-lg border border-dashed border-border"
+              data-testid="empty-state"
+            >
+              <p className="text-muted-foreground">
+                No notes yet. Start by adding your first note above!
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {notes.map((note) => (
+                <div
+                  key={note.id}
+                  className={cn(
+                    'group relative p-4 rounded-lg border transition-colors',
+                    'hover:bg-accent/50',
+                    editingNote?.id === note.id &&
+                      'ring-2 ring-ring ring-offset-2'
+                  )}
+                >
+                  {editingNote?.id === note.id ? (
+                    <div className="space-y-3">
+                      <Textarea
+                        value={editingNote.content}
+                        onChange={(e) =>
+                          setEditingNote((prev) =>
+                            prev
+                              ? {
+                                  ...prev,
+                                  content: e.target.value,
+                                  updatedAt: new Date(),
+                                }
+                              : null
+                          )
+                        }
+                        className="min-h-[120px] text-base"
+                        data-testid="edit-note-textarea"
+                      />
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setEditingNote(null)}
+                          data-testid="cancel-edit-btn"
+                        >
+                          <X className="h-4 w-4 mr-1" />
+                          Cancel
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={() => handleUpdate(note)}
+                          data-testid="save-note-btn"
+                        >
+                          <Save className="h-4 w-4 mr-1" />
+                          Save Changes
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                ) : (
-                  <div className="flex flex-col gap-2">
-                    <p
-                      className="text-gray-700 text-sm font-medium"
-                      data-testid="note-content"
-                    >
-                      &quot;{note.content}&quot;
-                    </p>
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs text-gray-400 mr-2">
-                        Last edited:{' '}
-                        {formatDistanceToNow(new Date(note.updatedAt), {
-                          addSuffix: true,
-                        })}
-                      </span>
-                      <div className="flex gap-2">
-                        <div
-                          role="button"
-                          tabIndex={0}
-                          onKeyDown={() => setEditingNote(note)}
-                          onClick={() => setEditingNote(note)}
-                          className="cursor-pointer"
-                          data-testid="edit-note-btn"
-                        >
-                          <Pencil className="h-4 w-4 text-blue-600 hover:text-blue-800" />
-                        </div>
-                        <div
-                          role="button"
-                          tabIndex={0}
-                          onKeyDown={() => handleDeleteNote(note.id)}
-                          onClick={() => handleDeleteNote(note.id)}
-                          className="cursor-pointer"
-                          data-testid="delete-note-btn"
-                        >
-                          <Trash2 className="h-4 w-4 text-red-600 hover:text-red-800" />
+                  ) : (
+                    <div className="space-y-3">
+                      <p
+                        className="whitespace-pre-wrap text-foreground"
+                        data-testid="note-content"
+                      >
+                        {note.content}
+                      </p>
+                      <div className="flex items-center justify-between text-sm text-muted-foreground">
+                        <span>
+                          Last edited:{' '}
+                          {formatDistanceToNow(new Date(note.updatedAt), {
+                            addSuffix: true,
+                          })}
+                        </span>
+                        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => setEditingNote(note)}
+                            data-testid="edit-note-btn"
+                            title="Edit note"
+                          >
+                            <Pencil className="h-4 w-4" />
+                            <span className="sr-only">Edit note</span>
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive hover:text-destructive"
+                            onClick={() => {
+                              if (
+                                confirm(
+                                  'Are you sure you want to delete this note?'
+                                )
+                              ) {
+                                handleDeleteNote(note.id);
+                              }
+                            }}
+                            data-testid="delete-note-btn"
+                            title="Delete note"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            <span className="sr-only">Delete note</span>
+                          </Button>
                         </div>
                       </div>
                     </div>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
