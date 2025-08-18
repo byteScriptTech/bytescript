@@ -119,13 +119,13 @@ export default function ProblemEditor({
             {activeTab === 'testResults' ? (
               <div>
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-                  <h2 className="text-base sm:text-lg font-semibold text-gray-900">
+                  <h2 className="text-base sm:text-lg font-semibold text-foreground">
                     Test Results
                   </h2>
                   <div className="flex items-center gap-3 text-sm">
-                    <span className="text-gray-600">
+                    <span className="text-muted-foreground">
                       Passed:{' '}
-                      <span className="font-medium">
+                      <span className="font-medium text-foreground">
                         {
                           executionResult.testResults.filter((r) => r.passed)
                             .length
@@ -136,8 +136,8 @@ export default function ProblemEditor({
                     <span
                       className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                         executionResult.testResults.every((r) => r.passed)
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-yellow-100 text-yellow-800'
+                          ? 'bg-green-500/10 text-green-600 dark:text-green-400'
+                          : 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400'
                       }`}
                     >
                       {executionResult.testResults.every((r) => r.passed)
@@ -153,8 +153,8 @@ export default function ProblemEditor({
                       key={index}
                       className={`p-3 sm:p-4 rounded-lg border ${
                         result.passed
-                          ? 'bg-green-50 border-green-100'
-                          : 'bg-red-50 border-red-100'
+                          ? 'bg-green-500/5 border-green-500/20 dark:bg-green-500/10 dark:border-green-500/20'
+                          : 'bg-red-500/5 border-red-500/20 dark:bg-red-500/10 dark:border-red-500/20'
                       }`}
                     >
                       <div className="flex items-center gap-3">
@@ -179,10 +179,10 @@ export default function ProblemEditor({
 
                           <div className="mt-2 space-y-2 text-xs sm:text-sm">
                             <div className="flex flex-col sm:flex-row gap-1 sm:items-start">
-                              <span className="font-medium text-gray-700 w-20 sm:w-24 flex-shrink-0 mt-1">
+                              <span className="font-medium text-foreground w-20 sm:w-24 flex-shrink-0 mt-1">
                                 Input:
                               </span>
-                              <pre className="whitespace-pre-wrap break-words bg-white/50 p-2 rounded border border-gray-100 overflow-x-auto flex-1 font-mono text-sm">
+                              <pre className="whitespace-pre-wrap break-words bg-background/50 p-2 rounded border border-border overflow-x-auto flex-1 font-mono text-sm">
                                 {typeof testCases[index].input === 'string'
                                   ? testCases[index].input
                                   : JSON.stringify(
@@ -193,10 +193,10 @@ export default function ProblemEditor({
                               </pre>
                             </div>
                             <div className="flex flex-col sm:flex-row gap-1 sm:items-start">
-                              <span className="font-medium text-gray-700 w-20 sm:w-24 flex-shrink-0 mt-1">
+                              <span className="font-medium text-foreground w-20 sm:w-24 flex-shrink-0 mt-1">
                                 Expected:
                               </span>
-                              <pre className="whitespace-pre-wrap break-words bg-white/50 p-2 rounded border border-gray-100 overflow-x-auto flex-1 font-mono text-sm">
+                              <pre className="whitespace-pre-wrap break-words bg-background/50 p-2 rounded border border-border overflow-x-auto flex-1 font-mono text-sm">
                                 {typeof testCases[index].expectedOutput ===
                                 'string'
                                   ? testCases[index].expectedOutput
@@ -208,21 +208,21 @@ export default function ProblemEditor({
                               </pre>
                             </div>
                             <div className="flex flex-col sm:flex-row gap-1 sm:items-start">
-                              <span className="font-medium text-gray-700 w-20 sm:w-24 flex-shrink-0 mt-1">
+                              <span className="font-medium text-foreground w-20 sm:w-24 flex-shrink-0 mt-1">
                                 Output:
                               </span>
                               <pre
-                                className={`whitespace-pre-wrap break-words bg-white/50 p-2 rounded border ${
+                                className={`whitespace-pre-wrap break-words bg-background/50 p-2 rounded border ${
                                   result.passed
-                                    ? 'border-green-100'
-                                    : 'border-red-100'
+                                    ? 'border-green-500/20'
+                                    : 'border-red-500/20'
                                 } overflow-x-auto flex-1 font-mono text-sm`}
                               >
                                 {result.output || '(no output)'}
                               </pre>
                             </div>
                             {result.error && (
-                              <div className="mt-1 text-red-600 text-xs sm:text-sm bg-red-50 p-2 rounded border border-red-100">
+                              <div className="mt-1 text-red-600 dark:text-red-400 text-xs sm:text-sm bg-red-500/10 p-2 rounded border border-red-500/20">
                                 Error: {result.error}
                               </div>
                             )}
@@ -234,10 +234,10 @@ export default function ProblemEditor({
                 </div>
               </div>
             ) : (
-              <div className="bg-black text-green-400 font-mono text-sm p-4 rounded-md h-[calc(40vh-8rem)] overflow-auto">
+              <div className="bg-background border border-border text-foreground font-mono text-sm p-4 rounded-md h-[calc(40vh-8rem)] overflow-auto">
                 {executionResult.testResults.map((result, index) => (
                   <div key={index} className="mb-4">
-                    <div className="text-blue-300 mb-1">
+                    <div className="text-blue-500 dark:text-blue-400 mb-1">
                       Test Case {index + 1}:
                     </div>
                     {result.consoleOutput ? (
@@ -245,14 +245,16 @@ export default function ProblemEditor({
                         {result.consoleOutput}
                       </pre>
                     ) : (
-                      <div className="text-gray-500">No console output</div>
+                      <div className="text-muted-foreground">
+                        No console output
+                      </div>
                     )}
                     {result.error && (
-                      <div className="text-red-400 mt-1">
+                      <div className="text-red-500 dark:text-red-400 mt-1">
                         Error: {result.error}
                       </div>
                     )}
-                    <div className="text-xs text-gray-500 mt-1">
+                    <div className="text-xs text-muted-foreground mt-1">
                       Execution time: {result.executionTime.toFixed(2)}ms
                     </div>
                   </div>

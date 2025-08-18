@@ -163,7 +163,7 @@ const ProblemPageContent = () => {
     };
 
     try {
-      // Parse the input and handle different input formats
+      // Parse the input as JSON array
       let fnArgs: unknown[] = [];
 
       if (Array.isArray(input)) {
@@ -171,76 +171,10 @@ const ProblemPageContent = () => {
         fnArgs = input;
       } else if (typeof input === 'string') {
         try {
-          // Try to parse as JSON array or object first
-          if (input.trim().startsWith('[') || input.trim().startsWith('{')) {
-            const parsed = JSON.parse(input);
-            fnArgs = Array.isArray(parsed) ? parsed : [parsed];
-          } else {
-            // Handle the format "nums = [1,2,3], target = 9"
-            const params: Record<string, any> = {};
-            const paramRegex =
-              /(\w+)\s*=\s*((?:\[.*?\])|(?:\{.*?\})|[^,]+)(?:,|$)/g;
-            let match;
-
-            while ((match = paramRegex.exec(input)) !== null) {
-              let [, key, value] = match;
-              key = key.trim();
-              value = value.trim();
-
-              // Remove any surrounding quotes
-              if (
-                (value.startsWith('"') && value.endsWith('"')) ||
-                (value.startsWith("'") && value.endsWith("'"))
-              ) {
-                value = value.slice(1, -1);
-              }
-
-              try {
-                // Try to parse as JSON first
-                params[key] = value ? JSON.parse(value) : value;
-              } catch (e) {
-                // If not valid JSON, try to parse as number/boolean
-                if (/^\d+$/.test(value)) {
-                  params[key] = parseInt(value, 10);
-                } else if (/^\d*\.\d+$/.test(value)) {
-                  params[key] = parseFloat(value);
-                } else if (value === 'true') {
-                  params[key] = true;
-                } else if (value === 'false') {
-                  params[key] = false;
-                } else if (value === 'null') {
-                  params[key] = null;
-                } else {
-                  params[key] = value;
-                }
-              }
-            }
-
-            if (Object.keys(params).length > 0) {
-              // If we successfully parsed named parameters, convert to array
-              if ('nums' in params) fnArgs.push(params.nums);
-              if ('target' in params) fnArgs.push(params.target);
-            } else {
-              // Fallback to simple parsing if no named parameters found
-              fnArgs = input.split(',').map((arg) => {
-                const trimmedArg = arg.trim();
-                // Try to parse as JSON
-                try {
-                  return JSON.parse(trimmedArg);
-                } catch (parseError) {
-                  // If not valid JSON, try to parse as number/boolean
-                  if (/^\d+$/.test(trimmedArg)) return parseInt(trimmedArg, 10);
-                  if (/^\d*\.\d+$/.test(trimmedArg))
-                    return parseFloat(trimmedArg);
-                  if (trimmedArg === 'true') return true;
-                  if (trimmedArg === 'false') return false;
-                  if (trimmedArg === 'null') return null;
-                  // Remove surrounding quotes if present
-                  return trimmedArg.replace(/^['"](.*)['"]$/, '$1');
-                }
-              });
-            }
-          }
+          // Parse the entire input string as JSON
+          const parsed = JSON.parse(input);
+          // If it's an array, use it directly, otherwise wrap it in an array
+          fnArgs = Array.isArray(parsed) ? parsed : [parsed];
         } catch (e) {
           console.error('Error parsing input:', e);
           // If parsing fails, use the input as is
@@ -341,6 +275,7 @@ const ProblemPageContent = () => {
             code,
             testCase.input
           );
+
           const executionTime = performance.now() - startTime;
 
           // Parse the expected and actual outputs for comparison
