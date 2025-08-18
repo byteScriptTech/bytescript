@@ -5,6 +5,7 @@ import React from 'react';
 
 import LandingPageHeader from '@/components/specific/LandingPageHeader';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 const CommunityPage = () => {
   const router = useRouter();
@@ -15,7 +16,10 @@ const CommunityPage = () => {
 
   return (
     <div
-      className="relative flex size-full min-h-screen flex-col bg-white group/design-root overflow-x-hidden"
+      className={cn(
+        'relative flex size-full min-h-screen flex-col group/design-root overflow-x-hidden transition-colors duration-200',
+        'bg-background text-foreground'
+      )}
       style={{ fontFamily: "Manrope, 'Noto Sans', sans-serif" }}
     >
       <div className="layout-container flex h-full grow flex-col">
@@ -26,10 +30,10 @@ const CommunityPage = () => {
           <div className="layout-content-container flex flex-col max-w-[960px] flex-1">
             <div className="flex flex-col gap-10 px-4 py-10">
               <div className="flex flex-col gap-6 text-center">
-                <h1 className="text-black text-4xl font-black leading-tight tracking-[-0.033em] @[480px]:text-5xl @[480px]:font-black @[480px]:leading-tight @[480px]:tracking-[-0.033em]">
+                <h1 className="text-foreground text-4xl font-black leading-tight tracking-[-0.033em] @[480px]:text-5xl @[480px]:font-black @[480px]:leading-tight @[480px]:tracking-[-0.033em]">
                   Join Our Community
                 </h1>
-                <h2 className="text-black text-base font-normal leading-relaxed max-w-[600px] mx-auto @[480px]:text-xl @[480px]:font-normal @[480px]:leading-relaxed">
+                <h2 className="text-muted-foreground text-base font-normal leading-relaxed max-w-[600px] mx-auto @[480px]:text-xl @[480px]:font-normal @[480px]:leading-relaxed">
                   Connect with fellow learners, share your progress, and get the
                   latest updates from the biteScript community.
                 </h2>
@@ -37,7 +41,7 @@ const CommunityPage = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto w-full mt-8 px-4">
                 {/* Instagram Card */}
-                <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 transition-all hover:shadow-md">
+                <div className="bg-card text-card-foreground rounded-xl shadow-sm overflow-hidden border border-border transition-all hover:shadow-md">
                   <div className="p-6">
                     <div className="flex items-center gap-4 mb-4">
                       <div className="p-3 bg-gradient-to-br from-pink-500 to-purple-600 rounded-lg">
@@ -54,11 +58,11 @@ const CommunityPage = () => {
                           />
                         </svg>
                       </div>
-                      <h3 className="text-2xl font-bold text-gray-900">
+                      <h3 className="text-2xl font-bold text-card-foreground">
                         Instagram
                       </h3>
                     </div>
-                    <p className="text-gray-600 mb-6">
+                    <p className="text-muted-foreground mb-6">
                       Follow us on Instagram for daily coding tips, and
                       community highlights.
                     </p>
@@ -66,7 +70,7 @@ const CommunityPage = () => {
                       href="https://instagram.com/bitescript.fun"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center justify-center w-full px-5 py-2.5 text-sm font-medium text-white bg-gradient-to-br from-pink-500 to-purple-600 rounded-lg hover:opacity-90 transition-opacity"
+                      className="inline-flex items-center justify-center w-full px-5 py-2.5 text-sm font-medium text-primary-foreground bg-gradient-to-br from-primary to-primary/80 rounded-lg hover:opacity-90 transition-opacity"
                     >
                       Follow @bitescript.fun
                     </a>
@@ -74,7 +78,7 @@ const CommunityPage = () => {
                 </div>
 
                 {/* X (Twitter) Card */}
-                <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 transition-all hover:shadow-md">
+                <div className="bg-card text-card-foreground rounded-xl shadow-sm overflow-hidden border border-border transition-all hover:shadow-md">
                   <div className="p-6">
                     <div className="flex items-center gap-4 mb-4">
                       <div className="p-3 bg-black rounded-lg">
@@ -87,11 +91,11 @@ const CommunityPage = () => {
                           <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                         </svg>
                       </div>
-                      <h3 className="text-2xl font-bold text-gray-900">
+                      <h3 className="text-2xl font-bold text-card-foreground">
                         X (Twitter)
                       </h3>
                     </div>
-                    <p className="text-gray-600 mb-6">
+                    <p className="text-muted-foreground mb-6">
                       Join the conversation on X for the latest updates, coding
                       challenges, and community discussions.
                     </p>
@@ -99,7 +103,7 @@ const CommunityPage = () => {
                       href="https://twitter.com/bitescript"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center justify-center w-full px-5 py-2.5 text-sm font-medium text-white bg-black rounded-lg hover:bg-gray-900 transition-colors"
+                      className="inline-flex items-center justify-center w-full px-5 py-2.5 text-sm font-medium text-primary-foreground bg-foreground rounded-lg hover:opacity-90 transition-opacity"
                     >
                       Follow @bitescript
                     </a>
@@ -108,10 +112,10 @@ const CommunityPage = () => {
               </div>
 
               <div className="mt-12 text-center">
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                <h3 className="text-2xl font-bold text-card-foreground mb-4">
                   #biteScriptCommunity
                 </h3>
-                <p className="text-gray-600 max-w-2xl mx-auto mb-8">
+                <p className="text-muted-foreground max-w-2xl mx-auto mb-8">
                   Share your coding journey with us using #biteScriptCommunity
                   for a chance to be featured on our social media!
                 </p>
