@@ -1,12 +1,20 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-echo "🔨 Building the project..."
-npm run build
+build_project() {
+  echo "🔨 Building the project..."
+  npm run build
+  return $?
+}
 
-if [ $? -ne 0 ]; then
-  echo "❌ Build failed. Please fix the build errors before pushing."
-  exit 1
+# Try building first
+if ! build_project; then
+  echo "⚠️  Build failed, cleaning cache and retrying..."
+  rm -rf .next
+  if ! build_project; then
+    echo "❌ Build failed after cache clean. Please check your changes."
+    exit 1
+  fi
 fi
 
 echo "🧪 Running all tests before push..."
