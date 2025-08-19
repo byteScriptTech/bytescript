@@ -75,7 +75,7 @@ describe('LearnTopicCard', () => {
     const card = screen.getByRole('button');
     fireEvent.click(card);
 
-    expect(mockRouter.push).toHaveBeenCalledWith('/data-structures');
+    expect(mockRouter.push).toHaveBeenCalledWith('/learn/data-structures');
   });
 
   it('calls onTopicClick when provided', () => {

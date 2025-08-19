@@ -27,7 +27,7 @@ export const LearnTopicCard: React.FC<LearnTopicCardProps> = ({
       if (name === 'competitive-programming') {
         router.push('/competitive-programming');
       } else if (name === 'data-structures-&-algorithms') {
-        router.push('/data-structures');
+        router.push('/learn/data-structures');
       } else {
         router.push(`/learn/${name}`);
       }
