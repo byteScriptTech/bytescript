@@ -44,6 +44,7 @@
     "firebase": "^10.14.1",
     "framer-motion": "^11.11.8",
     "highlight.js": "^11.11.1",
+    "lodash": "^4.17.21",
     "lucide-react": "^0.447.0",
     "monaco-editor": "^0.52.2",
     "next": "14.2.14",
@@ -77,10 +78,11 @@
     ]
   },
   "devDependencies": {
-    "@testing-library/jest-dom": "^6.5.0",
-    "@testing-library/react": "^16.0.1",
+    "@testing-library/jest-dom": "^6.7.0",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
     "@types/jest": "^29.5.13",
-    "@types/lodash": "^4.17.10",
+    "@types/lodash": "^4.17.20",
     "@types/node": "^20.19.9",
     "@types/react": "^18",
     "@types/react-dom": "^18",
