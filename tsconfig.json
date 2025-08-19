@@ -28,7 +28,8 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "src/components/specific/AddLanguageForm"
+    "src/components/specific/AddLanguageForm",
+    "src/app/learn/data-structures/.test.tsx"
   ],
   "exclude": ["node_modules"]
 }

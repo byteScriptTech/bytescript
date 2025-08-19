@@ -23,7 +23,7 @@ export const LanguagesList = () => {
     if (name === 'competitive-programming') {
       router.push('/competitive-programming');
     } else if (name === 'data-structures-&-algorithms') {
-      router.push('/data-structures');
+      router.push('/learn/data-structures');
     } else if (name === 'javascript') {
       router.push('/learn/javascript');
     } else if (name === 'python') {

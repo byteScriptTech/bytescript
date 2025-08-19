@@ -23,7 +23,10 @@ export default async function DSATopicPage({ params }: DSATopicPageProps) {
     return (
       <div className="mx-auto max-w-4xl px-4 py-6 sm:px-8 sm:py-8 md:px-12 md:py-10 lg:px-16">
         <Button variant="ghost" asChild className="mb-6 sm:mb-8">
-          <Link href="/data-structures" className="flex items-center gap-2">
+          <Link
+            href="/learn/data-structures"
+            className="flex items-center gap-2"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="16"
