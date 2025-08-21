@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface QuestionCardProps {
+  id: string;
   question: string;
   answer: string;
   defaultOpen?: boolean;
