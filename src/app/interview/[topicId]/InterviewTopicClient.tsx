@@ -6,6 +6,7 @@ import { useParams } from 'next/navigation';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { InterviewQuestionsList } from '@/components/interview/InterviewQuestionsList';
+import { AnswerSection } from '@/components/interview/types';
 import { Button } from '@/components/ui/button';
 import { interviewService } from '@/services/interviewService';
 
@@ -30,27 +31,29 @@ export default function InterviewTopicClient() {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [questionsPerPage, setQuestionsPerPage] = useState(10);
+  const [difficultyFilter, setDifficultyFilter] = useState<
+    'all' | 'easy' | 'medium' | 'hard'
+  >('all');
 
-  // Handle search
+  // Filter questions based on search query and difficulty
   const filteredQuestions = useMemo(() => {
-    if (!searchQuery) return questions;
-    const query = searchQuery.toLowerCase();
-    return questions.filter(
-      (q) =>
-        q.question.toLowerCase().includes(query) ||
-        q.answer.some((a) => {
-          if (typeof a.content === 'string') {
-            return a.content.toLowerCase().includes(query);
-          }
-          if (Array.isArray(a.content)) {
-            return a.content.some(
-              (c) => typeof c === 'string' && c.toLowerCase().includes(query)
-            );
-          }
-          return false;
-        })
-    );
-  }, [questions, searchQuery]);
+    return questions.filter((q) => {
+      const matchesSearch = searchQuery
+        ? q.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          q.answer.some(
+            (ans) =>
+              ans.type === 'text' &&
+              typeof ans.content === 'string' &&
+              ans.content.toLowerCase().includes(searchQuery.toLowerCase())
+          )
+        : true;
+
+      const matchesDifficulty =
+        difficultyFilter === 'all' || q.difficulty === difficultyFilter;
+
+      return matchesSearch && matchesDifficulty;
+    });
+  }, [questions, searchQuery, difficultyFilter]);
 
   // Pagination
   const totalPages = Math.ceil(filteredQuestions.length / questionsPerPage);
@@ -68,14 +71,7 @@ export default function InterviewTopicClient() {
     const fetchQuestions = async () => {
       try {
         setLoading(true);
-        console.log(`[DEBUG] Fetching questions for topic: ${topicId}`);
-        console.log('[DEBUG] interviewService:', interviewService);
-
         const questions = await interviewService.getQuestionsByTopic(topicId);
-        console.log(
-          '[DEBUG] Raw response from getQuestionsByTopic:',
-          questions
-        );
 
         if (!questions) {
           console.error('[ERROR] No questions array returned from service');
@@ -89,9 +85,6 @@ export default function InterviewTopicClient() {
           return;
         }
 
-        console.log(
-          `[DEBUG] Successfully loaded ${questions.length} questions`
-        );
         setQuestions(questions);
         setSearchQuery('');
       } catch (err) {
@@ -119,39 +112,28 @@ export default function InterviewTopicClient() {
     setCurrentPage(1); // Reset to first page when changing items per page
   };
 
-  // Format questions for display
-  const formatQuestion = (q: Question) => {
-    const answerText = q.answer
+  // Format questions for display in the list
+  const formatQuestionForList = (q: Question) => ({
+    id: q.id,
+    question: q.question,
+    answer: q.answer
       .map((a) => {
         if (a.type === 'text' && typeof a.content === 'string') {
           return a.content;
         }
         if (
           a.type === 'code' &&
-          a.content &&
           typeof a.content === 'object' &&
-          !Array.isArray(a.content) &&
-          'code' in a.content
+          !Array.isArray(a.content)
         ) {
           return `\`\`\`${a.content.language || ''}\n${a.content.code}\n\`\`\``;
-        }
-        if (Array.isArray(a.content)) {
-          return a.content.join('\n');
         }
         return '';
       })
       .filter(Boolean)
-      .join('\n\n');
-
-    return {
-      id: q.id,
-      question: q.question,
-      answer: answerText,
-    };
-  };
-
-  // Format all questions for display
-  const formattedQuestions = paginatedQuestions.map(formatQuestion);
+      .join('\n\n'),
+    answerArray: q.answer as AnswerSection[],
+  });
 
   if (loading) {
     return (
@@ -162,45 +144,11 @@ export default function InterviewTopicClient() {
             Back to topics
           </Link>
         </Button>
-
         <h1 className="text-3xl font-bold mb-6 capitalize">
           {topicId} Interview Questions
         </h1>
-
-        <div className="space-y-6">
-          <div className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-            {`${filteredQuestions.length} ${filteredQuestions.length === 1 ? 'question' : 'questions'}`}
-            {searchQuery && ` matching "${searchQuery}"`}
-          </div>
-
-          <InterviewQuestionsList
-            questions={formattedQuestions}
-            searchQuery={searchQuery}
-          />
-
-          {totalPages > 1 && (
-            <div className="flex justify-center space-x-2 mt-4">
-              <button
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-                className="px-4 py-2 border rounded-md disabled:opacity-50"
-              >
-                Previous
-              </button>
-              <span className="px-4 py-2">
-                Page {currentPage} of {totalPages}
-              </span>
-              <button
-                onClick={() =>
-                  setCurrentPage((p) => Math.min(totalPages, p + 1))
-                }
-                disabled={currentPage === totalPages}
-                className="px-4 py-2 border rounded-md disabled:opacity-50"
-              >
-                Next
-              </button>
-            </div>
-          )}
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary" />
         </div>
       </div>
     );
@@ -261,19 +209,33 @@ export default function InterviewTopicClient() {
               </select>
             </div>
             <div className="relative w-full sm:w-64">
-              <input
-                type="text"
-                placeholder="Search questions..."
-                value={searchQuery}
-                onChange={(e) => handleSearch(e.target.value)}
-                className="w-full px-3 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-background dark:border-input dark:text-foreground dark:placeholder-muted-foreground"
-              />
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Search questions..."
+                  value={searchQuery}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    handleSearch(e.target.value)
+                  }
+                  className="w-full px-3 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-background dark:border-input dark:text-foreground dark:placeholder-muted-foreground"
+                />
+                <select
+                  value={difficultyFilter}
+                  onChange={(e) => setDifficultyFilter(e.target.value as any)}
+                  className="px-3 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-background dark:border-input dark:text-foreground"
+                >
+                  <option value="all">All Levels</option>
+                  <option value="easy">Easy</option>
+                  <option value="medium">Medium</option>
+                  <option value="hard">Hard</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>
 
         <InterviewQuestionsList
-          questions={formattedQuestions}
+          questions={paginatedQuestions.map(formatQuestionForList)}
           searchQuery={searchQuery}
         />
 

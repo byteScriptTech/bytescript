@@ -107,7 +107,6 @@ class InterviewService {
         }
       });
 
-      console.log(`Successfully processed ${questions.length} questions`);
       return questions;
     } catch (error) {
       const errorMessage =

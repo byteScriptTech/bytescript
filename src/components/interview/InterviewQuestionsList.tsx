@@ -4,10 +4,13 @@ import React, { useMemo } from 'react';
 
 import { QuestionCard } from '@/components/interview/QuestionCard';
 
+import { AnswerSection } from './types';
+
 interface Question {
   id: string;
   question: string;
   answer: string;
+  answerArray?: AnswerSection[];
 }
 
 interface InterviewQuestionsListProps {
@@ -22,11 +25,14 @@ export function InterviewQuestionsList({
   const filteredQuestions = useMemo(() => {
     if (!searchQuery) return questions;
     const query = searchQuery.toLowerCase();
-    return questions.filter(
-      (q) =>
+
+    return questions.filter((q) => {
+      // Check if question or answer string matches
+      return (
         q.question.toLowerCase().includes(query) ||
-        q.answer.toLowerCase().includes(query)
-    );
+        (typeof q.answer === 'string' && q.answer.toLowerCase().includes(query))
+      );
+    });
   }, [questions, searchQuery]);
 
   return (
@@ -39,7 +45,7 @@ export function InterviewQuestionsList({
               key={q.id}
               id={q.id}
               question={q.question}
-              answer={q.answer}
+              answerArray={q.answerArray || []}
             />
           ))
         ) : (
