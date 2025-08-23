@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import * as React from 'react';
+const { useState, useRef, useEffect, useCallback } = React;
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 
 type ExecutionResult = {
@@ -59,7 +60,7 @@ export default function CodeEditor() {
     return { output, error, stack, executionTime };
   };
 
-  const handleRunCode = () => {
+  const handleRunCode = useCallback((): void => {
     if (isRunning) return;
 
     setIsRunning(true);
@@ -83,25 +84,25 @@ export default function CodeEditor() {
         setIsRunning(false);
       }
     }, 100);
-  };
+  }, [code, isRunning]);
 
-  const clearOutput = () => {
+  const clearOutput = React.useCallback((): void => {
     setResult(null);
-  };
+  }, []);
 
   // Handle keyboard shortcut (Ctrl+Enter)
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
+    const handleKeyDown = (e: KeyboardEvent): void => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
         handleRunCode();
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
-    return () => {
+    return (): void => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [code]);
+  }, [handleRunCode]);
 
   // Auto-resize textarea
   useEffect(() => {
@@ -127,271 +128,136 @@ export default function CodeEditor() {
     }
   }, [result]);
 
-  const renderEditor = (isMobile = false) => (
-    <div className={`flex-1 flex flex-col ${!isMobile ? 'h-full' : 'h-64'}`}>
-      <div className="flex items-center justify-between p-2 border-b bg-muted/30">
-        <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
-          <svg
-            className="w-4 h-4 text-yellow-500"
-            fill="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path d="M3 3h18v18H3V3zm16 16V5H5v14h14zM15 7h2v2h-2V7zm-4 0h2v2h-2V7zM7 7h2v2H7V7zm8 4h2v2h-2v-2zm-4 0h2v2h-2v-2zm-4 0h2v2H7v-2zm8 4h2v2h-2v-2zm-4 0h2v2h-2v-2zm-4 0h2v2H7v-2z" />
-          </svg>
-          script.js
-        </div>
-        {!isMobile && (
-          <button
-            onClick={handleRunCode}
-            disabled={isRunning}
-            className="p-1 text-gray-500 hover:text-gray-700 disabled:opacity-50"
-            title="Run (Ctrl+Enter)"
-          >
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
-              />
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-          </button>
-        )}
-      </div>
-      <div className="relative flex-1">
-        <textarea
-          ref={textareaRef}
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-          className="w-full h-full p-4 font-mono text-sm bg-background text-foreground focus:outline-none resize-none"
-          spellCheck="false"
-          placeholder="// Enter your JavaScript code here..."
-          style={{
-            lineHeight: '1.5',
-            tabSize: 2,
-          }}
-        />
-      </div>
-    </div>
-  );
-
-  const renderOutput = (isMobile = false) => (
-    <div className={`flex-1 flex flex-col ${!isMobile ? 'h-full' : 'h-48'}`}>
-      <div className="flex items-center justify-between p-2 border-b bg-muted/50">
-        <div className="flex items-center gap-2 text-xs font-medium text-foreground">
-          <svg
-            className="w-4 h-4 text-green-500"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
-          <span className="font-mono font-semibold">Console</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={clearOutput}
-            className="p-1.5 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-            title="Clear console"
-            aria-label="Clear console"
-          >
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-              />
-            </svg>
-          </button>
-        </div>
-      </div>
-      <div
-        ref={outputRef}
-        className={`overflow-auto p-4 text-sm bg-background ${!isMobile ? 'h-full' : 'h-48'}`}
-      >
-        {result ? (
-          <div className="space-y-4">
-            {result.output && (
-              <div className="mb-4 last:mb-0">
-                <div className="text-xs font-mono font-semibold text-muted-foreground mb-1.5 flex items-center">
-                  <span className="inline-block w-2 h-2 rounded-full bg-green-500 mr-2"></span>
-                  Output:
-                </div>
-                <div className="font-mono text-sm text-foreground bg-muted/20 p-3 rounded-md whitespace-pre-wrap border border-muted/30">
-                  {result.output}
-                </div>
-              </div>
-            )}
-            {result.error && (
-              <div className="mb-4 last:mb-0">
-                <div className="text-xs font-mono font-semibold text-destructive mb-1.5 flex items-center">
-                  <span className="inline-block w-2 h-2 rounded-full bg-destructive mr-2"></span>
-                  Error:
-                </div>
-                <div className="font-mono text-sm text-destructive bg-destructive/5 p-3 rounded-md whitespace-pre-wrap border border-destructive/20">
-                  {result.error}
-                </div>
-              </div>
-            )}
-            {result.stack && (
-              <div className="mb-4 last:mb-0">
-                <div className="text-xs font-mono font-semibold text-destructive/80 mb-1.5 flex items-center">
-                  <span className="inline-block w-2 h-2 rounded-full bg-destructive/80 mr-2"></span>
-                  Stack Trace:
-                </div>
-                <div className="font-mono text-xs text-destructive/80 bg-destructive/5 p-3 rounded-md overflow-x-auto border border-destructive/10">
-                  <pre className="whitespace-pre-wrap break-all">
-                    {result.stack}
-                  </pre>
-                </div>
-              </div>
-            )}
-            {result.executionTime !== undefined && (
-              <div className="text-xs text-muted-foreground mt-4 pt-3 border-t border-border/50">
-                <span className="inline-flex items-center gap-1.5">
-                  <svg
-                    className="w-3.5 h-3.5 text-muted-foreground/70"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={1.5}
-                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                  <span className="font-mono">
-                    Executed in {result.executionTime.toFixed(2)}ms
-                  </span>
-                </span>
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center h-full p-8 text-center">
-            <div className="w-16 h-16 mb-4 text-muted-foreground/30">
-              <svg
-                className="w-full h-full"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.2}
-                  d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-                />
-              </svg>
-            </div>
-            <p className="text-muted-foreground/80">
-              Click &quot;Run Code&quot; to execute your code
-            </p>
-            <p className="text-xs text-muted-foreground/50 mt-2">
-              Output will appear here
-            </p>
-          </div>
-        )}
-      </div>
-    </div>
+  const [algorithm, setAlgorithm] = useState<string>(
+    '// Write your algorithm here\n'
   );
 
   return (
-    <div className="flex flex-col h-full p-4 bg-background">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
-        <div className="flex items-center gap-2">
-          <h2 className="text-base sm:text-lg font-semibold text-foreground">
-            JavaScript Playground
-          </h2>
-        </div>
-        <button
-          onClick={handleRunCode}
-          disabled={isRunning}
-          className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-white rounded-md disabled:opacity-50 disabled:cursor-not-allowed
-                    bg-[#00BFA6] hover:bg-[#00c7ae] focus:outline-none focus:ring-2 focus:ring-[#00BFA6] transition-colors flex items-center justify-center gap-1.5"
+    <div className="flex flex-col h-full bg-background rounded-lg overflow-hidden border">
+      <PanelGroup direction="horizontal" className="flex-1">
+        {/* Algorithm Editor Panel */}
+        <Panel
+          defaultSize={30}
+          minSize={20}
+          className="flex flex-col border-r border-border"
         >
-          <svg
-            className="w-4 h-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
+          <div className="flex items-center justify-between p-2 border-b bg-muted/10">
+            <div className="text-sm font-medium px-2">Algorithm</div>
+            <div className="flex items-center text-xs text-muted-foreground">
+              <span>Markdown Supported</span>
+            </div>
+          </div>
+          <div className="flex-1 overflow-auto">
+            <textarea
+              value={algorithm}
+              onChange={(e) => setAlgorithm(e.target.value)}
+              className="w-full h-full p-4 font-mono text-sm bg-background text-foreground outline-none resize-none"
+              spellCheck={false}
+              placeholder="// Write your algorithm or notes here..."
+              style={{
+                tabSize: 2,
+                lineHeight: '1.5',
+                fontFeatureSettings: '"rlig" 1, "calt" 1',
+              }}
             />
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
-          {isRunning ? 'Running...' : 'Run Code'}
-        </button>
-      </div>
+          </div>
+        </Panel>
 
-      {/* Desktop View - Side by Side Panels */}
-      <div className="hidden md:block flex-1 rounded-lg overflow-hidden border border-border bg-background shadow-sm">
-        <PanelGroup direction="horizontal">
-          <Panel defaultSize={50} minSize={30} className="flex flex-col">
-            {renderEditor()}
-          </Panel>
-          <PanelResizeHandle className="w-1 bg-muted hover:bg-primary/20 transition-colors" />
-          <Panel defaultSize={50} minSize={30} className="flex flex-col">
-            {renderOutput()}
-          </Panel>
-        </PanelGroup>
-      </div>
+        <PanelResizeHandle className="w-2 bg-border/50 hover:bg-primary/50 transition-colors" />
 
-      {/* Mobile View - Vertical Resizable Panels */}
-      <div className="md:hidden flex-1 flex flex-col rounded-lg overflow-hidden border border-border bg-background shadow-sm">
-        <PanelGroup direction="vertical">
-          <Panel defaultSize={60} minSize={30} className="flex flex-col">
-            {renderEditor(true)}
-          </Panel>
-          <PanelResizeHandle className="h-2 bg-muted hover:bg-primary/20 transition-colors flex items-center justify-center">
-            <div className="w-16 h-1 bg-muted-foreground/30 rounded-full" />
-          </PanelResizeHandle>
-          <Panel defaultSize={40} minSize={30} className="flex flex-col">
-            {renderOutput(true)}
-          </Panel>
-        </PanelGroup>
-      </div>
+        {/* Main Content */}
+        <Panel defaultSize={70} minSize={30} className="flex flex-col">
+          <PanelGroup direction="vertical" className="flex-1">
+            {/* Editor Panel */}
+            <Panel defaultSize={70} minSize={30} className="flex flex-col">
+              <div className="flex items-center justify-between p-2 border-b bg-muted/10">
+                <div className="text-sm font-medium px-2">
+                  JavaScript Editor
+                </div>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={handleRunCode}
+                    disabled={isRunning}
+                    className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-3 text-xs"
+                  >
+                    {isRunning ? 'Running...' : 'Run (Ctrl+Enter)'}
+                  </button>
+                  <button
+                    onClick={clearOutput}
+                    disabled={!result}
+                    className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-3 text-xs"
+                  >
+                    Clear
+                  </button>
+                </div>
+              </div>
+              <div className="flex-1 overflow-auto">
+                <textarea
+                  ref={textareaRef}
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  className="w-full h-full p-4 font-mono text-sm bg-background text-foreground outline-none resize-none"
+                  spellCheck={false}
+                  placeholder="// Enter your JavaScript code here..."
+                  style={{
+                    tabSize: 2,
+                    lineHeight: '1.5',
+                    fontFeatureSettings: '"rlig" 1, "calt" 1',
+                  }}
+                />
+              </div>
+            </Panel>
+
+            {/* Output Panel */}
+            <PanelResizeHandle className="h-2 w-full bg-border/50 dark:bg-gray-600 hover:bg-primary/50 dark:hover:bg-primary/70 transition-colors relative group">
+              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-0.5 bg-gray-400 dark:bg-gray-400 rounded-full group-hover:bg-primary dark:group-hover:bg-primary" />
+            </PanelResizeHandle>
+            <Panel defaultSize={30} minSize={20} className="flex flex-col">
+              <div className="flex items-center justify-between p-2 border-b bg-muted/10">
+                <div className="text-sm font-medium px-2">Console Output</div>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={clearOutput}
+                    disabled={!result}
+                    className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-3 text-xs"
+                  >
+                    Clear
+                  </button>
+                </div>
+              </div>
+              <div
+                ref={outputRef}
+                className="flex-1 overflow-auto p-4 text-sm font-mono bg-background text-foreground whitespace-pre-wrap"
+              >
+                {isRunning ? (
+                  <div className="flex items-center justify-center h-full text-muted-foreground">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mr-2" />
+                    Running...
+                  </div>
+                ) : result ? (
+                  result.error ? (
+                    <div className="text-red-500">
+                      <div className="font-semibold">Error:</div>
+                      <div>{result.error}</div>
+                      {result.stack && (
+                        <pre className="mt-2 text-xs text-red-400">
+                          {result.stack}
+                        </pre>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="whitespace-pre-wrap">{result.output}</div>
+                  )
+                ) : (
+                  <div className="text-muted-foreground">
+                    Run the code to see the output here
+                  </div>
+                )}
+              </div>
+            </Panel>
+          </PanelGroup>
+        </Panel>
+      </PanelGroup>
     </div>
   );
 }

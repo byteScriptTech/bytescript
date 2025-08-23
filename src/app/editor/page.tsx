@@ -1,28 +1,94 @@
 'use client';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 import LandingPageHeader from '@/components/specific/LandingPageHeader';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ThemeProvider } from '@/context/theme-provider';
 
-// Import the CodeEditor component with SSR disabled since it uses browser APIs
-const CodeEditor = dynamic(() => import('@/components/CodeEditor'), {
+// Import the CodeEditor components with SSR disabled since they use browser APIs
+const JsEditor = dynamic(() => import('@/components/CodeEditor'), {
   ssr: false,
+  loading: () => (
+    <div className="flex-1 flex items-center justify-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary" />
+    </div>
+  ),
 });
+
+const PythonEditor = dynamic<{
+  initialCode?: string;
+  className?: string;
+  onCodeChange?: (code: string) => void;
+  readOnly?: boolean;
+}>(
+  () =>
+    import('@/components/common/PythonCodeEditor').then(
+      (mod) => mod.PythonCodeEditor
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex-1 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary" />
+      </div>
+    ),
+  }
+);
+
+type EditorType = 'javascript' | 'python';
+
+const DEFAULT_PYTHON_CODE = `# Welcome to the Python Editor!
+# Write your Python code here and click Run to execute it
+
+def greet(name):
+    return f"Hello, {name}! Welcome to BiteScript"
+
+# Example function call
+result = greet("Developer")
+print(result)
+
+# Try writing your own code below!`;
 
 export default function EditorPage() {
   const router = useRouter();
+  const [editorType, setEditorType] = useState<EditorType>('javascript');
+  const [pythonCode, setPythonCode] = useState(DEFAULT_PYTHON_CODE);
+
+  const handlePythonCodeChange = (code: string) => {
+    setPythonCode(code);
+  };
+
   return (
     <ThemeProvider>
       <div className="min-h-screen bg-background text-foreground">
         <LandingPageHeader
-          handleExploreBiteScriptClick={function (): void {
-            router.push('/login');
-          }}
+          handleExploreBiteScriptClick={() => router.push('/login')}
         />
         <div className="container mx-auto p-2 sm:p-4 h-[calc(100vh-64px)] flex flex-col max-w-7xl">
-          <div className="flex-1 flex flex-col min-h-0">
-            <CodeEditor />
+          <div className="mb-4">
+            <Tabs
+              value={editorType}
+              onValueChange={(value) => setEditorType(value as EditorType)}
+              className="w-full sm:w-[400px]"
+            >
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="javascript">JavaScript</TabsTrigger>
+                <TabsTrigger value="python">Python</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+
+          <div className="flex-1 flex flex-col min-h-0 rounded-lg overflow-hidden border">
+            {editorType === 'javascript' ? (
+              <JsEditor />
+            ) : (
+              <PythonEditor
+                initialCode={pythonCode}
+                onCodeChange={handlePythonCodeChange}
+              />
+            )}
           </div>
 
           <footer className="mt-4 sm:mt-6 text-center text-xs sm:text-sm text-muted-foreground px-2 sm:px-0">

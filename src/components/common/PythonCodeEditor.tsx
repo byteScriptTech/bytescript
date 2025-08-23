@@ -1,10 +1,10 @@
 'use client';
 
-import { Play, RotateCcw } from 'lucide-react';
+import { Play, RotateCw, Eraser } from 'lucide-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
 // Type declarations for Pyodide
 declare global {
@@ -17,239 +17,290 @@ declare global {
   }
 }
 
-type PythonCodeEditorProps = {
-  initialCode: string;
+interface PythonCodeEditorProps {
+  initialCode?: string;
   className?: string;
   onCodeChange?: (code: string) => void;
   readOnly?: boolean;
-};
+  _height?: string | number;
+  _showLineNumbers?: boolean;
+  _theme?: 'light' | 'dark';
+}
 
 export function PythonCodeEditor({
-  initialCode,
-  className,
+  initialCode = '# Write your Python code here\nprint("Hello, World!")\n\n# Example function\ndef add(a, b):\n    return a + b\n\n# Call the function and output result\nprint("2 + 3 =", add(2, 3))',
+  className = '',
   onCodeChange,
   readOnly = false,
 }: PythonCodeEditorProps) {
-  const [code, setCode] = useState(initialCode);
-  const [output, setOutput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [isResizing, setIsResizing] = useState(false);
-  const [panelHeight, setPanelHeight] = useState('50%');
-  const pyodideRef = useRef<any>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  const startResize = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsResizing(true);
-  };
-
-  const resize = useCallback(
-    (e: MouseEvent) => {
-      if (!isResizing || !containerRef.current) return;
-
-      const containerRect = containerRef.current.getBoundingClientRect();
-      const newHeight =
-        ((e.clientY - containerRect.top) / containerRect.height) * 100;
-
-      // Limit the height between 20% and 80% of container
-      const clampedHeight = Math.min(Math.max(newHeight, 20), 80);
-      setPanelHeight(`${clampedHeight}%`);
-    },
-    [isResizing]
+  const [algorithm, setAlgorithm] = useState<string>(
+    ['# Write your algorithm here'].join('\n')
   );
-
-  const stopResize = () => {
-    setIsResizing(false);
-  };
-
-  useEffect(() => {
-    window.addEventListener('mousemove', resize);
-    window.addEventListener('mouseup', stopResize);
-
-    return () => {
-      window.removeEventListener('mousemove', resize);
-      window.removeEventListener('mouseup', stopResize);
-    };
-  }, [isResizing, resize]);
+  const [code, setCode] = useState(initialCode);
+  const [_error, setError] = useState<string | null>(null);
+  const [isRunning, setIsRunning] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [result, setResult] = useState<{
+    output: string;
+    error?: string;
+    stack?: string;
+    executionTime?: number;
+  } | null>(null);
+  const pyodideRef = useRef<any>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const outputRef = useRef<HTMLDivElement>(null);
 
   // Load Pyodide from CDN
-  const loadPyodide = async () => {
+  const loadPyodide = useCallback(async () => {
     if (!window.loadPyodide) {
       // Load the Pyodide script
       const script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js';
+      script.src = 'https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js';
       script.async = true;
-      document.body.appendChild(script);
-
-      // Wait for Pyodide to be loaded
-      await new Promise((resolve) => {
+      await new Promise((resolve, reject) => {
         script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
       });
     }
 
-    return window.loadPyodide({
-      indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.25.0/full/',
-    });
-  };
+    try {
+      const pyodide = await window.loadPyodide({
+        indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.23.4/full/',
+      });
+      pyodideRef.current = pyodide;
+      setIsLoading(false);
+    } catch (err) {
+      console.error('Failed to load Pyodide:', err);
+      setError('Failed to load Python runtime. Please try again later.');
+      setIsLoading(false);
+    }
+  }, []);
 
   // Initialize Pyodide
   useEffect(() => {
-    let mounted = true;
+    loadPyodide();
+  }, [loadPyodide]);
 
-    const initPyodide = async () => {
-      try {
-        const pyodide = await loadPyodide();
-        if (mounted) {
-          pyodideRef.current = pyodide;
-        }
-      } catch (err) {
-        console.error('Failed to load Pyodide:', err);
-        if (mounted) {
-          setError('Failed to initialize Python runtime. Please try again.');
-        }
+  const runCode = useCallback(async () => {
+    if (!pyodideRef.current || isRunning) return;
+
+    setIsRunning(true);
+    setResult(null);
+    setError(null);
+
+    try {
+      // Initialize stdout capture
+      await pyodideRef.current.runPythonAsync('import sys');
+
+      // Override stdout to capture output
+      await pyodideRef.current.runPythonAsync(`
+import io
+class StdoutCatcher(io.StringIO):
+    def write(self, text):
+        super().write(text)
+        return len(text)
+sys.stdout = StdoutCatcher()
+      `);
+
+      // Run the actual code
+      const startTime = performance.now();
+      await pyodideRef.current.runPythonAsync(code);
+      const executionTime = performance.now() - startTime;
+
+      // Get the captured output
+      const output = await pyodideRef.current.runPythonAsync(
+        'sys.stdout.getvalue()'
+      );
+
+      setResult({
+        output: output || '',
+        executionTime,
+      });
+    } catch (err) {
+      setResult({
+        output: '',
+        error: err instanceof Error ? err.message : String(err),
+        executionTime: 0,
+      });
+    } finally {
+      setIsRunning(false);
+    }
+  }, [code, isRunning]);
+
+  const _handleCodeChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      const newCode = e.target.value;
+      setCode(newCode);
+      if (onCodeChange) {
+        onCodeChange(newCode);
+      }
+    },
+    [onCodeChange]
+  );
+
+  // Reset function (commented out as it's not currently used)
+  // const _resetCode = useCallback(() => {
+  //   setCode(initialCode);
+  //   setResult(null);
+  //   if (onCodeChange) {
+  //     onCodeChange(initialCode);
+  //   }
+  // }, [initialCode, onCodeChange]);
+
+  // Handle keyboard shortcut for running code
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        runCode();
       }
     };
 
-    initPyodide();
-
+    window.addEventListener('keydown', handleKeyDown);
     return () => {
-      mounted = false;
+      window.removeEventListener('keydown', handleKeyDown);
     };
-  }, []);
-
-  const runCode = async () => {
-    if (!pyodideRef.current || !code.trim()) return;
-
-    setIsLoading(true);
-    setError(null);
-    setOutput('');
-
-    try {
-      // Override Python's print function to capture output
-      await pyodideRef.current.runPythonAsync(`
-        import sys
-        import io
-        
-        class OutputBuffer(io.StringIO):
-            def write(self, text):
-                super().write(text)
-                return len(text)
-                
-        buffer = OutputBuffer()
-        sys.stdout = buffer
-        sys.stderr = buffer
-      `);
-
-      // Run the user's code
-      await pyodideRef.current.runPythonAsync(code);
-
-      // Get the captured output
-      const result =
-        await pyodideRef.current.runPythonAsync('buffer.getvalue()');
-      setOutput(result || '');
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : 'An error occurred while running the code'
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const resetCode = () => {
-    setCode(initialCode);
-    setOutput('');
-    setError(null);
-  };
-
-  const handleCodeChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const newCode = e.target.value;
-    setCode(newCode);
-    if (onCodeChange) {
-      onCodeChange(newCode);
-    }
-  };
+  }, [runCode]);
 
   return (
-    <Card className={className}>
-      <div className="flex justify-between items-center p-2 border-b">
-        <div className="text-sm font-mono px-2 py-1 bg-muted rounded">
-          Python
-        </div>
-        <div className="flex space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={resetCode}
-            disabled={isLoading}
-            className="h-8"
-          >
-            <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
-            Reset
-          </Button>
-          <Button
-            size="sm"
-            onClick={runCode}
-            disabled={isLoading || !pyodideRef.current}
-            className="h-8"
-          >
-            <Play className="h-3.5 w-3.5 mr-1.5" />
-            {isLoading ? 'Running...' : 'Run Code'}
-          </Button>
-        </div>
-      </div>
-
-      <div
-        ref={containerRef}
-        className="relative flex flex-col h-[400px] overflow-hidden border rounded-md"
-      >
-        {/* Code Editor */}
-        <div
-          className="overflow-hidden"
-          style={{ height: `calc(${panelHeight} - 8px)` }}
-        >
-          <textarea
-            value={code}
-            onChange={handleCodeChange}
-            className={`w-full h-full p-2 font-mono text-sm bg-transparent border-0 focus:outline-none resize-none ${
-              readOnly ? 'cursor-default' : ''
-            }`}
-            spellCheck="false"
-            readOnly={readOnly || isLoading}
-          />
-        </div>
-
-        {/* Resize Handle */}
-        <button
-          type="button"
-          className="h-2 w-full bg-gray-100 dark:bg-gray-800 cursor-row-resize flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-blue-500"
-          onMouseDown={startResize}
-          aria-label="Resize panels"
-        >
-          <div className="w-16 h-1 bg-gray-300 dark:bg-gray-600 rounded-full" />
-        </button>
-
-        {/* Output Panel */}
-        <div
-          className="flex-1 overflow-auto bg-muted/50 p-4"
-          style={{ height: `calc(100% - ${panelHeight} - 8px)` }}
-        >
-          <div className="text-sm font-mono whitespace-pre-wrap break-words">
-            {error ? (
-              <div className="text-destructive">{error}</div>
-            ) : output ? (
-              output
-            ) : (
-              <div className="text-muted-foreground">
-                Click &quot;Run Code&quot; to see the output here
-              </div>
-            )}
+    <div
+      className={cn(
+        'flex flex-col h-full bg-background rounded-lg overflow-hidden border',
+        className
+      )}
+    >
+      <PanelGroup direction="horizontal" className="flex-1">
+        {/* Editor Panel */}
+        <Panel defaultSize={30} minSize={20} className="flex flex-col">
+          <div className="flex items-center justify-between p-2 border-b bg-muted/10">
+            <div className="text-sm font-medium px-2">Python Editor</div>
+            <div className="flex space-x-2"></div>
           </div>
-        </div>
-      </div>
-    </Card>
+          <div className="flex-1 overflow-auto">
+            <textarea
+              value={algorithm}
+              onChange={(e) => setAlgorithm(e.target.value)}
+              className="w-full h-full p-4 font-mono text-sm bg-background text-foreground outline-none resize-none"
+              spellCheck={false}
+              placeholder="# Write your algorithm or notes here..."
+              style={{
+                tabSize: 2,
+                lineHeight: '1.5',
+                fontFeatureSettings: '"rlig" 1, "calt" 1',
+              }}
+            />
+          </div>
+        </Panel>
+
+        <PanelResizeHandle className="w-2 bg-border/50 hover:bg-primary/50 transition-colors" />
+
+        {/* Main Content */}
+        <Panel defaultSize={70} minSize={30} className="flex flex-col">
+          <PanelGroup direction="vertical" className="flex-1">
+            {/* Editor Panel */}
+            <Panel defaultSize={70} minSize={30} className="flex flex-col">
+              <div className="flex items-center justify-between p-2 border-b bg-muted/10">
+                <div className="text-sm font-medium px-2">Python Editor</div>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={runCode}
+                    disabled={isLoading || isRunning}
+                    className="inline-flex items-center justify-center rounded-md text-xs font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-3"
+                  >
+                    {isLoading ? (
+                      <RotateCw className="h-3.5 w-3.5 animate-spin mr-1.5" />
+                    ) : isRunning ? (
+                      <RotateCw className="h-3.5 w-3.5 animate-spin mr-1.5" />
+                    ) : (
+                      <Play className="h-3.5 w-3.5 mr-1.5" />
+                    )}
+                    {isRunning ? 'Running...' : 'Run (Ctrl+Enter)'}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setResult(null);
+                      setError(null);
+                    }}
+                    disabled={!result}
+                    className="inline-flex items-center justify-center rounded-md text-xs font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-3"
+                  >
+                    <Eraser className="h-3.5 w-3.5 mr-1.5" />
+                    Clear
+                  </button>
+                </div>
+              </div>
+              <div className="flex-1 overflow-auto">
+                <textarea
+                  ref={textareaRef}
+                  value={code}
+                  onChange={(e) => {
+                    setCode(e.target.value);
+                    onCodeChange?.(e.target.value);
+                  }}
+                  className="w-full h-full p-4 font-mono text-sm bg-background text-foreground outline-none resize-none"
+                  spellCheck={false}
+                  readOnly={readOnly || isRunning}
+                  style={{
+                    tabSize: 4,
+                    lineHeight: '1.5',
+                    fontFeatureSettings: '"rlig" 1, "calt" 1',
+                  }}
+                />
+              </div>
+            </Panel>
+
+            <PanelResizeHandle className="h-2 bg-border/50 hover:bg-primary/50 transition-colors" />
+
+            {/* Output Panel */}
+            <Panel defaultSize={30} minSize={10} className="flex flex-col">
+              <div className="flex items-center justify-between p-2 border-b bg-muted/10">
+                <div className="text-sm font-medium px-2">Output</div>
+                <div className="flex items-center text-xs text-muted-foreground">
+                  {result?.executionTime && (
+                    <span className="mr-2">
+                      {result.executionTime.toFixed(2)} ms
+                    </span>
+                  )}
+                  {result?.error && (
+                    <span className="text-destructive">Execution Error</span>
+                  )}
+                </div>
+              </div>
+              <div
+                ref={outputRef}
+                className="flex-1 overflow-auto p-4 font-mono text-sm bg-background text-foreground whitespace-pre-wrap"
+              >
+                {isLoading ? (
+                  <div className="text-muted-foreground">
+                    Loading Python runtime...
+                  </div>
+                ) : result?.error ? (
+                  <div className="text-destructive">
+                    <div className="font-semibold">Error:</div>
+                    <div className="whitespace-pre-wrap">{result.error}</div>
+                    {result?.error && (
+                      <div className="text-red-500 text-sm">
+                        {result.error}
+                        <div className="font-semibold">Stack trace:</div>
+                        <div className="whitespace-pre-wrap">
+                          {result.stack}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : result?.output ? (
+                  <div className="whitespace-pre-wrap">{result.output}</div>
+                ) : (
+                  <div className="text-muted-foreground">
+                    Run the code to see the output here
+                  </div>
+                )}
+              </div>
+            </Panel>
+          </PanelGroup>
+        </Panel>
+      </PanelGroup>
+    </div>
   );
 }
