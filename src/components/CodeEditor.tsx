@@ -143,9 +143,7 @@ export default function CodeEditor() {
         >
           <div className="flex items-center justify-between p-2 border-b bg-muted/10">
             <div className="text-sm font-medium px-2">Algorithm</div>
-            <div className="flex items-center text-xs text-muted-foreground">
-              <span>Markdown Supported</span>
-            </div>
+            <div className="flex items-center text-xs text-muted-foreground"></div>
           </div>
           <div className="flex-1 overflow-auto">
             <textarea
