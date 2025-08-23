@@ -13,7 +13,7 @@ type ExecutionResult = {
 
 export default function CodeEditor() {
   const [code, setCode] = useState<string>(
-    '// Write your JavaScript code here\nconsole.log("Hello, World!");\n\n// Example function\nfunction add(a, b) {\n  return a + b;\n}\n\n// Call the function and output result\nconsole.log("2 + 3 =", add(2, 3));'
+    '// Write your JavaScript code here\nconsole.log("Hello, World!");'
   );
   const [isRunning, setIsRunning] = useState(false);
   const [result, setResult] = useState<ExecutionResult | null>(null);

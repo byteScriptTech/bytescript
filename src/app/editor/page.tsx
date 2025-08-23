@@ -3,6 +3,7 @@ import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
+import { Timer } from '@/components/common/Timer';
 import LandingPageHeader from '@/components/specific/LandingPageHeader';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ThemeProvider } from '@/context/theme-provider';
@@ -39,17 +40,7 @@ const PythonEditor = dynamic<{
 
 type EditorType = 'javascript' | 'python';
 
-const DEFAULT_PYTHON_CODE = `# Welcome to the Python Editor!
-# Write your Python code here and click Run to execute it
-
-def greet(name):
-    return f"Hello, {name}! Welcome to BiteScript"
-
-# Example function call
-result = greet("Developer")
-print(result)
-
-# Try writing your own code below!`;
+const DEFAULT_PYTHON_CODE = `# Write your Python code here and click Run to execute it`;
 
 export default function EditorPage() {
   const router = useRouter();
@@ -67,17 +58,29 @@ export default function EditorPage() {
           handleExploreBiteScriptClick={() => router.push('/login')}
         />
         <div className="container mx-auto p-2 sm:p-4 h-[calc(100vh-64px)] flex flex-col max-w-7xl">
-          <div className="mb-4">
+          <div className="mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <Tabs
               value={editorType}
               onValueChange={(value) => setEditorType(value as EditorType)}
-              className="w-full sm:w-[400px]"
+              className="w-full sm:w-auto"
             >
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="javascript">JavaScript</TabsTrigger>
                 <TabsTrigger value="python">Python</TabsTrigger>
               </TabsList>
             </Tabs>
+            <div className="w-full sm:w-auto">
+              <Timer
+                onTimeUp={() => {
+                  // Optional: Add a notification or sound when timer ends
+                  if (typeof window !== 'undefined') {
+                    new Audio('/sounds/timer-end.mp3')
+                      .play()
+                      .catch(console.error);
+                  }
+                }}
+              />
+            </div>
           </div>
 
           <div className="flex-1 flex flex-col min-h-0 rounded-lg overflow-hidden border">
