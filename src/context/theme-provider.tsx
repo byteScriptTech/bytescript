@@ -23,35 +23,33 @@ const initialState: ThemeProviderState = {
 const ThemeProviderContext =
   React.createContext<ThemeProviderState>(initialState);
 
+// This function runs only on the server during the initial render
+const getInitialTheme = (storageKey: string, defaultTheme: Theme): Theme => {
+  // Always return the default theme during SSR/SSG
+  if (typeof window === 'undefined') {
+    return defaultTheme;
+  }
+
+  // On client side, try to get the theme from localStorage
+  try {
+    const storedTheme = localStorage.getItem(storageKey) as Theme | null;
+    return storedTheme || defaultTheme;
+  } catch (e) {
+    // In case localStorage is not available, return default
+    return defaultTheme;
+  }
+};
+
 export function ThemeProvider({
   children,
   defaultTheme = 'system',
   storageKey = 'bitescript-theme',
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = React.useState<Theme>(() => {
-    if (typeof window !== 'undefined') {
-      const storedTheme = localStorage.getItem(storageKey) as Theme;
-      return storedTheme || defaultTheme;
-    }
-    return defaultTheme;
-  });
-
-  React.useEffect(() => {
-    const root = window.document.documentElement;
-    root.classList.remove('light', 'dark');
-
-    if (theme === 'system') {
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)')
-        .matches
-        ? 'dark'
-        : 'light';
-      root.classList.add(systemTheme);
-      return;
-    }
-
-    root.classList.add(theme);
-  }, [theme, storageKey]);
+  const [theme, setTheme] = React.useState<Theme>(() =>
+    getInitialTheme(storageKey, defaultTheme)
+  );
+  const [mounted, setMounted] = React.useState(false);
 
   const value = React.useMemo(
     () => ({
@@ -63,6 +61,29 @@ export function ThemeProvider({
     }),
     [theme, storageKey]
   );
+
+  // Apply theme class to the HTML element before the initial render
+  React.useEffect(() => {
+    const root = window.document.documentElement;
+    root.classList.remove('light', 'dark');
+
+    let themeToApply = theme;
+    if (theme === 'system') {
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)')
+        .matches
+        ? 'dark'
+        : 'light';
+      themeToApply = systemTheme;
+    }
+
+    root.classList.add(themeToApply);
+    setMounted(true);
+  }, [theme, storageKey]);
+
+  // Prevent the UI from rendering until the theme is applied
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <ThemeProviderContext.Provider {...props} value={value}>
