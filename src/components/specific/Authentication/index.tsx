@@ -20,20 +20,23 @@ const Authentication = () => {
   return (
     <div
       className="relative flex size-full min-h-screen flex-col bg-[#111418] dark group/design-root overflow-x-hidden"
-      style={{ fontFamily: 'Inter, "Noto Sans", sans-serif' }}
+      style={{ fontFamily: 'Manrope, "Noto Sans", sans-serif' }}
     >
       <div className="layout-container flex h-full grow flex-col">
-        <header className="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#283039] px-4 sm:px-10 py-3">
-          <Link href="/" className="flex items-center gap-2 sm:gap-4">
-            <span>
-              <span className="text-white text-md sm:text-md font-bold">
+        <header className="border-b border-solid border-border bg-background">
+          <div className="flex items-center justify-between px-3 py-3 sm:px-8 sm:py-3">
+            <Link
+              href="/"
+              className="hover:opacity-80 transition-opacity cursor-pointer"
+            >
+              <span className="text-md sm:text-lg font-bold text-foreground">
                 bite
               </span>
               <span className="text-[#00BFA6] text-base sm:text-xl font-bold">
                 Script.
               </span>
-            </span>
-          </Link>
+            </Link>
+          </div>
         </header>
         <div className="px-4 sm:px-40 flex flex-1 justify-center items-center">
           <div className="layout-content-container flex flex-col w-full max-w-[512px] py-4 sm:py-5 justify-center items-center">

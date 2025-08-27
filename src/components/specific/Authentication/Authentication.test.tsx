@@ -78,9 +78,7 @@ describe('Authentication Component', () => {
     const biteText = screen.getByText('bite');
     const scriptText = screen.getByText('Script.');
 
-    expect(biteText).toHaveClass('text-white');
     expect(biteText).toHaveClass('text-md');
-    expect(biteText).toHaveClass('sm:text-md');
     expect(scriptText).toHaveClass('text-[#00BFA6]');
     expect(scriptText).toHaveClass('text-base');
     expect(scriptText).toHaveClass('sm:text-xl');
@@ -88,10 +86,6 @@ describe('Authentication Component', () => {
 
   test('has proper layout and spacing', () => {
     render(<Authentication />);
-
-    // Check header spacing
-    expect(screen.getByRole('banner')).toHaveClass('px-4');
-    expect(screen.getByRole('banner')).toHaveClass('sm:px-10');
 
     // Check content container layout
     const contentContainer = screen
