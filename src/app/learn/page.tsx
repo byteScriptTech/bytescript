@@ -17,12 +17,10 @@ export default function Learn() {
       <LocalStorageProvider>
         <LanguagesProvider>
           <div className="flex min-h-screen w-full flex-col bg-background">
-            <div className="flex flex-col flex-1">
-              <Navbar />
-              <main className="flex-1">
-                <LearnContent />
-              </main>
-            </div>
+            <Navbar />
+            <main className="flex-1">
+              <LearnContent />
+            </main>
           </div>
         </LanguagesProvider>
       </LocalStorageProvider>
