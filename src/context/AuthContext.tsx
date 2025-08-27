@@ -10,11 +10,10 @@ import {
 } from 'react';
 import { toast } from 'sonner';
 
-import { db, githubProvider, googleProvider } from '@/firebase/config';
+import { db, githubProvider } from '@/firebase/config';
 
 export interface AuthContextType {
   currentUser: any;
-  signInWithGoogle: () => Promise<void>;
   signInWithGithub: () => Promise<void>;
   signOut: () => Promise<void>;
 }
@@ -71,27 +70,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const signInWithGoogle = async () => {
-    try {
-      const result = await signInWithPopup(auth, googleProvider);
-      const user = result.user;
-      setCurrentUser(user);
-      const importantUserInfo: UserInfo = {
-        uid: user.uid,
-        displayName: user.displayName || 'Anonymous',
-        email: user.email || 'No Email',
-        photoURL: user.photoURL,
-      };
-      localStorage.setItem('user', JSON.stringify(importantUserInfo));
-
-      await saveUser(importantUserInfo);
-      router.push('/dashboard');
-    } catch (error: any) {
-      toast.error(error.message);
-      console.error('Google Sign In Error:', error);
-    }
-  };
-
   const signInWithGithub = async () => {
     try {
       const result = await signInWithPopup(auth, githubProvider);
@@ -138,7 +116,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     <AuthContext.Provider
       value={{
         currentUser,
-        signInWithGoogle,
         signInWithGithub,
         signOut,
       }}
