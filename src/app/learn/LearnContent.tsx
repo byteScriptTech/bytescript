@@ -33,8 +33,21 @@ function LearnContentInner() {
               {[...Array(8)].map((_, i) => (
                 <div
                   key={i}
-                  className="h-64 bg-muted/20 rounded-xl animate-pulse"
-                />
+                  className="bg-card rounded-xl border border-border overflow-hidden h-full"
+                >
+                  <div className="animate-pulse">
+                    <div className="h-32 bg-muted/50 w-full" />
+                    <div className="p-4 space-y-4">
+                      <div className="h-6 bg-muted/50 rounded w-3/4" />
+                      <div className="h-4 bg-muted/30 rounded w-1/2" />
+                      <div className="flex items-center space-x-2 pt-2">
+                        <div className="h-3 w-16 bg-muted/30 rounded-full" />
+                        <div className="h-3 w-12 bg-muted/20 rounded-full" />
+                      </div>
+                      <div className="h-10 bg-muted/10 rounded-lg mt-4" />
+                    </div>
+                  </div>
+                </div>
               ))}
             </div>
           ) : (
