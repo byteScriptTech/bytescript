@@ -4,40 +4,52 @@ import React, { Suspense } from 'react';
 
 import { LearnTopicCard } from '@/components/specific/LearnTopicCard';
 import { useTopics } from '@/hooks/useTopics';
+import { Topic } from '@/types/content';
+
+// Extend the base Topic type with additional properties for the UI
+type ExtendedTopic = Omit<Topic, 'difficulty'> & {
+  progress?: number;
+  rating?: number;
+  category?: string;
+  difficulty?: 'Beginner' | 'Intermediate' | 'Advanced' | string;
+};
 
 function LearnContentInner() {
   const { topics, loading } = useTopics();
-  return (
-    <div className="container mx-auto px-4 py-6 sm:px-6 lg:px-8 max-w-7xl">
-      <div className="mb-8 text-center sm:text-left">
-        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
-          Learn to Code
-        </h1>
-        <p className="mt-2 text-lg text-muted-foreground">
-          Choose a language or topic to start your coding journey
-        </p>
-      </div>
+  const filteredTopics = (topics as ExtendedTopic[]) || [];
 
-      {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          {[...Array(6)].map((_, i) => (
-            <div
-              key={i}
-              className="group relative flex flex-col items-center p-6 rounded-xl border border-border bg-card/90 shadow-sm"
-            >
-              <div className="w-16 h-16 rounded-full bg-muted/80 dark:bg-muted/60 animate-pulse mb-4" />
-              <div className="h-6 w-3/4 bg-muted/80 dark:bg-muted/60 animate-pulse rounded-md mb-2" />
-              <div className="h-4 w-1/2 bg-muted/80 dark:bg-muted/60 animate-pulse rounded-md" />
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Spacer */}
+      <div className="h-16"></div>
+
+      {/* Main Content */}
+      <div className="container mx-auto px-4 py-12 sm:py-16 max-w-7xl">
+        {/* All Topics */}
+        <div>
+          <h2 className="text-2xl font-bold mb-6">All Learning Paths</h2>
+          {loading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {[...Array(8)].map((_, i) => (
+                <div
+                  key={i}
+                  className="h-64 bg-muted/20 rounded-xl animate-pulse"
+                />
+              ))}
             </div>
-          ))}
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {filteredTopics?.map((topic) => (
+                <div key={topic.id} className="relative group">
+                  <div className="h-full bg-card rounded-xl border border-border transition-shadow duration-200 hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] dark:hover:shadow-[0_4px_12px_rgba(0,0,0,0.25)]">
+                    <LearnTopicCard topic={topic} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          {topics?.map((topic) => (
-            <LearnTopicCard key={topic.id} topic={topic} />
-          ))}
-        </div>
-      )}
+      </div>
     </div>
   );
 }

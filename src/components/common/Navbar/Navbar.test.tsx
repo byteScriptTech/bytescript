@@ -16,7 +16,6 @@ const mockSignOut = jest.fn();
 jest.mock('firebase/auth', () => ({
   signOut: (...args: any[]) => mockSignOut(...args),
   getAuth: () => ({}),
-  GoogleAuthProvider: jest.fn(),
   GithubAuthProvider: jest.fn(),
 }));
 
@@ -74,7 +73,6 @@ describe('Navbar', () => {
 
     authContextValue = {
       currentUser: null,
-      signInWithGoogle: jest.fn(),
       signInWithGithub: jest.fn(),
       signOut: jest.fn(),
     };

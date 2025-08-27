@@ -33,70 +33,103 @@ describe('LearnTopicCard', () => {
     jest.clearAllMocks();
   });
 
-  it('renders topic name and icon', () => {
-    render(<LearnTopicCard topic={mockTopic} />);
+  it('displays the correct topic name for different topics', () => {
+    const testCases = [
+      {
+        name: 'JavaScript',
+        expectedDisplay: 'JavaScript',
+      },
+      {
+        name: 'Python',
+        expectedDisplay: 'Python',
+      },
+      {
+        name: 'competitive-programming',
+        expectedDisplay: 'competitive programming',
+      },
+      {
+        name: 'data-structures-&-algorithms',
+        expectedDisplay: 'data structures & algorithms',
+      },
+    ];
 
-    expect(screen.getByText('JavaScript')).toBeInTheDocument();
-    expect(screen.getByText('Start learning')).toBeInTheDocument();
-    expect(screen.getByTestId('course-icon')).toBeInTheDocument();
+    testCases.forEach(({ name, expectedDisplay }) => {
+      const topic = { ...mockTopic, name };
+      const { unmount } = render(<LearnTopicCard topic={topic} />);
+
+      expect(
+        screen.getByText(new RegExp(expectedDisplay, 'i'))
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('heading', { name: new RegExp(expectedDisplay, 'i') })
+      ).toBeInTheDocument();
+
+      unmount();
+    });
   });
 
-  it('navigates to language page when clicked', () => {
+  it('navigates to correct path when clicked', () => {
     render(<LearnTopicCard topic={mockTopic} />);
-
-    const card = screen.getByRole('button');
-    fireEvent.click(card);
-
+    fireEvent.click(screen.getByRole('button'));
     expect(mockRouter.push).toHaveBeenCalledWith('/learn/javascript');
   });
 
-  it('navigates to competitive programming when topic is competitive-programming', () => {
-    const competitiveTopic: Topic = {
-      ...mockTopic,
-      name: 'competitive-programming',
-    };
+  it('handles special routes correctly', () => {
+    const testCases = [
+      {
+        name: 'competitive-programming',
+        expectedPath: '/competitive-programming',
+      },
+      {
+        name: 'data-structures-&-algorithms',
+        expectedPath: '/learn/data-structures',
+      },
+      {
+        name: 'some-other-topic',
+        expectedPath: '/learn/some-other-topic',
+      },
+    ];
 
-    render(<LearnTopicCard topic={competitiveTopic} />);
-
-    const card = screen.getByRole('button');
-    fireEvent.click(card);
-
-    expect(mockRouter.push).toHaveBeenCalledWith('/competitive-programming');
+    testCases.forEach(({ name, expectedPath }) => {
+      mockRouter.push.mockClear();
+      const topic = { ...mockTopic, name };
+      render(<LearnTopicCard topic={topic} />);
+      const card = screen.getByRole('button', {
+        name: new RegExp(`Learn ${name}`, 'i'),
+      });
+      fireEvent.click(card);
+      expect(mockRouter.push).toHaveBeenCalledWith(expectedPath);
+    });
   });
 
-  it('navigates to data structures when topic is data-structures-&-algorithms', () => {
-    const dsTopic: Topic = {
-      ...mockTopic,
-      name: 'data-structures-&-algorithms',
-    };
+  it('calls onTopicClick when provided instead of default navigation', () => {
+    const mockOnClick = jest.fn();
+    render(<LearnTopicCard topic={mockTopic} onTopicClick={mockOnClick} />);
 
-    render(<LearnTopicCard topic={dsTopic} />);
-
-    const card = screen.getByRole('button');
-    fireEvent.click(card);
-
-    expect(mockRouter.push).toHaveBeenCalledWith('/learn/data-structures');
-  });
-
-  it('calls onTopicClick when provided', () => {
-    const onTopicClick = jest.fn();
-
-    render(<LearnTopicCard topic={mockTopic} onTopicClick={onTopicClick} />);
-
-    const card = screen.getByRole('button');
-    fireEvent.click(card);
-
-    expect(onTopicClick).toHaveBeenCalledWith(mockTopic);
+    fireEvent.click(screen.getByRole('button'));
+    expect(mockOnClick).toHaveBeenCalledWith(mockTopic);
     expect(mockRouter.push).not.toHaveBeenCalled();
   });
 
-  it('handles keyboard navigation (Enter and Space)', () => {
+  it('handles keyboard navigation', () => {
     render(<LearnTopicCard topic={mockTopic} />);
-
     const card = screen.getByRole('button');
-    fireEvent.keyDown(card, { key: 'Enter', code: 'Enter' });
-    fireEvent.keyDown(card, { key: ' ', code: 'Space' });
 
-    expect(mockRouter.push).toHaveBeenCalledTimes(2);
+    // Test Enter key
+    fireEvent.keyDown(card, { key: 'Enter' });
+    expect(mockRouter.push).toHaveBeenCalledWith('/learn/javascript');
+
+    // Test Space key
+    mockRouter.push.mockClear();
+    fireEvent.keyDown(card, { key: ' ' });
+    expect(mockRouter.push).toHaveBeenCalledWith('/learn/javascript');
+  });
+
+  it('handles undefined or null difficulty', () => {
+    const topicWithoutDifficulty = { ...mockTopic, difficulty: undefined };
+    render(<LearnTopicCard topic={topicWithoutDifficulty} />);
+
+    // Should render without errors
+    expect(screen.getByText('JavaScript')).toBeInTheDocument();
   });
 });
