@@ -46,14 +46,14 @@ const components: Components = {
     // Extract language from className if needed in the future
     // const _match = /lang-(\w+)/.exec(className || '');
     return !inline ? (
-      <pre className="bg-gray-800 rounded-lg p-4 overflow-x-auto my-4">
+      <pre className="bg-gray-800 text-gray-100 rounded-lg p-4 overflow-x-auto my-4">
         <code className={className} {...props}>
           {children}
         </code>
       </pre>
     ) : (
       <code
-        className="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-sm font-mono"
+        className="bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-100 px-1.5 py-0.5 rounded text-sm font-mono"
         {...props}
       >
         {children}
