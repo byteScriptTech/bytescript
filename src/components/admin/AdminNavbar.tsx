@@ -31,7 +31,7 @@ export function AdminNavbar() {
   };
 
   const handleSettingsClick = () => {
-    router.push('settings');
+    router.push('/settings');
   };
 
   return (
