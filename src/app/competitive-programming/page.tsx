@@ -2,9 +2,8 @@
 
 import Navbar from '@/components/common/Navbar';
 import AuthGuard from '@/components/misc/authGuard';
-import { Leaderboard } from '@/components/specific/Leaderboard';
+import { Patterns } from '@/components/specific/Patterns';
 import { Problems } from '@/components/specific/Problems';
-import { Submissions } from '@/components/specific/Submissions';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AuthProvider } from '@/context/AuthContext';
 import { ContentProvider } from '@/context/ContentContext';
@@ -28,40 +27,29 @@ export default function CompetitiveProgrammingPage() {
                         Competitive Programming
                       </h1>
 
-                      <Tabs defaultValue="problems" className="w-full">
+                      <Tabs defaultValue="patterns" className="w-full">
                         <TabsList className="grid w-full max-w-md grid-cols-3 mb-6">
+                          <TabsTrigger
+                            value="patterns"
+                            className="text-sm font-medium"
+                          >
+                            Patterns
+                          </TabsTrigger>
                           <TabsTrigger
                             value="problems"
                             className="text-sm font-medium"
                           >
                             Problems
                           </TabsTrigger>
-                          <TabsTrigger
-                            value="submissions"
-                            className="text-sm font-medium"
-                          >
-                            Submissions
-                          </TabsTrigger>
-                          <TabsTrigger
-                            value="leaderboard"
-                            className="text-sm font-medium"
-                          >
-                            Leaderboard
-                          </TabsTrigger>
                         </TabsList>
+                        <TabsContent value="patterns" className="mt-0">
+                          <div className="rounded-lg border border-border bg-card text-card-foreground shadow-sm p-6">
+                            <Patterns />
+                          </div>
+                        </TabsContent>
                         <TabsContent value="problems" className="mt-0">
                           <div className="rounded-lg border border-border bg-card text-card-foreground shadow-sm p-6">
                             <Problems />
-                          </div>
-                        </TabsContent>
-                        <TabsContent value="submissions" className="mt-0">
-                          <div className="rounded-lg border border-border bg-card text-card-foreground shadow-sm p-6">
-                            <Submissions />
-                          </div>
-                        </TabsContent>
-                        <TabsContent value="leaderboard" className="mt-0">
-                          <div className="rounded-lg border border-border bg-card text-card-foreground shadow-sm p-6">
-                            <Leaderboard />
                           </div>
                         </TabsContent>
                       </Tabs>
