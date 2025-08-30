@@ -1,136 +1,74 @@
 import { Metadata } from 'next';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import { MarkdownRenderer } from '@/components/markdown/MarkdownRenderer';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { problemsService } from '@/services/firebase/problemsService';
+import { patternService } from '@/services/patternService';
 
-type ProblemStatus = 'solved' | 'attempted' | 'todo';
-type Difficulty = 'Easy' | 'Medium' | 'Hard';
-
-interface Problem {
-  id: string;
-  title: string;
-  difficulty: Difficulty;
-  tags: string[];
-  status: ProblemStatus;
-}
-
-interface PatternData {
-  title: string;
-  description: string;
-  readme?: string;
-  problems?: Problem[];
-}
-
-// Mock data - replace with actual data fetching
-const patternData: Record<string, PatternData> = {
-  backtracking: {
-    title: 'Backtracking',
-    description:
-      "Explore problems that involve trying different solutions and undoing them if they don't work, like solving mazes or puzzles.",
-    readme: `
-## What is Backtracking?
-
-Backtracking is an algorithmic technique for solving problems recursively by trying to build a solution incrementally, one piece at a time, removing those solutions that fail to satisfy the constraints of the problem at any point in time.
-
-## When to Use Backtracking
-
-- When you need to explore all possible solutions
-- When the solution requires making a series of choices
-- When you need to find all possible configurations
-- When the problem has constraints that must be satisfied
-
-## Common Problems
-
-- N-Queens Problem
-- Sudoku Solver
-- Maze Solving
-- Generating all permutations/combinations
-
-## Time Complexity
-
-- Generally O(b^d) where b is the branching factor and d is the depth of the recursion tree
-- Can be optimized with pruning techniques
-`,
-    problems: [
-      {
-        id: '1',
-        title: 'N-Queens',
-        difficulty: 'Hard',
-        tags: ['Backtracking', 'Recursion'],
-        status: 'solved',
-      },
-      {
-        id: '2',
-        title: 'Sudoku Solver',
-        difficulty: 'Hard',
-        tags: ['Backtracking', 'Matrix'],
-        status: 'attempted',
-      },
-      {
-        id: '3',
-        title: 'Combination Sum',
-        difficulty: 'Medium',
-        tags: ['Backtracking', 'Array'],
-        status: 'todo',
-      },
-    ],
-  },
-  'binary-search': {
-    title: 'Binary Search',
-    description:
-      'Learn how to efficiently search through sorted data by repeatedly dividing the search interval in half.',
-    readme:
-      '## Binary Search\n\nBinary search is an efficient algorithm for finding an item from a sorted list of items...',
-    problems: [
-      {
-        id: '4',
-        title: 'Binary Search',
-        difficulty: 'Easy',
-        tags: ['Binary Search', 'Array'],
-        status: 'todo',
-      },
-    ],
-  } satisfies PatternData,
-};
-
-type Props = {
+interface PageProps {
   params: { patternId: string[] };
-};
+}
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export const revalidate = 3600; // Revalidate at most every hour
+
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
   const patternId = params.patternId?.[0] || '';
-  const pattern = patternData[patternId];
+  const pattern = await patternService.getPatternById(patternId);
 
-  if (!pattern) return {};
+  if (!pattern) {
+    return {
+      title: 'Pattern Not Found',
+    };
+  }
 
   return {
-    title: `${pattern.title} | Competitive Programming`,
+    title: `${pattern.title} - Problem Solving Pattern`,
     description: pattern.description,
   };
 }
 
-function getStatusColor(status: ProblemStatus) {
-  switch (status) {
-    case 'solved':
-      return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-    case 'attempted':
-      return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
-    default:
-      return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
+async function fetchPatternData(slug: string) {
+  try {
+    // First try to get the pattern by slug
+    const pattern = await patternService.getPatternById(slug);
+
+    if (!pattern) {
+      console.log(`Pattern not found with slug: ${slug}`);
+      notFound();
+    }
+
+    // Get all problems and filter by the pattern's slug
+    const allProblems = await problemsService.getAllProblems();
+    const patternSlugLower = pattern.slug.toLowerCase();
+
+    const problems = allProblems.filter((problem) => {
+      return (
+        problem.tags?.some(
+          (tag) =>
+            typeof tag === 'string' && tag.toLowerCase() === patternSlugLower
+        ) ||
+        (problem.category &&
+          typeof problem.category === 'string' &&
+          problem.category.toLowerCase() === patternSlugLower)
+      );
+    });
+
+    return { pattern, problems };
+  } catch (error) {
+    console.error('Error fetching pattern data:', error);
+    notFound();
   }
 }
 
-export default function PatternPage({ params }: Props) {
+export default async function PatternPage({ params }: PageProps) {
   const patternId = params.patternId?.[0] || '';
-  const pattern = patternData[patternId];
-
-  if (!pattern) {
-    notFound();
-  }
+  const { pattern, problems } = await fetchPatternData(patternId);
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -139,70 +77,93 @@ export default function PatternPage({ params }: Props) {
         <p className="text-muted-foreground mt-2">{pattern.description}</p>
       </div>
 
-      <Tabs defaultValue="readme" className="w-full">
+      <Tabs defaultValue="overview" className="w-full">
         <TabsList className="grid w-full grid-cols-2 max-w-xs mb-6">
-          <TabsTrigger value="readme">Readme</TabsTrigger>
-          <TabsTrigger value="problems">Problems</TabsTrigger>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="problems">
+            Problems ({problems.length})
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="readme">
-          <Card>
-            <CardContent className="pt-6">
-              <article className="prose dark:prose-invert max-w-none">
-                {pattern.readme ? (
-                  <MarkdownRenderer>{pattern.readme}</MarkdownRenderer>
-                ) : (
-                  <p className="text-muted-foreground">
-                    No readme available for this pattern.
-                  </p>
-                )}
-              </article>
-            </CardContent>
-          </Card>
+        <TabsContent value="overview" className="space-y-4">
+          <div className="prose dark:prose-invert max-w-none">
+            <MarkdownRenderer>{pattern.readme}</MarkdownRenderer>
+          </div>
         </TabsContent>
 
-        <TabsContent value="problems">
-          <Card>
-            <CardHeader>
-              <CardTitle>Practice Problems</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {pattern.problems?.map((problem) => (
-                  <div
-                    key={problem.id}
-                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors"
-                  >
-                    <div>
-                      <h3 className="font-medium">{problem.title}</h3>
-                      <div className="flex gap-2 mt-1">
-                        <Badge
-                          variant="outline"
-                          className={getStatusColor(problem.status)}
-                        >
-                          {problem.status.charAt(0).toUpperCase() +
-                            problem.status.slice(1)}
-                        </Badge>
-                        <Badge variant="outline">{problem.difficulty}</Badge>
-                        {problem.tags.map((tag: string) => (
-                          <div key={tag} className="whitespace-nowrap">
-                            <Badge variant="secondary">{tag}</Badge>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    <Button variant="outline" size="sm">
-                      Solve
-                    </Button>
-                  </div>
-                )) || (
-                  <p className="text-muted-foreground text-center py-8">
-                    No problems available for this pattern yet.
-                  </p>
-                )}
+        <TabsContent value="problems" className="space-y-4">
+          <div className="grid gap-4">
+            {problems.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">
+                  No problems found for this pattern.
+                </p>
               </div>
-            </CardContent>
-          </Card>
+            ) : (
+              <div className="grid gap-4">
+                {problems.map((problem) => (
+                  <Card
+                    key={problem.id}
+                    className="hover:shadow-md transition-shadow"
+                  >
+                    <CardHeader className="pb-2">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="text-lg font-medium">
+                            <Link
+                              href={`/competitive-programming/problems/${problem.id}`}
+                              className="hover:underline"
+                            >
+                              {problem.title}
+                            </Link>
+                          </h3>
+                          <div className="flex gap-2 mt-1">
+                            <span
+                              className={`px-2 py-0.5 text-xs rounded-full ${
+                                problem.difficulty === 'Easy'
+                                  ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                                  : problem.difficulty === 'Medium'
+                                    ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                                    : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                              }`}
+                            >
+                              {problem.difficulty}
+                            </span>
+                            <span className="px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
+                              Not Started
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      {problem.description && (
+                        <p className="text-sm text-muted-foreground line-clamp-2">
+                          {problem.description}
+                        </p>
+                      )}
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {problem.tags?.slice(0, 3).map((tag: string) => (
+                          <Badge
+                            key={tag}
+                            variant="outline"
+                            className="text-xs"
+                          >
+                            {tag}
+                          </Badge>
+                        ))}
+                        {problem.tags && problem.tags.length > 3 && (
+                          <Badge variant="outline" className="text-xs">
+                            +{problem.tags.length - 3} more
+                          </Badge>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
         </TabsContent>
       </Tabs>
     </div>
