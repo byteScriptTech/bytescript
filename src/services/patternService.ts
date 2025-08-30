@@ -1,6 +1,8 @@
 import {
   collection,
+  deleteDoc,
   doc,
+  getDoc,
   getDocs,
   setDoc,
   query,
@@ -41,17 +43,32 @@ export const patternService = {
     }
   },
 
+  // Get a single pattern by document ID
+  async getPatternById(id: string): Promise<PatternData | null> {
+    try {
+      const docRef = doc(db, PATTERNS_COLLECTION, id);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        return { id: docSnap.id, ...docSnap.data() } as PatternData;
+      }
+      return null;
+    } catch (error) {
+      console.error('Error getting pattern by ID:', error);
+      throw error;
+    }
+  },
+
   // Get a single pattern by slug
-  async getPatternById(slug: string): Promise<PatternData | null> {
+  async getPatternBySlug(slug: string): Promise<PatternData | null> {
     try {
       const patternsRef = collection(db, PATTERNS_COLLECTION);
       const q = query(patternsRef, where('slug', '==', slug));
       const querySnapshot = await getDocs(q);
-      console.log(querySnapshot, 'this is the query snapshot');
+
       if (!querySnapshot.empty) {
         const doc = querySnapshot.docs[0];
-        const data = doc.data();
-        return { id: doc.id, ...data } as PatternData;
+        return { id: doc.id, ...doc.data() } as PatternData;
       }
       return null;
     } catch (error) {
@@ -80,6 +97,17 @@ export const patternService = {
       return patternRef.id;
     } catch (error) {
       console.error('Error saving pattern:', error);
+      throw error;
+    }
+  },
+
+  // Delete a pattern by ID
+  async deletePattern(id: string): Promise<void> {
+    try {
+      const docRef = doc(db, PATTERNS_COLLECTION, id);
+      await deleteDoc(docRef);
+    } catch (error) {
+      console.error('Error deleting pattern:', error);
       throw error;
     }
   },

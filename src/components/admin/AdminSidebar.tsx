@@ -15,6 +15,11 @@ export function AdminSidebar() {
       icon: Database,
     },
     {
+      name: 'Patterns',
+      href: '/admin/patterns',
+      icon: Code,
+    },
+    {
       name: 'Python',
       href: '/admin/python',
       icon: Code,
