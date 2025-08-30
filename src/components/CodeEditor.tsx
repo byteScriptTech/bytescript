@@ -161,7 +161,9 @@ export default function CodeEditor() {
           </div>
         </Panel>
 
-        <PanelResizeHandle className="w-2 bg-border/50 hover:bg-primary/50 transition-colors" />
+        <PanelResizeHandle className="w-2 bg-border/50 hover:bg-primary/50 transition-colors relative group">
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-0.5 h-12 bg-gray-400 dark:bg-gray-400 rounded-full group-hover:bg-primary dark:group-hover:bg-primary" />
+        </PanelResizeHandle>
 
         {/* Main Content */}
         <Panel defaultSize={70} minSize={30} className="flex flex-col">
