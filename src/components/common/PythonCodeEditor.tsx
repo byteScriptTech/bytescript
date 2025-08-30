@@ -25,6 +25,7 @@ interface PythonCodeEditorProps {
   _height?: string | number;
   _showLineNumbers?: boolean;
   _theme?: 'light' | 'dark';
+  showAlgorithm?: boolean;
 }
 
 export function PythonCodeEditor({
@@ -32,6 +33,7 @@ export function PythonCodeEditor({
   className = '',
   onCodeChange,
   readOnly = false,
+  showAlgorithm = true,
 }: PythonCodeEditorProps) {
   const [algorithm, setAlgorithm] = useState<string>(
     ['# Write your algorithm here'].join('\n')
@@ -128,6 +130,34 @@ sys.stdout = StdoutCatcher()
     }
   }, [code, isRunning]);
 
+  const handleTabKey = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const target = e.target as HTMLTextAreaElement;
+      const start = target.selectionStart;
+      const end = target.selectionEnd;
+      const value = target.value;
+
+      // Insert 4 spaces at the cursor position
+      const newValue =
+        value.substring(0, start) + '    ' + value.substring(end);
+
+      // Update the textarea value and move the cursor
+      setCode(newValue);
+      if (onCodeChange) {
+        onCodeChange(newValue);
+      }
+
+      // Set the cursor position after the inserted spaces
+      setTimeout(() => {
+        if (textareaRef.current) {
+          textareaRef.current.selectionStart = start + 4;
+          textareaRef.current.selectionEnd = start + 4;
+        }
+      }, 0);
+    }
+  };
+
   const _handleCodeChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       const newCode = e.target.value;
@@ -138,15 +168,6 @@ sys.stdout = StdoutCatcher()
     },
     [onCodeChange]
   );
-
-  // Reset function (commented out as it's not currently used)
-  // const _resetCode = useCallback(() => {
-  //   setCode(initialCode);
-  //   setResult(null);
-  //   if (onCodeChange) {
-  //     onCodeChange(initialCode);
-  //   }
-  // }, [initialCode, onCodeChange]);
 
   // Handle keyboard shortcut for running code
   useEffect(() => {
@@ -171,29 +192,33 @@ sys.stdout = StdoutCatcher()
       )}
     >
       <PanelGroup direction="horizontal" className="flex-1">
-        {/* Editor Panel */}
-        <Panel defaultSize={30} minSize={20} className="flex flex-col">
-          <div className="flex items-center justify-between p-2 border-b bg-muted/10">
-            <div className="text-sm font-medium px-2">Python Editor</div>
-            <div className="flex space-x-2"></div>
-          </div>
-          <div className="flex-1 overflow-auto">
-            <textarea
-              value={algorithm}
-              onChange={(e) => setAlgorithm(e.target.value)}
-              className="w-full h-full p-4 font-mono text-sm bg-background text-foreground outline-none resize-none"
-              spellCheck={false}
-              placeholder="# Write your algorithm or notes here..."
-              style={{
-                tabSize: 2,
-                lineHeight: '1.5',
-                fontFeatureSettings: '"rlig" 1, "calt" 1',
-              }}
-            />
-          </div>
-        </Panel>
-
-        <PanelResizeHandle className="w-2 bg-border/50 hover:bg-primary/50 transition-colors" />
+        {/* Algorithm Panel - Only show if showAlgorithm is true */}
+        {showAlgorithm && (
+          <>
+            <Panel defaultSize={30} minSize={20} className="flex flex-col">
+              <div className="flex items-center justify-between p-2 border-b bg-muted/10">
+                <div className="text-sm font-medium px-2">Algorithm</div>
+              </div>
+              <div className="flex-1 overflow-auto">
+                <textarea
+                  value={algorithm}
+                  onChange={(e) => setAlgorithm(e.target.value)}
+                  className="w-full h-full p-4 font-mono text-sm bg-background text-foreground outline-none resize-none"
+                  spellCheck={false}
+                  placeholder="# Write your algorithm or notes here..."
+                  style={{
+                    tabSize: 2,
+                    lineHeight: '1.5',
+                    fontFeatureSettings: '"rlig" 1, "calt" 1',
+                  }}
+                />
+              </div>
+            </Panel>
+            <PanelResizeHandle className="w-2 bg-border/50 hover:bg-primary/50 transition-colors relative group">
+              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-0.5 h-12 bg-gray-400 dark:bg-gray-400 rounded-full group-hover:bg-primary dark:group-hover:bg-primary" />
+            </PanelResizeHandle>
+          </>
+        )}
 
         {/* Main Content */}
         <Panel defaultSize={70} minSize={30} className="flex flex-col">
@@ -234,6 +259,7 @@ sys.stdout = StdoutCatcher()
                 <textarea
                   ref={textareaRef}
                   value={code}
+                  onKeyDown={handleTabKey}
                   onChange={(e) => {
                     setCode(e.target.value);
                     onCodeChange?.(e.target.value);
@@ -250,8 +276,9 @@ sys.stdout = StdoutCatcher()
               </div>
             </Panel>
 
-            <PanelResizeHandle className="h-2 bg-border/50 hover:bg-primary/50 transition-colors" />
-
+            <PanelResizeHandle className="h-2 w-full bg-border/50 dark:bg-gray-600 hover:bg-primary/50 dark:hover:bg-primary/70 transition-colors relative group">
+              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-0.5 bg-gray-400 dark:bg-gray-400 rounded-full group-hover:bg-primary dark:group-hover:bg-primary" />
+            </PanelResizeHandle>
             {/* Output Panel */}
             <Panel defaultSize={30} minSize={10} className="flex flex-col">
               <div className="flex items-center justify-between p-2 border-b bg-muted/10">

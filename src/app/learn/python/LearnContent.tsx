@@ -167,11 +167,14 @@ const LearnContentInner = ({
               {example.description}
             </p>
           )}
-          <PythonCodeEditor
-            initialCode={example.code}
-            readOnly
-            className="rounded-lg overflow-hidden border"
-          />
+          <div className="h-96 min-h-[24rem]">
+            <PythonCodeEditor
+              initialCode={example.code}
+              readOnly
+              showAlgorithm={false}
+              className="h-full rounded-lg overflow-hidden border"
+            />
+          </div>
         </div>
       ))}
     </div>
