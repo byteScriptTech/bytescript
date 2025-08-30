@@ -130,6 +130,34 @@ sys.stdout = StdoutCatcher()
     }
   }, [code, isRunning]);
 
+  const handleTabKey = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const target = e.target as HTMLTextAreaElement;
+      const start = target.selectionStart;
+      const end = target.selectionEnd;
+      const value = target.value;
+
+      // Insert 4 spaces at the cursor position
+      const newValue =
+        value.substring(0, start) + '    ' + value.substring(end);
+
+      // Update the textarea value and move the cursor
+      setCode(newValue);
+      if (onCodeChange) {
+        onCodeChange(newValue);
+      }
+
+      // Set the cursor position after the inserted spaces
+      setTimeout(() => {
+        if (textareaRef.current) {
+          textareaRef.current.selectionStart = start + 4;
+          textareaRef.current.selectionEnd = start + 4;
+        }
+      }, 0);
+    }
+  };
+
   const _handleCodeChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       const newCode = e.target.value;
@@ -140,15 +168,6 @@ sys.stdout = StdoutCatcher()
     },
     [onCodeChange]
   );
-
-  // Reset function (commented out as it's not currently used)
-  // const _resetCode = useCallback(() => {
-  //   setCode(initialCode);
-  //   setResult(null);
-  //   if (onCodeChange) {
-  //     onCodeChange(initialCode);
-  //   }
-  // }, [initialCode, onCodeChange]);
 
   // Handle keyboard shortcut for running code
   useEffect(() => {
@@ -240,6 +259,7 @@ sys.stdout = StdoutCatcher()
                 <textarea
                   ref={textareaRef}
                   value={code}
+                  onKeyDown={handleTabKey}
                   onChange={(e) => {
                     setCode(e.target.value);
                     onCodeChange?.(e.target.value);
