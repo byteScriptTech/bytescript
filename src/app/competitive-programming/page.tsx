@@ -28,7 +28,7 @@ export default function CompetitiveProgrammingPage() {
                       </h1>
 
                       <Tabs defaultValue="patterns" className="w-full">
-                        <TabsList className="grid w-full max-w-md grid-cols-3 mb-6">
+                        <TabsList className="grid w-full max-w-md grid-cols-2 mb-6">
                           <TabsTrigger
                             value="patterns"
                             className="text-sm font-medium"
