@@ -16,7 +16,7 @@ export default function ProblemPage() {
             <div className="min-h-screen bg-background flex flex-col">
               <Navbar />
               <main className="flex-1 container mx-auto px-4 py-8">
-                <div className="bg-card rounded-lg border shadow-sm">
+                <div>
                   <ProblemPageContent />
                 </div>
               </main>
