@@ -36,7 +36,7 @@ interface ProblemWithOptionalStarterCode extends Omit<Problem, 'starterCode'> {
 }
 
 const ProblemPageContent = () => {
-  const { id } = useParams() as { id: string };
+  const { problemId } = useParams() as { problemId: string };
   const [problem, setProblem] = useState<ProblemWithOptionalStarterCode | null>(
     null
   );
@@ -50,10 +50,10 @@ const ProblemPageContent = () => {
 
   useEffect(() => {
     const fetchProblemAndTestCases = async () => {
-      if (!id) return;
+      if (!problemId) return;
       setLoading(true);
       try {
-        const fetchedProblem = await problemsService.getProblemById(id);
+        const fetchedProblem = await problemsService.getProblemById(problemId);
         if (!fetchedProblem) {
           toast.error('Problem not found');
           return;
@@ -63,7 +63,7 @@ const ProblemPageContent = () => {
         if (currentUser) {
           try {
             fetchedTestCases =
-              await testCasesService.getTestCasesByProblemId(id);
+              await testCasesService.getTestCasesByProblemId(problemId);
           } catch (err) {
             console.error('Error fetching test cases:', err);
             toast.warning('Failed to load test cases');
@@ -96,7 +96,7 @@ const ProblemPageContent = () => {
     };
 
     fetchProblemAndTestCases();
-  }, [id, currentUser]);
+  }, [problemId, currentUser]);
 
   useEffect(() => {
     if (!problem || !problem.examples?.[0]) {

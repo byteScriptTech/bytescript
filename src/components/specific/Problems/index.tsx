@@ -58,7 +58,7 @@ export const Problems = () => {
 
   const handlePractice = async (id: string) => {
     await updateLastAttempted(id);
-    router.push(`/competitive-programming/${id}`);
+    router.push(`/competitive-programming/problems/${id}`);
   };
 
   return (
