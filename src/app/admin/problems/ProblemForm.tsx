@@ -153,25 +153,41 @@ export function ProblemForm({ problem }: ProblemFormProps) {
   };
 
   const onSubmit: SubmitHandler<ProblemFormInput> = async (data) => {
-    const { patternId, ...problemData } = data;
+    const { tags, constraints, ...formData } = data;
+    // Handle patternId separately to ensure it's not undefined
+    const patternId =
+      data.patternId === 'none' || !data.patternId ? null : data.patternId;
+
     try {
       setIsSubmitting(true);
 
       // Transform the form data to match the Problem type
       const problemData = {
-        ...problemData,
-        patternId: patternId || null,
+        ...formData,
+        ...(patternId !== null && { patternId }),
         order: problem?.order || 0,
-        tags: problemData.tags
-          .split(',')
-          .map((tag) => tag.trim())
-          .filter(Boolean),
-        constraints: problemData.constraints
-          .split('\n')
-          .map((c) => c.trim())
-          .filter(Boolean),
+        tags:
+          typeof tags === 'string'
+            ? tags
+                .split(',')
+                .map((tag) => tag.trim())
+                .filter(Boolean)
+            : Array.isArray(tags)
+              ? tags
+              : [],
+        constraints:
+          typeof constraints === 'string'
+            ? constraints
+                .split('\n')
+                .map((c) => c.trim())
+                .filter(Boolean)
+            : Array.isArray(constraints)
+              ? constraints
+              : [],
         examples: examples.filter((ex) => ex.input && ex.output),
       };
+
+      console.log('Processed problem data:', problemData);
 
       if (problem) {
         await problemsService.updateProblem(problem.id, problemData);
@@ -198,7 +214,14 @@ export function ProblemForm({ problem }: ProblemFormProps) {
         </TabsList>
 
         <TabsContent value="problem">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              console.log('Form submit event fired');
+              handleSubmit(onSubmit)(e);
+            }}
+            className="space-y-6"
+          >
             <div className="space-y-4">
               <div>
                 <div className="grid grid-cols-2 gap-4">
