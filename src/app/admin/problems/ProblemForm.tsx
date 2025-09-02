@@ -9,7 +9,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import * as z from 'zod';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -28,11 +28,19 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { Problem } from '@/services/firebase/problemsService';
 import { problemsService } from '@/services/firebase/problemsService';
+import { patternService } from '@/services/patternService';
+
+interface Pattern {
+  id: string;
+  title: string;
+  slug: string;
+}
 
 const problemSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   description: z.string().min(1, 'Description is required'),
   difficulty: z.enum(['Easy', 'Medium', 'Hard']),
+  patternId: z.string().optional(),
   category: z.string().min(1, 'Category is required'),
   tags: z.string().transform((val) =>
     val
@@ -82,7 +90,24 @@ interface ProblemFormInput {
 
 export function ProblemForm({ problem }: ProblemFormProps) {
   const router = useRouter();
+
+  useEffect(() => {
+    const loadPatterns = async () => {
+      try {
+        const patternData = await patternService.getPatterns();
+        setPatterns(patternData);
+      } catch (error) {
+        console.error('Error loading patterns:', error);
+      } finally {
+        setIsLoadingPatterns(false);
+      }
+    };
+
+    loadPatterns();
+  }, []);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [patterns, setPatterns] = useState<Pattern[]>([]);
+  const [isLoadingPatterns, setIsLoadingPatterns] = useState(true);
   const [examples, setExamples] = useState(
     problem?.examples || [{ input: '', output: '', explanation: '' }]
   );
@@ -127,18 +152,21 @@ export function ProblemForm({ problem }: ProblemFormProps) {
     setExamples(newExamples);
   };
 
-  const onSubmit: SubmitHandler<ProblemFormInput> = async (formData) => {
+  const onSubmit: SubmitHandler<ProblemFormInput> = async (data) => {
+    const { patternId, ...problemData } = data;
     try {
       setIsSubmitting(true);
 
       // Transform the form data to match the Problem type
       const problemData = {
-        ...formData,
-        tags: formData.tags
+        ...problemData,
+        patternId: patternId || null,
+        order: problem?.order || 0,
+        tags: problemData.tags
           .split(',')
           .map((tag) => tag.trim())
           .filter(Boolean),
-        constraints: formData.constraints
+        constraints: problemData.constraints
           .split('\n')
           .map((c) => c.trim())
           .filter(Boolean),
@@ -173,15 +201,48 @@ export function ProblemForm({ problem }: ProblemFormProps) {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="space-y-4">
               <div>
-                <Label htmlFor="title">Title</Label>
-                <Input
-                  id="title"
-                  {...register('title')}
-                  placeholder="Enter problem title"
-                />
-                {errors.title && (
-                  <p className="text-sm text-red-500">{errors.title.message}</p>
-                )}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="title">Title</Label>
+                    <Input
+                      id="title"
+                      {...register('title')}
+                      placeholder="Enter problem title"
+                    />
+                    {errors.title && (
+                      <p className="text-sm text-red-500">
+                        {errors.title.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Pattern (Optional)</Label>
+                    <Select
+                      onValueChange={(value) =>
+                        setValue('patternId', value === 'none' ? null : value)
+                      }
+                      defaultValue={problem?.patternId || 'none'}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a pattern" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">None</SelectItem>
+                        {patterns.map((pattern) => (
+                          <SelectItem key={pattern.id} value={pattern.id}>
+                            {pattern.title}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {errors.patternId && (
+                      <p className="text-sm text-red-500">
+                        {errors.patternId.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
               </div>
 
               <div>
