@@ -33,7 +33,7 @@ export const PatternCard = ({
         </CardHeader>
         <CardContent className="pb-4">
           <p className="text-sm text-muted-foreground line-clamp-3">
-            {description}
+            {description.split('.')[0] + '.'}
           </p>
         </CardContent>
       </Card>

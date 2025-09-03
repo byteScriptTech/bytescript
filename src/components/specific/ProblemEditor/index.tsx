@@ -1,7 +1,14 @@
+import { Info } from 'lucide-react';
 import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { CodeEditor } from '@/components/ui/CodeEditor';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { useTheme } from '@/context/theme-provider';
 import type { TestCase, TestResult, Submission } from '@/types/problem';
 
@@ -41,9 +48,35 @@ export default function ProblemEditor({
       {/* Editor Header */}
       <div className="px-4 sm:px-6 py-3 border-b border-border bg-card">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <h2 className="text-lg sm:text-xl font-semibold text-foreground">
-            Code Editor
-          </h2>
+          <div className="flex items-center gap-3">
+            <h2 className="text-lg sm:text-xl font-semibold text-foreground">
+              Code Editor
+            </h2>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-6 w-6">
+                    <Info className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                    <span className="sr-only">Code Format Information</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs p-4">
+                  <p className="text-sm">
+                    If a solve function is not already defined with parameters
+                    in the editor, create a solve function and write all your
+                    code inside it:
+                    <pre className="mt-2 p-2 bg-muted rounded text-xs overflow-x-auto">
+                      {`function solve(parameterOne, paramTwo) {
+  // Your logic to solve the question
+  // and return the value
+  return result;
+}`}
+                    </pre>
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
           <div className="flex flex-wrap gap-2">
             <Button
               onClick={onRun}
