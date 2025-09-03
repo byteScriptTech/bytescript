@@ -11,10 +11,29 @@ type ExecutionResult = {
   executionTime?: number;
 };
 
-export default function CodeEditor() {
-  const [code, setCode] = useState<string>(
-    '// Write your JavaScript code here\nconsole.log("Hello, World!");'
-  );
+interface CodeEditorProps {
+  code?: string;
+  onCodeChange?: (code: string) => void;
+  initialCode?: string;
+}
+
+export default function CodeEditor({
+  code: externalCode,
+  onCodeChange,
+  initialCode = '// Write your JavaScript code here\nconsole.log("Hello, World!");',
+}: CodeEditorProps) {
+  const [internalCode, setInternalCode] = useState(initialCode);
+
+  // Use external code if provided, otherwise use internal state
+  const code = externalCode !== undefined ? externalCode : internalCode;
+
+  const handleCodeChange = (newCode: string) => {
+    if (onCodeChange) {
+      onCodeChange(newCode);
+    } else {
+      setInternalCode(newCode);
+    }
+  };
   const [isRunning, setIsRunning] = useState(false);
   const [result, setResult] = useState<ExecutionResult | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -138,7 +157,7 @@ export default function CodeEditor() {
         {/* Algorithm Editor Panel */}
         <Panel
           defaultSize={30}
-          minSize={20}
+          minSize={0}
           className="flex flex-col border-r border-border"
         >
           <div className="flex items-center justify-between p-2 border-b bg-muted/10">
@@ -195,7 +214,7 @@ export default function CodeEditor() {
                 <textarea
                   ref={textareaRef}
                   value={code}
-                  onChange={(e) => setCode(e.target.value)}
+                  onChange={(e) => handleCodeChange(e.target.value)}
                   className="w-full h-full p-4 font-mono text-sm bg-background text-foreground outline-none resize-none"
                   spellCheck={false}
                   placeholder="// Enter your JavaScript code here..."
