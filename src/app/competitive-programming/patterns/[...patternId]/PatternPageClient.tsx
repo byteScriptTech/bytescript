@@ -32,16 +32,13 @@ export function PatternPageClient({ children }: PatternPageClientProps) {
   const [showEditor, setShowEditor] = useState(false);
   const [editorCode] = useState('');
   const circleSize = 50;
-  const toggleEditor = () => {
-    setShowEditor(!showEditor);
-  };
 
   return (
     <div className="relative min-h-screen">
-      <div className="absolute inset-0" style={{ zIndex: 1000 }}>
+      <div className="absolute top-4 right-4 z-50">
         <DraggableCircle
           size={circleSize}
-          onClick={() => setShowEditor(true)}
+          onClick={() => setShowEditor(!showEditor)}
         />
       </div>
       <div>{children}</div>
@@ -49,7 +46,6 @@ export function PatternPageClient({ children }: PatternPageClientProps) {
         <DraggableEditor
           defaultEditorType="javascript"
           defaultPythonCode={editorCode}
-          onClose={toggleEditor}
         />
       )}
     </div>
