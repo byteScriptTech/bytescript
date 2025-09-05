@@ -1,4 +1,3 @@
-import { Cpu } from 'lucide-react';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -18,6 +17,8 @@ import { cn } from '@/lib/utils';
 import { problemsService } from '@/services/firebase/problemsService';
 import { patternService } from '@/services/patternService';
 
+import { PatternCategories } from './components/PatternCategories';
+import { PatternHeader } from './components/PatternHeader';
 import { PatternPageClient } from './PatternPageClient';
 
 // Cache the pattern fetch to deduplicate requests
@@ -95,38 +96,13 @@ export default async function PatternPage({ params }: PageProps) {
     <PatternPageClient>
       <div className="container mx-auto max-w-5xl px-4 py-8">
         <div className="mb-8">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 rounded-lg bg-primary/10 text-primary">
-                  <Cpu className="h-6 w-6" />
-                </div>
-                <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-                  {pattern.title}
-                </h1>
-              </div>
-              <p className="text-muted-foreground text-lg">
-                {pattern.description}
-              </p>
-              {pattern.category && (
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {pattern.category
-                    .split(',')
-                    .map((cat: string) => cat.trim())
-                    .filter(Boolean)
-                    .map((category: string, index: number) => (
-                      <Badge
-                        key={index}
-                        variant="secondary"
-                        className="text-sm"
-                      >
-                        {category}
-                      </Badge>
-                    ))}
-                </div>
-              )}
-            </div>
-          </div>
+          <PatternHeader
+            title={pattern.title}
+            description={pattern.description}
+          />
+          {pattern.category && (
+            <PatternCategories categories={pattern.category} />
+          )}
         </div>
 
         <Tabs defaultValue="overview" className="w-full">
