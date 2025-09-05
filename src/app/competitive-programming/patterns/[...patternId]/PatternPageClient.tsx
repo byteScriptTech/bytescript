@@ -26,15 +26,11 @@ const DraggableEditor = dynamic(
 
 interface PatternPageClientProps {
   children: React.ReactNode;
-  initialCode?: string;
 }
 
-export function PatternPageClient({
-  children,
-  initialCode = '',
-}: PatternPageClientProps) {
+export function PatternPageClient({ children }: PatternPageClientProps) {
   const [showEditor, setShowEditor] = useState(false);
-  const [editorCode] = useState(initialCode);
+  const [editorCode] = useState('');
   const circleSize = 50;
   const toggleEditor = () => {
     setShowEditor(!showEditor);

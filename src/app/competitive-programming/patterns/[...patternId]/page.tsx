@@ -2,6 +2,7 @@ import { Cpu } from 'lucide-react';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { cache } from 'react';
 
 import { MarkdownRenderer } from '@/components/markdown/MarkdownRenderer';
 import { Badge } from '@/components/ui/badge';
@@ -19,6 +20,16 @@ import { patternService } from '@/services/patternService';
 
 import { PatternPageClient } from './PatternPageClient';
 
+// Cache the pattern fetch to deduplicate requests
+const getPatternBySlug = cache(async (slug: string) => {
+  try {
+    return await patternService.getPatternBySlug(slug);
+  } catch (error) {
+    console.error('Error fetching pattern:', error);
+    return null;
+  }
+});
+
 interface PageProps {
   params: { patternId: string[] };
 }
@@ -29,7 +40,7 @@ export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const slug = params.patternId?.[0] || '';
-  const pattern = await patternService.getPatternBySlug(slug);
+  const pattern = await getPatternBySlug(slug);
 
   if (!pattern) {
     return {
@@ -45,8 +56,8 @@ export async function generateMetadata({
 
 async function fetchPatternData(slug: string) {
   try {
-    // Get the pattern by slug
-    const pattern = await patternService.getPatternBySlug(slug);
+    // Get the pattern by slug (uses cached version)
+    const pattern = await getPatternBySlug(slug);
 
     if (!pattern) {
       console.log(`Pattern not found with slug: ${slug}`);
@@ -80,19 +91,8 @@ export default async function PatternPage({ params }: PageProps) {
   const patternId = params.patternId?.[0] || '';
   const { pattern, problems } = await fetchPatternData(patternId);
 
-  // Default code example for the editor
-  const defaultCode = `// ${pattern.title} Pattern
-// Add your implementation here
-
-function example() {
-  // Your code here
-  return "Hello, World!";
-}
-
-console.log(example());`;
-
   return (
-    <PatternPageClient initialCode={defaultCode}>
+    <PatternPageClient>
       <div className="container mx-auto max-w-5xl px-4 py-8">
         <div className="mb-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
