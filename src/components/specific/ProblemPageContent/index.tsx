@@ -360,7 +360,9 @@ const ProblemPageContent = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-foreground">Loading problem...</div>
+        <div className="text-foreground" data-testid="loading">
+          Loading problem...
+        </div>
       </div>
     );
   }
