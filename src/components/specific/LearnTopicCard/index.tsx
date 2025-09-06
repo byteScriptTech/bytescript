@@ -26,7 +26,6 @@ export const LearnTopicCard: React.FC<LearnTopicCardProps> = ({
   onTopicClick,
 }) => {
   const router = useRouter();
-  console.log(topic);
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     if (onTopicClick) {
@@ -121,14 +120,7 @@ export const LearnTopicCard: React.FC<LearnTopicCardProps> = ({
           </div>
 
           <div className="mt-auto pt-4 border-t border-border/50">
-            <div className="flex items-center">
-              <BookOpen className="w-4 h-4 text-muted-foreground mr-2" />
-              <span className="text-sm font-medium text-muted-foreground">
-                {topic.duration || 'Varies'}
-              </span>
-            </div>
-
-            <div className="mt-4 flex items-center text-sm font-medium text-primary">
+            <div className="flex items-center text-sm font-medium text-primary">
               Start Learning
               <svg
                 className="ml-1.5 w-4 h-4 transition-transform group-hover:translate-x-1"
