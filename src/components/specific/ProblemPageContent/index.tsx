@@ -113,7 +113,7 @@ const ProblemPageContent = () => {
     const paramPattern = /(\w+)\s*=\s*(\[[^\]]*\]|[^,]+)(?:,\s*|$)/g;
     const matches = [...inputStr.matchAll(paramPattern)];
 
-    if (matches.length < 2) {
+    if (matches.length === 0) {
       setCode(`// Write your solution here`);
       return;
     }

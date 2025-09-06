@@ -10,7 +10,9 @@ describe('LandingPageFooter', () => {
     render(<LandingPageFooter />);
 
     expect(
-      screen.getByText(`© ${currentYear} BiteScript. All rights reserved.`)
+      screen.getByText(
+        `© ${currentYear} BiteScript. Open Source under the MIT License.`
+      )
     ).toBeInTheDocument();
   });
 
@@ -44,7 +46,7 @@ describe('LandingPageFooter', () => {
   it('renders text with correct styling', () => {
     render(<LandingPageFooter />);
 
-    const text = screen.getByText(/All rights reserved/);
+    const text = screen.getByText(/Open Source under the MIT License./);
     expect(text).toHaveClass(
       'text-muted-foreground',
       'text-base',
