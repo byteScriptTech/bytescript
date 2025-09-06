@@ -46,6 +46,7 @@ export function PatternPageClient({ children }: PatternPageClientProps) {
         <DraggableEditor
           defaultEditorType="javascript"
           defaultPythonCode={editorCode}
+          onClose={() => setShowEditor(false)}
         />
       )}
     </div>

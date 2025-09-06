@@ -111,21 +111,6 @@ export function DraggableEditor({
     centerEditor();
   }, [centerEditor]);
 
-  // Handle keyboard navigation for the draggable editor
-  const _handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === 'Escape' && onClose) {
-        onClose();
-      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-        // Switch between editor tabs
-        setEditorType((prev) =>
-          prev === 'javascript' ? 'python' : 'javascript'
-        );
-      }
-    },
-    [onClose]
-  );
-
   // Handle mouse move for both dragging and resizing
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -185,12 +170,14 @@ export function DraggableEditor({
     >
       {/* Header with drag handle and close button */}
       <div className="flex items-center justify-between h-10 bg-muted/50 border-b border-border">
-        <button
-          type="button"
-          className="flex-1 h-full flex items-center px-4 cursor-move bg-transparent border-none p-0 text-left focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+        <div
+          className="flex-1 h-full flex items-center px-4 cursor-move"
           onMouseDown={(e) => {
-            e.stopPropagation();
-            if (e.target === e.currentTarget) {
+            // Only start dragging if clicking on the header itself, not on buttons
+            if (
+              e.target === e.currentTarget ||
+              (e.target as HTMLElement).closest('button') === null
+            ) {
               setIsDragging(true);
               setDragStart({
                 x: e.clientX - position.x,
@@ -199,12 +186,17 @@ export function DraggableEditor({
             }
           }}
           onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
+            if (
+              (e.key === 'Enter' || e.key === ' ') &&
+              e.target === e.currentTarget
+            ) {
               e.preventDefault();
               onClose?.();
             }
           }}
-          aria-label="Editor header - drag to move"
+          role="button"
+          tabIndex={0}
+          aria-label="Drag to move editor"
         >
           <Tabs
             value={editorType}
@@ -219,7 +211,7 @@ export function DraggableEditor({
               <TabsTrigger value="python">Python</TabsTrigger>
             </TabsList>
           </Tabs>
-        </button>
+        </div>
         <button
           type="button"
           onClick={onClose}
@@ -263,16 +255,6 @@ export function DraggableEditor({
       >
         <div className="absolute bottom-1 right-1 w-2 h-2 border-r-2 border-b-2 border-muted-foreground" />
       </div>
-
-      {/* Close button */}
-      <button
-        type="button"
-        onClick={onClose}
-        className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-        aria-label="Close editor"
-      >
-        <X className="h-4 w-4" />
-      </button>
     </div>
   );
 }
