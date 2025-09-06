@@ -37,6 +37,7 @@
     "@radix-ui/react-tooltip": "^1.1.3",
     "@types/firebase": "^2.4.32",
     "@uiw/react-md-editor": "^4.0.8",
+    "@vercel/analytics": "^1.5.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
