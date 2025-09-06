@@ -50,12 +50,10 @@ export function DSATopicClient({
     <AuthProvider>
       <div className="relative w-full min-h-screen">
         <Navbar />
-        <div className="fixed top-4 right-4 z-50">
-          <DraggableCircle
-            size={circleSize}
-            onClick={() => setShowEditor(true)}
-          />
-        </div>
+        <DraggableCircle
+          size={circleSize}
+          onClick={() => setShowEditor(true)}
+        />
         {showEditor && (
           <DraggableEditor
             defaultPosition={{ x: 0, y: 0 }}

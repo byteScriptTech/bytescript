@@ -35,12 +35,11 @@ export function PatternPageClient({ children }: PatternPageClientProps) {
 
   return (
     <div className="relative min-h-screen">
-      <div className="absolute top-4 right-4 z-50">
-        <DraggableCircle
-          size={circleSize}
-          onClick={() => setShowEditor(!showEditor)}
-        />
-      </div>
+      <DraggableCircle
+        size={circleSize}
+        onClick={() => setShowEditor(!showEditor)}
+      />
+
       <div>{children}</div>
       {showEditor && (
         <DraggableEditor
