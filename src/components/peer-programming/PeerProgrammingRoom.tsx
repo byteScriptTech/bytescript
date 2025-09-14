@@ -23,6 +23,7 @@ export function PeerProgrammingRoom() {
   const [code, setCode] = useState('// Start coding with your peer!');
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(false);
+  const [isCreatingRoom, setIsCreatingRoom] = useState(false);
 
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
@@ -33,7 +34,8 @@ export function PeerProgrammingRoom() {
   const {
     connectionStatus,
     localStream,
-    remoteStream,
+    remoteStreams: _remoteStreams, // Prefix with _ to indicate it's intentionally unused
+    firstRemoteStream,
     error,
     peers,
     joinRoom: joinRoomRTC,
@@ -50,8 +52,11 @@ export function PeerProgrammingRoom() {
       localVideo.srcObject = localStream;
     }
 
-    if (remoteVideo && remoteStream) {
-      remoteVideo.srcObject = remoteStream;
+    // Use the first remote stream if available
+    if (remoteVideo && firstRemoteStream) {
+      remoteVideo.srcObject = firstRemoteStream;
+    } else if (remoteVideo) {
+      remoteVideo.srcObject = null;
     }
 
     return () => {
@@ -62,7 +67,7 @@ export function PeerProgrammingRoom() {
         remoteVideo.srcObject = null;
       }
     };
-  }, [localStream, remoteStream]);
+  }, [localStream, firstRemoteStream]);
 
   // Handle code changes and sync with peer
   const handleCodeChange = useCallback(
@@ -73,11 +78,52 @@ export function PeerProgrammingRoom() {
     [sendData]
   );
 
-  // Join room
-  const joinRoom = useCallback(() => {
-    if (!roomId.trim()) return;
-    joinRoomRTC();
-  }, [roomId, joinRoomRTC]);
+  // Create a new room
+  const createRoom = useCallback(async () => {
+    if (connectionStatus === 'connected' || connectionStatus === 'connecting') {
+      return;
+    }
+
+    try {
+      setIsCreatingRoom(true);
+      // Error is managed by the useWebRTC hook
+
+      // Generate a random room ID
+      const newRoomId = Math.random().toString(36).substring(2, 10);
+      setRoomId(newRoomId);
+
+      // Update URL with the new room ID
+      window.history.pushState({}, '', `?room=${newRoomId}`);
+
+      // Join the room
+      await joinRoomRTC();
+    } catch (err) {
+      console.error('Failed to create room:', err);
+      // Error is already handled by the useWebRTC hook
+    } finally {
+      setIsCreatingRoom(false);
+    }
+  }, [joinRoomRTC, connectionStatus]);
+
+  // Join an existing room
+  const joinRoom = useCallback(async () => {
+    if (
+      !roomId.trim() ||
+      connectionStatus === 'connected' ||
+      connectionStatus === 'connecting'
+    ) {
+      return;
+    }
+
+    try {
+      // Error is managed by the useWebRTC hook
+      // Note: roomId and userId are already provided to the useWebRTC hook
+      await joinRoomRTC();
+    } catch (err) {
+      console.error('Failed to join room:', err);
+      // Error is already handled by the useWebRTC hook
+    }
+  }, [roomId, userId, joinRoomRTC, connectionStatus]);
 
   // Toggle mute
   const toggleMute = useCallback(() => {
@@ -101,24 +147,42 @@ export function PeerProgrammingRoom() {
 
   // End call
   const endCall = useCallback(() => {
-    leaveRoomRTC();
-    setRoomId('');
+    try {
+      leaveRoomRTC();
+      setRoomId('');
+      // Error state is managed by the useWebRTC hook
+      // Update URL to remove room ID
+      window.history.pushState({}, '', window.location.pathname);
+    } catch (err) {
+      console.error('Error leaving room:', err);
+      // Error is already handled by the useWebRTC hook
+    }
   }, [leaveRoomRTC]);
 
   // Check for room ID in URL
   useEffect(() => {
     const roomIdFromUrl = searchParams.get('room');
-    if (roomIdFromUrl) {
+    if (roomIdFromUrl && roomIdFromUrl !== roomId) {
       setRoomId(roomIdFromUrl);
+      // Don't auto-join here, let the user click the Join button
     }
-  }, [searchParams]);
+  }, [searchParams, roomId]);
 
-  // Auto-join if room ID is in URL
+  // Clean up on unmount
   useEffect(() => {
-    if (roomId && connectionStatus === 'disconnected') {
-      joinRoom();
-    }
-  }, [roomId, joinRoom, connectionStatus]);
+    return () => {
+      try {
+        if (
+          connectionStatus === 'connected' ||
+          connectionStatus === 'connecting'
+        ) {
+          leaveRoomRTC();
+        }
+      } catch (err) {
+        console.error('Error during cleanup:', err);
+      }
+    };
+  }, [connectionStatus, leaveRoomRTC]);
 
   return (
     <div className="flex flex-col h-screen bg-background">
@@ -129,17 +193,50 @@ export function PeerProgrammingRoom() {
           <div className="flex items-center gap-4">
             {connectionStatus === 'disconnected' ? (
               <div className="flex gap-2">
-                <Input
-                  placeholder="Enter Room ID"
-                  value={roomId}
-                  onChange={(e) => setRoomId(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && joinRoom()}
-                  className="w-48"
-                />
-                <Button onClick={joinRoom}>
-                  <VideoIcon className="mr-2 h-4 w-4" />
-                  Join Room
-                </Button>
+                <div className="flex-1 max-w-xs">
+                  <Input
+                    placeholder="Enter Room ID"
+                    value={roomId}
+                    onChange={(e) => setRoomId(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && joinRoom()}
+                    className="w-full"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={joinRoom}
+                    variant="outline"
+                    disabled={
+                      !roomId.trim() || connectionStatus !== 'disconnected'
+                    }
+                    className="relative"
+                  >
+                    <VideoIcon className="mr-2 h-4 w-4" />
+                    Join Room
+                  </Button>
+                  <div className="relative">
+                    <div className="absolute -top-2 -right-2 h-3 w-3 rounded-full bg-green-500 animate-ping"></div>
+                    <Button
+                      onClick={createRoom}
+                      variant="default"
+                      disabled={
+                        !roomId.trim() || connectionStatus !== 'disconnected'
+                      }
+                      className="relative"
+                    >
+                      {isCreatingRoom ? (
+                        <>
+                          <span className="inline-flex items-center">
+                            <span className="h-4 w-4 rounded-full border-2 border-t-transparent border-current animate-spin mr-2"></span>
+                            Creating...
+                          </span>
+                        </>
+                      ) : (
+                        'Create Room'
+                      )}
+                    </Button>
+                  </div>
+                </div>
               </div>
             ) : (
               <div className="flex items-center gap-2">
@@ -178,7 +275,7 @@ export function PeerProgrammingRoom() {
           </h2>
           <div className="flex-1 grid grid-cols-1 gap-4">
             <div className="relative aspect-video bg-muted rounded-lg overflow-hidden">
-              {remoteStream ? (
+              {firstRemoteStream ? (
                 <video
                   ref={remoteVideoRef}
                   autoPlay
