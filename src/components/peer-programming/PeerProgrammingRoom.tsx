@@ -212,18 +212,34 @@ export function PeerProgrammingRoom() {
     }
   }, [searchParams, roomId]);
 
-  // Clean up on unmount
+  // add near top of component
+  const disconnectTimerRef = useRef<number | null>(null);
+
+  // Clean up on unmount — debounce the actual leave to avoid aborting in-progress connects
   useEffect(() => {
+    // Clear any lingering timer when component mounts
+    if (disconnectTimerRef.current) {
+      clearTimeout(disconnectTimerRef.current);
+      disconnectTimerRef.current = null;
+    }
+
     return () => {
       try {
         if (
           connectionStatus === 'connected' ||
           connectionStatus === 'connecting'
         ) {
-          leaveRoomRTC();
+          disconnectTimerRef.current = window.setTimeout(() => {
+            try {
+              leaveRoomRTC();
+              disconnectTimerRef.current = null;
+            } catch (err) {
+              console.error('Error during delayed leaveRoomRTC():', err);
+            }
+          }, 250); // 250ms debounce
         }
       } catch (err) {
-        console.error('Error during cleanup:', err);
+        console.error('Error during cleanup scheduling:', err);
       }
     };
   }, [connectionStatus, leaveRoomRTC]);

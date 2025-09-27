@@ -48,75 +48,75 @@ export class WebSocketService {
   // Connect takes an optional token (ephemeral JWT or Firebase ID token).
   connect(token?: string): Promise<void> {
     return new Promise((resolve, reject) => {
-      // If already connected or connecting, resolve immediately
       if (this.ws?.readyState === WebSocket.OPEN) {
         resolve();
         return;
       }
 
-      // Clear any existing reconnection timer
       if (this.reconnectTimer) {
         clearTimeout(this.reconnectTimer);
         this.reconnectTimer = null;
       }
 
-      // If explicitly closed, don't reconnect
       if (this.isExplicitlyClosed) {
         reject(new Error('Connection was explicitly closed'));
         return;
       }
 
-      // Close existing connection if any
       if (this.ws) {
-        this.ws.close();
+        try {
+          this.ws.close();
+        } catch (e) {
+          // Ignore errors during close
+        }
         this.ws = null;
       }
 
       try {
-        // Build the URL: baseUrl + query token/userId/roomId
         const url = new URL(this.baseUrl);
-        if (token) url.searchParams.set('token', token);
+        if (token) url.searchParams.set('token', token); // Connect with token
         url.searchParams.set('userId', this.userId);
         url.searchParams.set('roomId', this.roomId);
 
+        // Force wss:// if page is served over https://
+        if (window.location?.protocol === 'https:' && url.protocol === 'ws:') {
+          url.protocol = 'wss:';
+        }
+
         this.ws = new WebSocket(url.toString());
         this.setupEventHandlers();
-        this.isConnected = false; // Will be set to true on successful connection
+        this.isConnected = false;
         this.reconnectAttempts = 0;
 
         this.ws.onopen = () => {
-          console.log('WebSocket connected');
           this.isConnected = true;
-          this.reconnectAttempts = 0; // Reset reconnection attempts on successful connection
-
-          // Announce join via server-side join handler
-          this.send({ type: 'join', payload: {}, to: undefined });
+          this.reconnectAttempts = 0;
           resolve();
         };
 
-        this.ws.onerror = (error) => {
-          console.error('WebSocket error:', error);
+        this.ws.onclose = (_event) => {
           this.isConnected = false;
-          if (this.reconnectAttempts === 0) {
-            // Only reject on first attempt to avoid unhandled promise rejections
-            reject(error);
-          }
-        };
-
-        this.ws.onclose = (event) => {
-          console.log('WebSocket disconnected', {
-            code: event.code,
-            reason: event.reason,
-          });
-          this.isConnected = false;
-
-          // Only attempt to reconnect if not explicitly closed and not a normal closure
-          if (!this.isExplicitlyClosed && event.code !== 1000) {
+          if (!this.isExplicitlyClosed) {
             this.attemptReconnect();
           }
         };
+
+        this.ws.onerror = (error) => {
+          if (!this.isExplicitlyClosed) {
+            this.attemptReconnect();
+          }
+          reject(error);
+        };
+
+        this.ws.onmessage = (event) => {
+          try {
+            const message = JSON.parse(event.data);
+            this.messageHandlers.forEach((handler) => handler(message));
+          } catch (error) {
+            // Error parsing WebSocket message
+          }
+        };
       } catch (error) {
-        console.error('Failed to create WebSocket:', error);
         reject(error);
       }
     });
@@ -125,12 +125,21 @@ export class WebSocketService {
   private setupEventHandlers() {
     if (!this.ws) return;
 
-    this.ws.onmessage = (event: MessageEvent) => {
-      try {
-        const message = JSON.parse(event.data as string) as WebSocketMessage;
-        this.notifyHandlers(message);
-      } catch (error) {
-        console.error('Error parsing WebSocket message:', error);
+    this.ws.onopen = () => {
+      this.isConnected = true;
+      this.reconnectAttempts = 0;
+    };
+
+    this.ws.onclose = () => {
+      this.isConnected = false;
+      if (!this.isExplicitlyClosed) {
+        this.attemptReconnect();
+      }
+    };
+
+    this.ws.onerror = () => {
+      if (!this.isExplicitlyClosed) {
+        this.attemptReconnect();
       }
     };
   }
@@ -142,11 +151,7 @@ export class WebSocketService {
   private attemptReconnect() {
     // Don't attempt to reconnect if explicitly closed or already reconnecting
     if (this.isExplicitlyClosed || this.reconnectTimer) {
-      return;
-    }
-
-    if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-      console.error('Max reconnection attempts reached');
+      // Reconnection attempt in progress
       this.notifyHandlers({
         type: 'error',
         payload: {
@@ -163,9 +168,7 @@ export class WebSocketService {
       30000 // Max 30 seconds between attempts
     );
 
-    console.log(
-      `Attempting to reconnect in ${delay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`
-    );
+    // Reconnection attempt in progress
 
     this.reconnectTimer = setTimeout(() => {
       this.reconnectTimer = null;
@@ -180,8 +183,6 @@ export class WebSocketService {
   send(message: Omit<WebSocketMessage, 'from'>) {
     if (this.ws?.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify({ ...message, from: this.userId }));
-    } else {
-      console.warn('WebSocket is not connected');
     }
   }
 
@@ -191,19 +192,15 @@ export class WebSocketService {
   }
 
   disconnect() {
-    // Mark as explicitly closed to prevent reconnections
     this.isExplicitlyClosed = true;
 
-    // Clear any pending reconnection
     if (this.reconnectTimer) {
       clearTimeout(this.reconnectTimer);
       this.reconnectTimer = null;
     }
 
-    // Close the WebSocket connection if it exists
     if (this.ws) {
       try {
-        // Try to close gracefully with a normal closure code
         this.ws.close(1000, 'User disconnected');
       } catch (error) {
         console.error('Error closing WebSocket:', error);
