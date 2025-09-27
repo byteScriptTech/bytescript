@@ -10,8 +10,8 @@ import {
 import { useSearchParams } from 'next/navigation';
 import { useState, useEffect, useRef, useCallback } from 'react';
 
-import { DraggableEditor } from '@/components/editor/DraggableEditor';
 import { Button } from '@/components/ui/button';
+import { CodeEditor } from '@/components/ui/CodeEditor';
 import { Input } from '@/components/ui/input';
 import { useWebRTC } from '@/hooks/useWebRTC';
 
@@ -41,7 +41,11 @@ export function PeerProgrammingRoom() {
     joinRoom: joinRoomRTC,
     leaveRoom: leaveRoomRTC,
     sendData,
+    onData,
   } = useWebRTC(roomId, userId);
+
+  // Track if we've set up the data channel handler
+  const dataChannelInitialized = useRef(false);
 
   // Set up video elements when streams change
   useEffect(() => {
@@ -69,11 +73,51 @@ export function PeerProgrammingRoom() {
     };
   }, [localStream, firstRemoteStream]);
 
-  // Handle code changes and sync with peer
+  // Handle incoming data from peers
+  useEffect(() => {
+    if (!onData || dataChannelInitialized.current) return;
+    const handleIncomingData = (from: string, data: string) => {
+      try {
+        const message = JSON.parse(data);
+        if (message.type === 'code-update' && message.code) {
+          // Only update code if it's different to prevent cursor jumps
+          setCode((prevCode) => {
+            return message.code !== prevCode ? message.code : prevCode;
+          });
+        }
+      } catch (error) {
+        console.error('Error handling incoming data:', error);
+      }
+    };
+
+    // Subscribe to data channel messages
+    const cleanup = onData(handleIncomingData);
+    dataChannelInitialized.current = true;
+
+    // Cleanup subscription on unmount
+    return () => {
+      cleanup();
+      dataChannelInitialized.current = false;
+    };
+  }, [onData]);
+
+  // Handle code changes and sync with peers
   const handleCodeChange = useCallback(
     (newCode: string) => {
-      setCode(newCode);
-      sendData(newCode);
+      // Only send if the code has actually changed
+      setCode((prevCode) => {
+        if (prevCode !== newCode) {
+          // Broadcast the change to all connected peers
+          sendData(
+            JSON.stringify({
+              type: 'code-update',
+              code: newCode,
+            })
+          );
+          return newCode;
+        }
+        return prevCode;
+      });
     },
     [sendData]
   );
@@ -375,11 +419,15 @@ export function PeerProgrammingRoom() {
             )}
           </div>
           <div className="flex-1 relative">
-            <DraggableEditor
-              defaultEditorType="javascript"
-              defaultPythonCode={code}
-              onPythonCodeChange={handleCodeChange}
-            />
+            <div className="h-full w-full">
+              <CodeEditor
+                code={code}
+                onCodeChange={handleCodeChange}
+                language="javascript"
+                height="100%"
+                theme="light"
+              />
+            </div>
           </div>
         </div>
       </main>
