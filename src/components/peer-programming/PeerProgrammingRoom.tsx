@@ -11,9 +11,13 @@ import { useSearchParams } from 'next/navigation';
 import { useState, useEffect, useRef, useCallback } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { CodeEditor } from '@/components/ui/CodeEditor';
 import { Input } from '@/components/ui/input';
 import { useWebRTC } from '@/hooks/useWebRTC';
+
+import {
+  CollaborativeCodeEditor,
+  type RemoteCursor,
+} from './CollaborativeCodeEditor';
 
 // ConnectionStatus type is defined in useWebRTC
 
@@ -21,6 +25,10 @@ export function PeerProgrammingRoom() {
   const searchParams = useSearchParams();
   const [roomId, setRoomId] = useState('');
   const [code, setCode] = useState('// Start coding with your peer!');
+  const [remoteCursors, setRemoteCursors] = useState<RemoteCursor[]>([]);
+  const cursorUpdateTimeouts = useRef<
+    Record<string, ReturnType<typeof setTimeout>>
+  >({});
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(false);
   const [isCreatingRoom, setIsCreatingRoom] = useState(false);
@@ -76,14 +84,62 @@ export function PeerProgrammingRoom() {
   // Handle incoming data from peers
   useEffect(() => {
     if (!onData || dataChannelInitialized.current) return;
+
     const handleIncomingData = (from: string, data: string) => {
       try {
         const message = JSON.parse(data);
+
         if (message.type === 'code-update' && message.code) {
           // Only update code if it's different to prevent cursor jumps
           setCode((prevCode) => {
             return message.code !== prevCode ? message.code : prevCode;
           });
+        }
+        // Handle cursor updates from peers
+        else if (
+          message.type === 'cursor-update' &&
+          message.userId !== userId
+        ) {
+          const {
+            position,
+            selection,
+            color,
+            name = `User-${message.userId.slice(0, 4)}`,
+          } = message;
+
+          // Clear any existing timeout for this user
+          if (cursorUpdateTimeouts.current[message.userId]) {
+            clearTimeout(cursorUpdateTimeouts.current[message.userId]);
+          }
+
+          // Add or update the cursor
+          setRemoteCursors((prev) => {
+            const existingIndex = prev.findIndex(
+              (c) => c.id === message.userId
+            );
+            const newCursor = {
+              id: message.userId,
+              name,
+              color: color || '#000000',
+              position,
+              selection,
+            };
+
+            if (existingIndex >= 0) {
+              const updated = [...prev];
+              updated[existingIndex] = newCursor;
+              return updated;
+            }
+            return [...prev, newCursor];
+          });
+
+          // Set a timeout to remove the cursor if no updates are received
+          cursorUpdateTimeouts.current[message.userId] = setTimeout(() => {
+            setRemoteCursors((prev) =>
+              prev.filter((c) => c.id !== message.userId)
+            );
+            delete cursorUpdateTimeouts.current[message.userId];
+          }, 3000); // Remove cursor after 3 seconds of inactivity
         }
       } catch (error) {
         console.error('Error handling incoming data:', error);
@@ -98,8 +154,10 @@ export function PeerProgrammingRoom() {
     return () => {
       cleanup();
       dataChannelInitialized.current = false;
+      // Clear all timeouts
+      Object.values(cursorUpdateTimeouts.current).forEach(clearTimeout);
     };
-  }, [onData]);
+  }, [onData, userId]);
 
   // Handle code changes and sync with peers
   const handleCodeChange = useCallback(
@@ -436,12 +494,15 @@ export function PeerProgrammingRoom() {
           </div>
           <div className="flex-1 relative">
             <div className="h-full w-full">
-              <CodeEditor
+              <CollaborativeCodeEditor
                 code={code}
                 onCodeChange={handleCodeChange}
+                remoteCursors={remoteCursors}
                 language="javascript"
                 height="100%"
                 theme="light"
+                userId={userId}
+                sendData={sendData}
               />
             </div>
           </div>
