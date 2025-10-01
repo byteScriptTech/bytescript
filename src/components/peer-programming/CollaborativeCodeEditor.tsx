@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 
 import { CodeEditor } from '@/components/ui/CodeEditor';
+import { useTheme } from '@/context/theme-provider';
 
 interface CursorPosition {
   lineNumber: number;
@@ -56,7 +57,6 @@ export function CollaborativeCodeEditor({
   remoteCursors = [],
   language = 'javascript',
   height = '100%',
-  theme = 'light',
   userId,
   sendData,
 }: CollaborativeCodeEditorProps) {
@@ -83,6 +83,8 @@ export function CollaborativeCodeEditor({
     },
     [sendData, userId, userColor]
   );
+  const { theme } = useTheme();
+  const editorTheme = theme === 'dark' ? 'vs-dark' : 'light';
 
   // Notify parent of code changes with debouncing
   const handleCodeChange = useCallback(
@@ -154,7 +156,7 @@ export function CollaborativeCodeEditor({
         remoteCursors={remoteCursors}
         language={language}
         height={height}
-        theme={theme}
+        theme={editorTheme}
       />
 
       {/* Remote cursor indicators */}

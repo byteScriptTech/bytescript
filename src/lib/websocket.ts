@@ -1,3 +1,4 @@
+// websockets.ts
 export type RTCSessionDescriptionInit = {
   type: 'offer' | 'answer' | 'pranswer' | 'rollback';
   sdp?: string;
@@ -18,7 +19,17 @@ type MessageType =
   | 'leave'
   | 'connected'
   | 'joined'
-  | 'error';
+  | 'peers-updated'
+  | 'ice'
+  | 'error'
+  // collaborative/document types
+  | 'get-doc'
+  | 'doc'
+  | 'doc-updated'
+  | 'update'
+  | 'update-rejected'
+  | 'cursor'
+  | 'get-peers';
 
 export type WebSocketMessage = {
   type: MessageType;
@@ -34,8 +45,8 @@ export class WebSocketService {
   private messageHandlers = new Set<MessageHandler>();
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
-  private reconnectTimeout = 1000; // 1 second
-  private isConnected = false;
+  private reconnectTimeout = 1000; // base 1s
+  private isConnectedFlag = false;
   private isExplicitlyClosed = false;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -45,29 +56,39 @@ export class WebSocketService {
     private baseUrl = 'ws://localhost:4000' // default for dev
   ) {}
 
+  isConnected() {
+    return this.isConnectedFlag;
+  }
+
   // Connect takes an optional token (ephemeral JWT or Firebase ID token).
+  // Resolves after the socket is open (or rejects on error).
   connect(token?: string): Promise<void> {
     return new Promise((resolve, reject) => {
+      // Already open
       if (this.ws?.readyState === WebSocket.OPEN) {
+        this.isConnectedFlag = true;
         resolve();
         return;
       }
 
-      if (this.reconnectTimer) {
-        clearTimeout(this.reconnectTimer);
-        this.reconnectTimer = null;
-      }
-
+      // Prevent connecting if explicitly closed
       if (this.isExplicitlyClosed) {
         reject(new Error('Connection was explicitly closed'));
         return;
       }
 
+      // Clear any pending reconnect timer
+      if (this.reconnectTimer) {
+        clearTimeout(this.reconnectTimer);
+        this.reconnectTimer = null;
+      }
+
+      // Close existing socket if present
       if (this.ws) {
         try {
           this.ws.close();
-        } catch (e) {
-          // Ignore errors during close
+        } catch {
+          // ignore
         }
         this.ws = null;
       }
@@ -78,44 +99,61 @@ export class WebSocketService {
         url.searchParams.set('userId', this.userId);
         url.searchParams.set('roomId', this.roomId);
 
-        // Force wss:// if page is served over https://
-        if (window.location?.protocol === 'https:' && url.protocol === 'ws:') {
+        // If page served over https, use wss
+        if (
+          typeof window !== 'undefined' &&
+          window.location?.protocol === 'https:' &&
+          url.protocol === 'ws:'
+        ) {
           url.protocol = 'wss:';
         }
 
         this.ws = new WebSocket(url.toString());
-        this.setupEventHandlers();
-        this.isConnected = false;
-        this.reconnectAttempts = 0;
 
-        this.ws.onopen = () => {
-          this.isConnected = true;
+        // wire up handlers
+        this.setupEventHandlers();
+
+        // Hook into open/close/error to resolve/reject this connect attempt
+        const onOpen = () => {
+          this.isConnectedFlag = true;
           this.reconnectAttempts = 0;
+          cleanupHandlers();
           resolve();
         };
 
-        this.ws.onclose = (_event) => {
-          this.isConnected = false;
+        const onError = () => {
+          cleanupHandlers();
+          // Setup attemptReconnect if not explicitly closed
           if (!this.isExplicitlyClosed) {
             this.attemptReconnect();
           }
+          reject(new Error('WebSocket connection error'));
         };
 
-        this.ws.onerror = (error) => {
-          if (!this.isExplicitlyClosed) {
-            this.attemptReconnect();
-          }
-          reject(error);
+        const onClose = () => {
+          cleanupHandlers();
+          this.isConnectedFlag = false;
+          if (!this.isExplicitlyClosed) this.attemptReconnect();
+          reject(new Error('WebSocket closed before open'));
         };
 
-        this.ws.onmessage = (event) => {
-          try {
-            const message = JSON.parse(event.data);
-            this.messageHandlers.forEach((handler) => handler(message));
-          } catch (error) {
-            // Error parsing WebSocket message
-          }
+        const cleanupHandlers = () => {
+          if (!this.ws) return;
+          this.ws.removeEventListener('open', onOpen);
+          this.ws.removeEventListener('error', onError);
+          this.ws.removeEventListener('close', onClose);
         };
+
+        // If ws already open synchronously (unlikely) resolve immediately
+        if (this.ws.readyState === WebSocket.OPEN) {
+          this.isConnectedFlag = true;
+          resolve();
+          return;
+        }
+
+        this.ws.addEventListener('open', onOpen);
+        this.ws.addEventListener('error', onError);
+        this.ws.addEventListener('close', onClose);
       } catch (error) {
         reject(error);
       }
@@ -125,64 +163,121 @@ export class WebSocketService {
   private setupEventHandlers() {
     if (!this.ws) return;
 
+    // onopen
     this.ws.onopen = () => {
-      this.isConnected = true;
+      this.isConnectedFlag = true;
       this.reconnectAttempts = 0;
+      // optional: notify handlers of a 'connected' system message
+      this.notifyHandlers({
+        type: 'connected',
+        payload: { message: 'ws-open' },
+        from: 'system',
+      });
     };
 
-    this.ws.onclose = () => {
-      this.isConnected = false;
+    // onclose
+    this.ws.onclose = (_ev) => {
+      this.isConnectedFlag = false;
       if (!this.isExplicitlyClosed) {
         this.attemptReconnect();
       }
+      this.notifyHandlers({
+        type: 'error',
+        payload: { message: 'WebSocket closed' },
+        from: 'system',
+      });
     };
 
-    this.ws.onerror = () => {
+    // onerror
+    this.ws.onerror = (_ev) => {
+      // We still let reconnect handle it
       if (!this.isExplicitlyClosed) {
         this.attemptReconnect();
+      }
+      this.notifyHandlers({
+        type: 'error',
+        payload: { message: 'WebSocket error' },
+        from: 'system',
+      });
+    };
+
+    // onmessage
+    this.ws.onmessage = (event) => {
+      try {
+        const message = JSON.parse(event.data) as WebSocketMessage;
+        this.notifyHandlers(message);
+      } catch (error) {
+        console.warn('Failed to parse WS message', error);
+        // ignore malformed frames
       }
     };
   }
 
   private notifyHandlers(message: WebSocketMessage) {
-    this.messageHandlers.forEach((handler) => handler(message));
+    this.messageHandlers.forEach((handler) => {
+      try {
+        handler(message);
+      } catch (e) {
+        console.error('Message handler threw', e);
+      }
+    });
   }
 
   private attemptReconnect() {
-    // Don't attempt to reconnect if explicitly closed or already reconnecting
-    if (this.isExplicitlyClosed || this.reconnectTimer) {
-      // Reconnection attempt in progress
+    if (this.isExplicitlyClosed) return;
+
+    // Already scheduled
+    if (this.reconnectTimer) return;
+
+    this.reconnectAttempts++;
+    if (this.reconnectAttempts > this.maxReconnectAttempts) {
+      // notify handlers of persistent failure
       this.notifyHandlers({
         type: 'error',
-        payload: {
-          message: 'Connection lost. Please refresh the page to try again.',
-        },
+        payload: { message: 'Max reconnect attempts reached' },
         from: 'system',
       });
       return;
     }
 
-    this.reconnectAttempts++;
     const delay = Math.min(
       this.reconnectTimeout * Math.pow(2, this.reconnectAttempts - 1),
-      30000 // Max 30 seconds between attempts
+      30000
     );
-
-    // Reconnection attempt in progress
 
     this.reconnectTimer = setTimeout(() => {
       this.reconnectTimer = null;
-      // Try to reconnect without token (caller should manage token lifecycle)
+      // Attempt reconnect without token — caller should manage token lifecycle
       this.connect().catch(() => {
-        // Ignore connection errors during reconnection
-        // The next reconnection attempt will be scheduled if needed
+        // ignore, next attempt scheduled by attemptReconnect if needed
       });
     }, delay);
   }
 
+  // Generic send; automatically sets 'from'
   send(message: Omit<WebSocketMessage, 'from'>) {
     if (this.ws?.readyState === WebSocket.OPEN) {
-      this.ws.send(JSON.stringify({ ...message, from: this.userId }));
+      try {
+        this.ws.send(JSON.stringify({ ...message, from: this.userId }));
+      } catch (e) {
+        console.warn('Failed to send WS message', e);
+      }
+    } else {
+      console.warn('WS not open, cannot send message', message.type);
+    }
+  }
+
+  // Send arbitrary object (will include `from` if not present)
+  sendRaw(obj: any) {
+    if (this.ws?.readyState === WebSocket.OPEN) {
+      const out = { ...obj, from: obj.from ?? this.userId };
+      try {
+        this.ws.send(JSON.stringify(out));
+      } catch (e) {
+        console.warn('sendRaw failed', e);
+      }
+    } else {
+      console.warn('WS not open for sendRaw', obj);
     }
   }
 
@@ -209,7 +304,7 @@ export class WebSocketService {
       }
     }
 
-    this.isConnected = false;
+    this.isConnectedFlag = false;
   }
 
   // WebRTC signaling helpers
@@ -241,7 +336,68 @@ export class WebSocketService {
     });
   }
 
-  // Cleanup
+  // Convenience helpers for collaborative editor logic
+
+  // notify server we joined (server will reply with 'joined'/'peers-updated' etc)
+  joinRoom() {
+    this.send({
+      type: 'join',
+      payload: { roomId: this.roomId, userId: this.userId },
+      to: undefined,
+    });
+  }
+
+  leaveRoom() {
+    this.send({
+      type: 'leave',
+      payload: { roomId: this.roomId, userId: this.userId },
+      to: undefined,
+    });
+  }
+
+  // Request authoritative doc for the room
+  requestDoc() {
+    this.send({
+      type: 'get-doc',
+      payload: { roomId: this.roomId },
+      to: undefined,
+    });
+  }
+
+  // Request peers list explicitly
+  requestPeers() {
+    this.send({
+      type: 'get-peers',
+      payload: { roomId: this.roomId },
+      to: undefined,
+    });
+  }
+
+  // Send an update (full-text optimistic update)
+  sendUpdate(text: string, baseVersion: number | null = null) {
+    this.send({
+      type: 'update',
+      payload: {
+        roomId: this.roomId,
+        userId: this.userId,
+        text,
+        baseVersion,
+        timestamp: Date.now(),
+      },
+      to: undefined,
+    });
+  }
+
+  // Send cursor position
+  sendCursor(cursor: any | null, selection: any | null = null) {
+    this.send({
+      type: 'cursor',
+      payload: { roomId: this.roomId, userId: this.userId, cursor, selection },
+      to: undefined,
+    });
+  }
+
+  // Cleanup helper
   cleanup() {
     this.disconnect();
     this.messageHandlers.clear();

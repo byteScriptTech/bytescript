@@ -30,19 +30,10 @@ export function useWebRTC(
   const pendingCandidates = useRef<Map<string, RTCIceCandidateShape[]>>(
     new Map()
   );
-  // Map remotePeerId -> DataChannel
-  const dataChannels = useRef<Map<string, RTCDataChannel>>(new Map());
 
   // Helper to fetch ephemeral token (adapt to your auth)
   const fetchToken = useCallback(async () => {
     try {
-      console.log('Fetching token...');
-      console.log('Environment variables:', {
-        hasJwtSecret: !!process.env.NEXT_PUBLIC_WS_JWT_SECRET,
-        userId,
-        roomId,
-      });
-
       // If we have a JWT secret, sign a token with user and room info
       if (process.env.NEXT_PUBLIC_WS_JWT_SECRET) {
         try {
@@ -62,15 +53,12 @@ export function useWebRTC(
             .setExpirationTime('1h')
             .sign(secret);
 
-          console.log('JWT Token generated successfully');
           return token;
         } catch (signError) {
           console.error('Error signing token:', signError);
           throw signError;
         }
       }
-
-      console.log('No JWT secret found, falling back to API token');
       // Fallback to fetching from API if no token provided
       try {
         const res = await fetch('/api/ws-token');
@@ -102,7 +90,7 @@ export function useWebRTC(
       });
       return null;
     }
-  }, [userId, roomId]); // Add dependencies to the dependency array
+  }, [userId, roomId]);
 
   // Init local media
   const initLocalStream = useCallback(async () => {
@@ -179,53 +167,50 @@ export function useWebRTC(
     [localStream]
   );
 
-  // create data channel (negotiated false — open by caller creating)
-  const createDataChannelFor = useCallback(
-    (remoteId: string, pc: RTCPeerConnection) => {
-      const dc = pc.createDataChannel('code-sync');
-      dc.onopen = () => {
-        console.log('datachannel open', remoteId);
-      };
-      dc.onmessage = (ev) => {
-        // you may want to provide a callback API (onData) — here we console.log
-        console.log('data from', remoteId, ev.data);
-      };
-      dataChannels.current.set(remoteId, dc);
-      return dc;
-    },
-    []
-  );
-
   // handle incoming messages from signaling server
   const handleMessage = useCallback(
     async (message: WebSocketMessage) => {
       const { type, payload, from } = message;
-      if (from === userId) return; // ignore our own messages if server echoes
+      console.debug('WS message received:', { type, from, payload });
 
-      if (type === 'joined') {
-        // payload.participants => array of participants
-        // add any new peer entries
-        const list: string[] = (payload?.participants || [])
-          .map((p: any) => p.clientId || p.uid)
-          .filter(Boolean);
-        setPeers((prev) => {
-          const copy = new Set(prev);
-          list.forEach((id) => {
-            if (id !== userId) copy.add(id);
-          });
-          return copy;
-        });
+      // Don't ignore authoritative peer list updates even if server sets from === userId
+      if (from === userId && type !== 'peers-updated' && type !== 'connected') {
+        return; // ignore our own signaling echoes for offer/answer/ice
+      }
+
+      // --- Peer list updates from server (authoritative) ---
+      if (type === 'peers-updated' || type === 'connected') {
+        const rawPeers =
+          payload?.peers ?? payload?.participants ?? payload ?? [];
+        const ids: string[] = Array.isArray(rawPeers)
+          ? rawPeers
+              .map((p: any) =>
+                typeof p === 'string' ? p : (p?.id ?? p?.clientId ?? p?.uid)
+              )
+              .filter(Boolean)
+          : [];
+
+        const filtered = ids.filter((id) => id !== userId);
+
+        setPeers(() => new Set(filtered));
+
         return;
       }
 
       if (type === 'join') {
         const newPeerId = from;
-        setPeers((prev) => new Set([...Array.from(prev), newPeerId]));
-        // if someone else joined, create offer to them
+        if (newPeerId && newPeerId !== userId) {
+          setPeers((prev) => {
+            const copy = new Set(prev);
+            copy.add(newPeerId);
+            return copy;
+          });
+        }
+
+        // create offer if needed (existing logic)
         if (newPeerId !== userId) {
           try {
             const pc = await createPeerFor(newPeerId);
-            createDataChannelFor(newPeerId, pc);
             const offer = await pc.createOffer();
             await pc.setLocalDescription(offer);
             wsService.current?.sendOffer(
@@ -239,18 +224,12 @@ export function useWebRTC(
         return;
       }
 
+      // --- offers / answers / ice (unchanged logic) ---
       if (type === 'offer') {
         const remoteId = from;
         try {
           const pc = await createPeerFor(remoteId);
-          // ensure data channel exists: will be created by remote side
-          pc.ondatachannel = (ev) => {
-            const dc = ev.channel;
-            dataChannels.current.set(remoteId, dc);
-            dc.onmessage = (ev) => console.log('dc msg', ev.data);
-          };
 
-          // set remote description and reply with answer
           await pc.setRemoteDescription(new RTCSessionDescription(payload.sdp));
           const answer = await pc.createAnswer();
           await pc.setLocalDescription(answer);
@@ -259,7 +238,7 @@ export function useWebRTC(
             remoteId
           );
 
-          // flush any pending ICE candidates for this peer
+          // flush pending candidates
           const pending = pendingCandidates.current.get(remoteId) || [];
           for (const c of pending) {
             try {
@@ -287,10 +266,9 @@ export function useWebRTC(
         return;
       }
 
-      if (type === 'ice-candidate') {
+      if (type === 'ice-candidate' || type === 'ice') {
         const remoteId = from;
         const candidate = payload;
-        const pc = pcs.current.get(remoteId);
         const candidateShape: RTCIceCandidateShape = {
           candidate: candidate.candidate,
           sdpMLineIndex: candidate.sdpMLineIndex ?? null,
@@ -298,6 +276,7 @@ export function useWebRTC(
           usernameFragment: candidate.usernameFragment ?? null,
         };
 
+        const pc = pcs.current.get(remoteId);
         if (pc && pc.remoteDescription) {
           try {
             await pc.addIceCandidate(candidateShape as any);
@@ -312,7 +291,7 @@ export function useWebRTC(
         return;
       }
     },
-    [createPeerFor, createDataChannelFor, userId]
+    [createPeerFor, userId]
   );
 
   // join room: init local media + connect ws and attach handler
@@ -401,7 +380,7 @@ export function useWebRTC(
   ]);
 
   const leaveRoom = useCallback(() => {
-    // close all peer connections and data channels
+    // close all peer connections
     pcs.current.forEach((pc, _id) => {
       try {
         pc.close();
@@ -410,14 +389,6 @@ export function useWebRTC(
       }
     });
     pcs.current.clear();
-    dataChannels.current.forEach((dc) => {
-      try {
-        dc.close();
-      } catch (error) {
-        console.error('Error closing data channel:', error);
-      }
-    });
-    dataChannels.current.clear();
     pendingCandidates.current.clear();
     setPeers(new Set());
     setRemoteStreamMap(new Map());
@@ -432,45 +403,7 @@ export function useWebRTC(
     }
   }, [localStream]);
 
-  // send data to a specific peer or broadcast
-  const sendData = useCallback((data: string, to?: string) => {
-    if (to) {
-      const dc = dataChannels.current.get(to);
-      if (dc && dc.readyState === 'open') {
-        dc.send(data);
-        return true;
-      }
-      return false;
-    } else {
-      // broadcast
-      let sent = false;
-      dataChannels.current.forEach((dc) => {
-        if (dc.readyState === 'open') {
-          dc.send(data);
-          sent = true;
-        }
-      });
-      return sent;
-    }
-  }, []);
-
-  // onData handler - attach callback to all current & future data channels
-  const onData = useCallback((cb: (from: string, data: string) => void) => {
-    // attach to existing
-    dataChannels.current.forEach((dc, id) => {
-      dc.onmessage = (ev) => cb(id, ev.data);
-    });
-
-    // future channels will be attached when created in handleMessage
-    // we return a cleanup
-    return () => {
-      dataChannels.current.forEach((dc) => {
-        dc.onmessage = null;
-      });
-    };
-  }, []);
-
-  // expose single remoteStream (first) or map - here we expose map and helper getFirst
+  // helper: get the first remote stream
   const getFirstRemoteStream = useCallback(() => {
     for (const s of remoteStreamMap.values()) return s;
     return null;
@@ -493,7 +426,5 @@ export function useWebRTC(
     peers: Array.from(peers),
     joinRoom,
     leaveRoom,
-    sendData,
-    onData,
   };
 }
