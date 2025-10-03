@@ -6,7 +6,6 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useWebRTC } from '@/hooks/useWebRTC';
 import { WebSocketService } from '@/lib/websocket';
 
 import { CollaborativeCodeEditor } from './CollaborativeCodeEditor';
@@ -18,7 +17,7 @@ export function PeerProgrammingRoom() {
 
   // UI / editor state
   const [roomId, setRoomId] = useState('');
-  const [code, setCode] = useState('// Start coding with your peer!');
+  const [code, setCode] = useState<string>('');
   const [wsConnectionStatus, setWsConnectionStatus] =
     useState<ConnectionStatus>('disconnected');
   const [editorPeers, setEditorPeers] = useState<string[]>([]);
@@ -38,25 +37,6 @@ export function PeerProgrammingRoom() {
   // debounce timer for sending edits
   const sendDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // This hook manages its own signaling connection and peer connections for media.
-  // We intentionally keep it separate from the editor WebSocket.
-  const {
-    connectionStatus: rtcConnectionStatus,
-    localStream,
-    firstRemoteStream,
-    peers: rtcPeerList,
-    joinRoom: joinRoomRTC,
-    leaveRoom: leaveRoomRTC,
-  } = useWebRTC(roomId, userId, process.env.NEXT_PUBLIC_SIGNALING_URL);
-
-  // local UI toggles for audio/video
-  const [isMuted, setIsMuted] = useState(false);
-  const [isVideoOff, setIsVideoOff] = useState(false);
-
-  // Refs for <video> elements
-  const localVideoRef = useRef<HTMLVideoElement | null>(null);
-  const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
-
   // If the search param contains a room, show it in the UI
   useEffect(() => {
     const roomIdFromUrl = searchParams.get('room');
@@ -66,17 +46,31 @@ export function PeerProgrammingRoom() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
-  // Helper: fetch token for editor WebSocket (best-effort)
-  const fetchToken = useCallback(async (): Promise<string | null> => {
-    try {
-      const res = await fetch('/api/ws-token');
-      if (!res.ok) return null;
-      const json = await res.json();
-      return json.token as string;
-    } catch {
-      return null;
-    }
-  }, []);
+  // Helper: fetch  for editor WebSocket (best-effort)
+  const fetchToken = useCallback(
+    async (userId: string, roomId: string): Promise<string | null> => {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL || ''}/api/ws-token`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ userId, roomId }),
+          }
+        );
+
+        if (!res.ok) return null;
+        const { token } = await res.json();
+        return token;
+      } catch (error) {
+        console.error('Failed to fetch token:', error);
+        return null;
+      }
+    },
+    []
+  );
 
   // Handler for incoming editor WebSocket messages
   const handleWsMessage = useCallback(
@@ -140,19 +134,14 @@ export function PeerProgrammingRoom() {
     [userId]
   );
 
-  // Connect + join both editor WebSocket and RTC (video)
+  // Connect + join editor WebSocket (video removed)
   const joinRoom = useCallback(async () => {
     if (!roomId?.trim()) {
       setError('Please provide a room id');
       return;
     }
 
-    // If already connected to both, do nothing
-    if (
-      wsRef.current &&
-      wsRef.current.isConnected?.() &&
-      rtcConnectionStatus === 'connected'
-    ) {
+    if (wsRef.current && wsRef.current.isConnected?.()) {
       return;
     }
 
@@ -169,7 +158,7 @@ export function PeerProgrammingRoom() {
       wsRef.current = null;
     }
 
-    const token = await fetchToken().catch(() => null);
+    const token = await fetchToken(userId, roomId).catch(() => null);
 
     // Create new editor WebSocket and connect
     const ws = new WebSocketService(
@@ -195,31 +184,15 @@ export function PeerProgrammingRoom() {
       console.error('Editor WebSocket connection failed', e);
       setWsConnectionStatus('disconnected');
       setError((prev) => prev ?? e?.message ?? 'Editor WebSocket failed');
-      // keep going — video may still work
-    }
-
-    // Start RTC video flow (separate signaling managed by useWebRTC)
-    try {
-      await joinRoomRTC();
-    } catch (e) {
-      console.warn('RTC join failed', e);
-      // leave it to hook to update its own status
     }
 
     // cleanup function that will be returned by joinRoom (but not used by UI directly)
     return () => {
       cleanupHandler();
     };
-  }, [
-    fetchToken,
-    handleWsMessage,
-    joinRoomRTC,
-    roomId,
-    rtcConnectionStatus,
-    userId,
-  ]);
+  }, [fetchToken, handleWsMessage, roomId, userId]);
 
-  // Leave both editor websocket and RTC
+  // Leave editor websocket
   const leaveRoom = useCallback(() => {
     // Editor WS
     try {
@@ -227,7 +200,7 @@ export function PeerProgrammingRoom() {
         try {
           wsRef.current.leaveRoom();
         } catch {
-          console;
+          /* empty */
         }
         wsRef.current.cleanup();
         wsRef.current = null;
@@ -239,14 +212,7 @@ export function PeerProgrammingRoom() {
       setEditorPeers([]);
       docVersionRef.current = null;
     }
-
-    // RTC
-    try {
-      leaveRoomRTC();
-    } catch (e) {
-      console.error('Error leaving rtc room', e);
-    }
-  }, [leaveRoomRTC]);
+  }, []);
 
   // sendData wrapper used by CollaborativeCodeEditor — we interpret code-update messages
   const sendData = useCallback((data: string) => {
@@ -299,41 +265,6 @@ export function PeerProgrammingRoom() {
     }, 300);
   }, []);
 
-  // Attach streams to <video> elements
-  useEffect(() => {
-    const lv = localVideoRef.current;
-    const rv = remoteVideoRef.current;
-    if (lv) {
-      lv.srcObject = localStream ?? null;
-    }
-    if (rv) {
-      rv.srcObject = firstRemoteStream ?? null;
-    }
-    return () => {
-      if (lv) lv.srcObject = null;
-      if (rv) rv.srcObject = null;
-    };
-  }, [localStream, firstRemoteStream]);
-
-  // toggle mute/video
-  const toggleMute = useCallback(() => {
-    if (!localStream) return;
-    localStream.getAudioTracks().forEach((t) => (t.enabled = !t.enabled));
-    setIsMuted((s) => !s);
-  }, [localStream]);
-
-  const toggleVideo = useCallback(() => {
-    if (!localStream) return;
-    localStream.getVideoTracks().forEach((t) => (t.enabled = !t.enabled));
-    setIsVideoOff((v) => !v);
-  }, [localStream]);
-
-  // generate room id
-  const createRoom = useCallback(() => {
-    const newId = uuidv4().slice(0, 8);
-    setRoomId(newId);
-  }, []);
-
   // cleanup on unmount
   useEffect(() => {
     return () => {
@@ -346,9 +277,8 @@ export function PeerProgrammingRoom() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Overall "connected" indicator: show green if either editor WS or RTC is connected
-  const overallConnected =
-    wsConnectionStatus === 'connected' || rtcConnectionStatus === 'connected';
+  // Overall "connected" indicator (only editor WS now)
+  const overallConnected = wsConnectionStatus === 'connected';
 
   return (
     <div className="flex flex-col h-screen bg-background">
@@ -377,7 +307,13 @@ export function PeerProgrammingRoom() {
                   >
                     Join Room
                   </Button>
-                  <Button onClick={createRoom} variant="ghost">
+                  <Button
+                    onClick={() => {
+                      const newId = uuidv4().slice(0, 8);
+                      setRoomId(newId);
+                    }}
+                    variant="ghost"
+                  >
                     Create
                   </Button>
                 </div>
@@ -409,94 +345,38 @@ export function PeerProgrammingRoom() {
 
       {/* Main content */}
       <main className="flex-1 flex flex-col md:flex-row overflow-hidden">
-        {/* Video column */}
-        <div className="w-full md:w-1/3 border-r border-border p-4 flex flex-col gap-4">
-          <h2 className="text-lg font-semibold">
-            {rtcConnectionStatus === 'connected'
-              ? `Participants (${rtcPeerList.length + 1})`
-              : 'Video Call'}
-          </h2>
+        {/* Presence / info panel */}
+        <aside className="w-full md:w-1/4 border-r border-border p-4">
+          <h2 className="text-lg font-semibold mb-2">Participants</h2>
+          <div className="text-sm text-muted-foreground mb-4">
+            {wsConnectionStatus === 'connected'
+              ? `${editorPeers.length + 1} in room`
+              : 'Not connected'}
+          </div>
 
-          <div className="relative aspect-video bg-muted rounded-lg overflow-hidden">
-            {firstRemoteStream ? (
-              <video
-                ref={remoteVideoRef}
-                autoPlay
-                playsInline
-                className="w-full h-full object-cover"
-                aria-label="Remote participant video"
-              >
-                <track
-                  kind="captions"
-                  src=""
-                  srcLang="en"
-                  label="English"
-                  default
-                />
-              </video>
-            ) : (
-              <div className="w-full h-full flex items-center justify-center bg-muted/50">
-                <div className="h-16 w-16 rounded-full bg-muted-foreground/20 flex items-center justify-center">
-                  <span className="text-muted-foreground">Peer</span>
-                </div>
-              </div>
-            )}
+          <div>
+            <strong>Your ID:</strong>
+            <div className="text-sm my-2">{userId}</div>
+          </div>
 
-            <div className="absolute bottom-2 right-2 w-32 h-24 bg-muted rounded overflow-hidden border border-border">
-              {localStream ? (
-                <video
-                  ref={localVideoRef}
-                  autoPlay
-                  muted
-                  playsInline
-                  className={`w-full h-full object-cover ${isVideoOff ? 'bg-muted' : ''}`}
-                  aria-label="Your video"
-                />
+          <div className="mt-4">
+            <strong>Peers</strong>
+            <ul className="mt-2">
+              {editorPeers.length === 0 ? (
+                <li className="text-sm text-muted-foreground">No peers</li>
               ) : (
-                <div className="w-full h-full flex items-center justify-center bg-muted/50">
-                  <div className="h-8 w-8 rounded-full bg-muted-foreground/20 flex items-center justify-center">
-                    <span className="text-xs text-muted-foreground">You</span>
-                  </div>
-                </div>
+                editorPeers.map((p) => (
+                  <li key={p} className="text-sm">
+                    {p}
+                  </li>
+                ))
               )}
-              {isVideoOff && (
-                <div className="absolute inset-0 flex items-center justify-center bg-muted/80">
-                  <span className="text-muted-foreground">Video Off</span>
-                </div>
-              )}
-            </div>
+            </ul>
           </div>
+        </aside>
 
-          <div className="flex gap-2 mt-2">
-            <Button
-              variant={isMuted ? 'secondary' : 'outline'}
-              size="sm"
-              onClick={toggleMute}
-            >
-              {isMuted ? 'Unmute' : 'Mute'}
-            </Button>
-            <Button
-              variant={isVideoOff ? 'secondary' : 'outline'}
-              size="sm"
-              onClick={toggleVideo}
-            >
-              {isVideoOff ? 'Start Video' : 'Stop Video'}
-            </Button>
-            {overallConnected && (
-              <Button
-                variant="destructive"
-                size="sm"
-                className="ml-auto"
-                onClick={leaveRoom}
-              >
-                End Call
-              </Button>
-            )}
-          </div>
-        </div>
-
-        {/* Editor column */}
-        <div className="flex-1 flex flex-col">
+        {/* Editor */}
+        <section className="flex-1 flex flex-col">
           <div className="p-4 border-b border-border flex justify-between items-center">
             <h2 className="text-lg font-semibold">Collaborative Editor</h2>
             <div className="text-sm text-muted-foreground">
@@ -518,7 +398,7 @@ export function PeerProgrammingRoom() {
               />
             </div>
           </div>
-        </div>
+        </section>
       </main>
     </div>
   );
