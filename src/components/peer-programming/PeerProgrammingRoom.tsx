@@ -2,15 +2,17 @@
 
 import { useSearchParams } from 'next/navigation';
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import { v4 as uuidv4 } from 'uuid';
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { useFetchWsToken } from '@/hooks/useFetchWsToken';
 import { WebSocketService } from '@/lib/websocket';
+import type { ConnectionStatus } from '@/types/peer';
 
-import { CollaborativeCodeEditor } from './CollaborativeCodeEditor';
-
-type ConnectionStatus = 'disconnected' | 'connecting' | 'connected';
+import { ConsolePanel } from './ConsolePanel';
+import EditorPanel from './EditorPanel';
+import HeaderBar from './HeaderBar';
+import PresencePanel from './PresencePanel';
 
 export function PeerProgrammingRoom() {
   const searchParams = useSearchParams();
@@ -22,57 +24,111 @@ export function PeerProgrammingRoom() {
     useState<ConnectionStatus>('disconnected');
   const [editorPeers, setEditorPeers] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [logs, setLogs] = useState<
+    Array<{
+      type: 'log' | 'error' | 'info' | 'warn';
+      message: string;
+      timestamp: number;
+    }>
+  >([]);
+  const [isExecuting, setIsExecuting] = useState(false);
 
-  // stable userId for the session
+  const clearLogs = useCallback(() => {
+    setLogs([]);
+  }, []);
+
+  const executeCode = useCallback((code: string) => {
+    setIsExecuting(true);
+
+    // Store original console methods
+    const originalConsole = {
+      log: console.log,
+      error: console.error,
+      warn: console.warn,
+      info: console.info,
+    };
+
+    // Override console methods to capture output
+    const captureLog = (type: 'log' | 'error' | 'warn' | 'info') => {
+      return (...args: any[]) => {
+        // Call original console method
+        originalConsole[type](...args);
+
+        // Convert all arguments to strings and join with space
+        const message = args
+          .map((arg) => {
+            if (typeof arg === 'object' && arg !== null) {
+              try {
+                return JSON.stringify(arg, null, 2);
+              } catch (e) {
+                return String(arg);
+              }
+            }
+            return String(arg);
+          })
+          .join(' ');
+
+        // Add to logs
+        setLogs((prevLogs) => [
+          ...prevLogs,
+          {
+            type,
+            message,
+            timestamp: Date.now(),
+          },
+        ]);
+      };
+    };
+
+    // Override console methods
+    console.log = captureLog('log');
+    console.error = captureLog('error');
+    console.warn = captureLog('warn');
+    console.info = captureLog('info');
+
+    try {
+      // Execute the code in a try-catch to handle any errors
+      const result = new Function(`
+        'use strict';
+        ${code}
+      `)();
+
+      // If the code returns a value (not undefined), log it
+      if (result !== undefined) {
+        console.log('Output:', result);
+      }
+    } catch (error) {
+      console.error(
+        'Error:',
+        error instanceof Error ? error.message : String(error)
+      );
+    } finally {
+      // Restore original console methods
+      console.log = originalConsole.log;
+      console.error = originalConsole.error;
+      console.warn = originalConsole.warn;
+      console.info = originalConsole.info;
+
+      setIsExecuting(false);
+    }
+  }, []);
+
   const userIdRef = useRef<string | null>(null);
   if (!userIdRef.current) userIdRef.current = `user-${uuidv4().slice(0, 8)}`;
   const userId = userIdRef.current!;
 
-  // WebSocketService instance (editor/collab)
   const wsRef = useRef<WebSocketService | null>(null);
-
-  // local version of the server doc (authoritative)
   const docVersionRef = useRef<number | null>(null);
-
-  // debounce timer for sending edits
   const sendDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // If the search param contains a room, show it in the UI
+  const fetchToken = useFetchWsToken();
+
   useEffect(() => {
     const roomIdFromUrl = searchParams.get('room');
-    if (roomIdFromUrl && roomIdFromUrl !== roomId) {
-      setRoomId(roomIdFromUrl);
-    }
+    if (roomIdFromUrl && roomIdFromUrl !== roomId) setRoomId(roomIdFromUrl);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
-  // Helper: fetch  for editor WebSocket (best-effort)
-  const fetchToken = useCallback(
-    async (userId: string, roomId: string): Promise<string | null> => {
-      try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL || ''}/api/ws-token`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ userId, roomId }),
-          }
-        );
-
-        if (!res.ok) return null;
-        const { token } = await res.json();
-        return token;
-      } catch (error) {
-        console.error('Failed to fetch token:', error);
-        return null;
-      }
-    },
-    []
-  );
-
-  // Handler for incoming editor WebSocket messages
   const handleWsMessage = useCallback(
     (msg: any) => {
       const { type, payload = {} } = msg;
@@ -121,11 +177,6 @@ export function PeerProgrammingRoom() {
         return;
       }
 
-      if (type === 'cursor') {
-        // Optional: forward to editor to show cursors (not implemented here)
-        return;
-      }
-
       if (type === 'error') {
         setError(payload?.message ?? 'Unknown WebSocket error');
         return;
@@ -134,21 +185,17 @@ export function PeerProgrammingRoom() {
     [userId]
   );
 
-  // Connect + join editor WebSocket (video removed)
   const joinRoom = useCallback(async () => {
     if (!roomId?.trim()) {
       setError('Please provide a room id');
       return;
     }
 
-    if (wsRef.current && wsRef.current.isConnected?.()) {
-      return;
-    }
+    if (wsRef.current && wsRef.current.isConnected?.()) return;
 
     setWsConnectionStatus('connecting');
     setError(null);
 
-    // Clean previous editor WS if present
     if (wsRef.current) {
       try {
         wsRef.current.cleanup();
@@ -160,7 +207,6 @@ export function PeerProgrammingRoom() {
 
     const token = await fetchToken(userId, roomId).catch(() => null);
 
-    // Create new editor WebSocket and connect
     const ws = new WebSocketService(
       userId,
       roomId,
@@ -171,13 +217,12 @@ export function PeerProgrammingRoom() {
 
     try {
       await ws.connect(token || undefined);
-      // Join room on editor WS
       try {
         ws.joinRoom();
         ws.requestDoc();
         ws.requestPeers();
       } catch (e) {
-        // server might not support helper methods — ignore
+        // ignore
       }
       setWsConnectionStatus('connected');
     } catch (e: any) {
@@ -186,15 +231,10 @@ export function PeerProgrammingRoom() {
       setError((prev) => prev ?? e?.message ?? 'Editor WebSocket failed');
     }
 
-    // cleanup function that will be returned by joinRoom (but not used by UI directly)
-    return () => {
-      cleanupHandler();
-    };
+    return () => cleanupHandler();
   }, [fetchToken, handleWsMessage, roomId, userId]);
 
-  // Leave editor websocket
   const leaveRoom = useCallback(() => {
-    // Editor WS
     try {
       if (wsRef.current) {
         try {
@@ -214,7 +254,6 @@ export function PeerProgrammingRoom() {
     }
   }, []);
 
-  // sendData wrapper used by CollaborativeCodeEditor — we interpret code-update messages
   const sendData = useCallback((data: string) => {
     try {
       const parsed = JSON.parse(data);
@@ -225,7 +264,7 @@ export function PeerProgrammingRoom() {
         typeof parsed.code === 'string'
       ) {
         const text = parsed.code;
-        setCode(text); // optimistic local update
+        setCode(text);
         if (sendDebounce.current) clearTimeout(sendDebounce.current);
         sendDebounce.current = setTimeout(() => {
           try {
@@ -251,7 +290,6 @@ export function PeerProgrammingRoom() {
     }
   }, []);
 
-  // direct editor callback when user edits in the editor component
   const handleCodeChange = useCallback((newCode: string) => {
     setCode((prev) => (prev === newCode ? prev : newCode));
     if (sendDebounce.current) clearTimeout(sendDebounce.current);
@@ -265,7 +303,6 @@ export function PeerProgrammingRoom() {
     }, 300);
   }, []);
 
-  // cleanup on unmount
   useEffect(() => {
     return () => {
       if (sendDebounce.current) {
@@ -277,65 +314,18 @@ export function PeerProgrammingRoom() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Overall "connected" indicator (only editor WS now)
   const overallConnected = wsConnectionStatus === 'connected';
 
   return (
     <div className="flex flex-col h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border p-4">
-        <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Peer Programming</h1>
-          <div className="flex items-center gap-4">
-            {!overallConnected ? (
-              <div className="flex gap-2">
-                <div className="flex-1 max-w-xs">
-                  <Input
-                    placeholder="Enter Room ID or create one"
-                    value={roomId}
-                    onChange={(e) => setRoomId(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && joinRoom()}
-                    className="w-full"
-                  />
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    onClick={joinRoom}
-                    variant="outline"
-                    disabled={!roomId.trim()}
-                    className="relative"
-                  >
-                    Join Room
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      const newId = uuidv4().slice(0, 8);
-                      setRoomId(newId);
-                    }}
-                    variant="ghost"
-                  >
-                    Create
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <span
-                  className={`flex h-3 w-3 rounded-full ${overallConnected ? 'bg-green-500' : 'bg-yellow-500'}`}
-                />
-                <span>
-                  {overallConnected
-                    ? `Connected to: ${roomId} (${editorPeers.length} peer${editorPeers.length !== 1 ? 's' : ''})`
-                    : 'Connecting...'}
-                </span>
-                <Button variant="link" onClick={leaveRoom}>
-                  Leave
-                </Button>
-              </div>
-            )}
-          </div>
-        </div>
-      </header>
+      <HeaderBar
+        roomId={roomId}
+        setRoomId={setRoomId}
+        joinRoom={joinRoom}
+        leaveRoom={leaveRoom}
+        overallConnected={overallConnected}
+        editorPeersCount={editorPeers.length}
+      />
 
       {error && (
         <div className="bg-destructive/10 text-destructive p-4 text-center">
@@ -343,63 +333,34 @@ export function PeerProgrammingRoom() {
         </div>
       )}
 
-      {/* Main content */}
-      <main className="flex-1 flex flex-col md:flex-row overflow-hidden">
-        {/* Presence / info panel */}
-        <aside className="w-full md:w-1/4 border-r border-border p-4">
-          <h2 className="text-lg font-semibold mb-2">Participants</h2>
-          <div className="text-sm text-muted-foreground mb-4">
-            {wsConnectionStatus === 'connected'
-              ? `${editorPeers.length + 1} in room`
-              : 'Not connected'}
-          </div>
-
-          <div>
-            <strong>Your ID:</strong>
-            <div className="text-sm my-2">{userId}</div>
-          </div>
-
-          <div className="mt-4">
-            <strong>Peers</strong>
-            <ul className="mt-2">
-              {editorPeers.length === 0 ? (
-                <li className="text-sm text-muted-foreground">No peers</li>
-              ) : (
-                editorPeers.map((p) => (
-                  <li key={p} className="text-sm">
-                    {p}
-                  </li>
-                ))
-              )}
-            </ul>
-          </div>
-        </aside>
-
-        {/* Editor */}
-        <section className="flex-1 flex flex-col">
-          <div className="p-4 border-b border-border flex justify-between items-center">
-            <h2 className="text-lg font-semibold">Collaborative Editor</h2>
-            <div className="text-sm text-muted-foreground">
-              {wsConnectionStatus === 'connected'
-                ? `Connected with ${editorPeers.length} peer${editorPeers.length !== 1 ? 's' : ''}`
-                : 'Disconnected'}
-            </div>
-          </div>
-
-          <div className="flex-1 relative">
-            <div className="h-full w-full">
-              <CollaborativeCodeEditor
-                code={code}
-                onCodeChange={handleCodeChange}
-                onCursorChange={() => {}}
-                height="100%"
-                userId={userId}
-                sendData={sendData}
-              />
-            </div>
-          </div>
-        </section>
-      </main>
+      <div className="flex flex-1 overflow-hidden">
+        <PresencePanel
+          editorPeers={editorPeers}
+          userId={userId}
+          wsConnectionStatus={wsConnectionStatus}
+        />
+        <PanelGroup direction="vertical" className="flex-1">
+          <Panel defaultSize={70} minSize={30} className="overflow-hidden">
+            <EditorPanel
+              code={code}
+              onCodeChange={handleCodeChange}
+              onRunCode={executeCode}
+              sendData={sendData}
+              wsConnectionStatus={wsConnectionStatus}
+              userId={userId}
+              isExecuting={isExecuting}
+            />
+          </Panel>
+          <PanelResizeHandle className="h-2 bg-gray-100 dark:bg-gray-800 hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors" />
+          <Panel
+            defaultSize={30}
+            minSize={10}
+            className="overflow-hidden border-t border-gray-200 dark:border-gray-700"
+          >
+            <ConsolePanel logs={logs} onClear={clearLogs} />
+          </Panel>
+        </PanelGroup>
+      </div>
     </div>
   );
 }
