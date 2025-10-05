@@ -309,6 +309,7 @@ export class WebSocketService {
 
   // WebRTC signaling helpers
   sendOffer(offer: RTCSessionDescriptionInit, to: string) {
+    console.debug('[WS] sendOffer ->', { to, type: offer?.type });
     this.send({
       type: 'offer',
       payload: { sdp: offer },
@@ -317,6 +318,7 @@ export class WebSocketService {
   }
 
   sendAnswer(answer: RTCSessionDescriptionInit, to: string) {
+    console.debug('[WS] sendAnswer ->', { to, type: answer?.type });
     this.send({
       type: 'answer',
       payload: { sdp: answer },
@@ -324,14 +326,19 @@ export class WebSocketService {
     });
   }
 
+  // Fixed: send candidate as a single object under payload.candidate
   sendICECandidate(candidate: RTCIceCandidateShape, to: string) {
+    const candidateObj = {
+      candidate: candidate.candidate,
+      sdpMLineIndex: candidate.sdpMLineIndex,
+      sdpMid: candidate.sdpMid,
+      usernameFragment: (candidate as any).usernameFragment ?? null,
+    };
+
+    console.debug('[WS] sendICECandidate ->', { to, candidate: candidateObj });
     this.send({
       type: 'ice-candidate',
-      payload: {
-        candidate: candidate.candidate,
-        sdpMLineIndex: candidate.sdpMLineIndex,
-        sdpMid: candidate.sdpMid,
-      },
+      payload: { candidate: candidateObj },
       to,
     });
   }

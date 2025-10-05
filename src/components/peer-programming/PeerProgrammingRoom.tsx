@@ -5,10 +5,12 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import { v4 as uuidv4 } from 'uuid';
 
+import { useCall } from '@/hooks/useCall';
 import { useFetchWsToken } from '@/hooks/useFetchWsToken';
 import { WebSocketService } from '@/lib/websocket';
 import type { ConnectionStatus } from '@/types/peer';
 
+import CallControls from './CallControls';
 import { ConsolePanel } from './ConsolePanel';
 import EditorPanel from './EditorPanel';
 import HeaderBar from './HeaderBar';
@@ -33,14 +35,11 @@ export function PeerProgrammingRoom() {
   >([]);
   const [isExecuting, setIsExecuting] = useState(false);
 
-  const clearLogs = useCallback(() => {
-    setLogs([]);
-  }, []);
+  const clearLogs = useCallback(() => setLogs([]), []);
 
   const executeCode = useCallback((code: string) => {
     setIsExecuting(true);
 
-    // Store original console methods
     const originalConsole = {
       log: console.log,
       error: console.error,
@@ -48,67 +47,40 @@ export function PeerProgrammingRoom() {
       info: console.info,
     };
 
-    // Override console methods to capture output
-    const captureLog = (type: 'log' | 'error' | 'warn' | 'info') => {
-      return (...args: any[]) => {
-        // Call original console method
+    const captureLog =
+      (type: 'log' | 'error' | 'warn' | 'info') =>
+      (...args: any[]) => {
         originalConsole[type](...args);
-
-        // Convert all arguments to strings and join with space
         const message = args
           .map((arg) => {
             if (typeof arg === 'object' && arg !== null) {
               try {
                 return JSON.stringify(arg, null, 2);
-              } catch (e) {
+              } catch {
                 return String(arg);
               }
             }
             return String(arg);
           })
           .join(' ');
-
-        // Add to logs
-        setLogs((prevLogs) => [
-          ...prevLogs,
-          {
-            type,
-            message,
-            timestamp: Date.now(),
-          },
-        ]);
+        setLogs((prev) => [...prev, { type, message, timestamp: Date.now() }]);
       };
-    };
 
-    // Override console methods
     console.log = captureLog('log');
     console.error = captureLog('error');
     console.warn = captureLog('warn');
     console.info = captureLog('info');
 
     try {
-      // Execute the code in a try-catch to handle any errors
-      const result = new Function(`
-        'use strict';
-        ${code}
-      `)();
-
-      // If the code returns a value (not undefined), log it
-      if (result !== undefined) {
-        console.log('Output:', result);
-      }
-    } catch (error) {
-      console.error(
-        'Error:',
-        error instanceof Error ? error.message : String(error)
-      );
+      const result = new Function(`'use strict'; ${code}`)();
+      if (result !== undefined) console.log('Output:', result);
+    } catch (err) {
+      console.error('Error:', err instanceof Error ? err.message : String(err));
     } finally {
-      // Restore original console methods
       console.log = originalConsole.log;
       console.error = originalConsole.error;
       console.warn = originalConsole.warn;
       console.info = originalConsole.info;
-
       setIsExecuting(false);
     }
   }, []);
@@ -118,6 +90,7 @@ export function PeerProgrammingRoom() {
   const userId = userIdRef.current!;
 
   const wsRef = useRef<WebSocketService | null>(null);
+  const wsMessageCleanupRef = useRef<(() => void) | null>(null);
   const docVersionRef = useRef<number | null>(null);
   const sendDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -129,10 +102,58 @@ export function PeerProgrammingRoom() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
+  // Buffer for signals that arrive before call handler is ready
+  const signalBufferRef = useRef<any[]>([]);
+
+  // call hook
+  const overallConnected = wsConnectionStatus === 'connected';
+  const call = useCall({ wsRef, userId, roomConnected: overallConnected });
+
+  // keep latest call in ref to avoid stale closures
+  const callRef = useRef<any>(null);
+  useEffect(() => {
+    callRef.current = call;
+    // flush buffered signals if handler available
+    if (callRef.current && typeof callRef.current.handleSignal === 'function') {
+      const buf = signalBufferRef.current.splice(0);
+      buf.forEach((m) => {
+        try {
+          callRef.current.handleSignal(m);
+        } catch (err) {
+          // non-fatal
+          console.warn('Failed to process buffered signal', err);
+        }
+      });
+    }
+  }, [call]);
+
   const handleWsMessage = useCallback(
     (msg: any) => {
       const { type, payload = {} } = msg;
 
+      // forward signaling messages to call handler (single dispatcher)
+      if (
+        ['offer', 'answer', 'ice-candidate', 'ice', 'call-declined'].includes(
+          type
+        )
+      ) {
+        try {
+          if (
+            callRef.current &&
+            typeof callRef.current.handleSignal === 'function'
+          ) {
+            callRef.current.handleSignal(msg);
+          } else {
+            // buffer if call handler not ready
+            signalBufferRef.current.push(msg);
+          }
+        } catch (err) {
+          console.error('Error forwarding signal to call handler', err);
+        }
+        return;
+      }
+
+      // Editor / document / peers messages
       if (type === 'joined' || type === 'peers-updated') {
         const rawPeers =
           payload?.peers ?? payload?.participants ?? payload ?? [];
@@ -170,10 +191,7 @@ export function PeerProgrammingRoom() {
       if (type === 'update-rejected') {
         docVersionRef.current = payload?.currentVersion ?? null;
         setCode(typeof payload?.text === 'string' ? payload.text : '');
-        console.warn(
-          'Update rejected by server; authoritative doc applied.',
-          payload
-        );
+        console.warn('Update rejected by server; authoritative doc applied.');
         return;
       }
 
@@ -181,7 +199,10 @@ export function PeerProgrammingRoom() {
         setError(payload?.message ?? 'Unknown WebSocket error');
         return;
       }
+
+      // other message types: ignore
     },
+    // userId is stable (from ref) but we include it to satisfy linter
     [userId]
   );
 
@@ -196,13 +217,20 @@ export function PeerProgrammingRoom() {
     setWsConnectionStatus('connecting');
     setError(null);
 
+    // cleanup previous ws if exists
     if (wsRef.current) {
       try {
+        wsMessageCleanupRef.current?.();
+      } catch (e: any) {
+        console.error('Failed to cleanup previous editor WS', e.message);
+      }
+      try {
         wsRef.current.cleanup();
-      } catch (e) {
-        console.error('Failed to cleanup previous editor WS', e);
+      } catch (e: any) {
+        console.error('Failed to cleanup previous editor WS', e.message);
       }
       wsRef.current = null;
+      wsMessageCleanupRef.current = null;
     }
 
     const token = await fetchToken(userId, roomId).catch(() => null);
@@ -212,8 +240,14 @@ export function PeerProgrammingRoom() {
       roomId,
       process.env.NEXT_PUBLIC_SIGNALING_URL || 'ws://localhost:4000'
     );
+
+    // set the ref first so other hooks can observe it
     wsRef.current = ws;
-    const cleanupHandler = ws.addMessageHandler((m) => handleWsMessage(m));
+
+    // register central handler and keep cleanup
+    wsMessageCleanupRef.current = ws.addMessageHandler((m) =>
+      handleWsMessage(m)
+    );
 
     try {
       await ws.connect(token || undefined);
@@ -221,28 +255,45 @@ export function PeerProgrammingRoom() {
         ws.joinRoom();
         ws.requestDoc();
         ws.requestPeers();
-      } catch (e) {
-        // ignore
+      } catch {
+        // ignore non-critical
       }
       setWsConnectionStatus('connected');
+
+      // minimal debug helper (optional)
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (window as any).wsRefForDebug = wsRef.current;
+      } catch (e: any) {
+        console.error('Failed to set wsRefForDebug', e.message);
+      }
     } catch (e: any) {
       console.error('Editor WebSocket connection failed', e);
       setWsConnectionStatus('disconnected');
       setError((prev) => prev ?? e?.message ?? 'Editor WebSocket failed');
     }
-
-    return () => cleanupHandler();
   }, [fetchToken, handleWsMessage, roomId, userId]);
 
   const leaveRoom = useCallback(() => {
     try {
+      try {
+        wsMessageCleanupRef.current?.();
+      } catch (e: any) {
+        console.error('Failed to cleanup previous editor WS', e.message);
+      }
+      wsMessageCleanupRef.current = null;
+
       if (wsRef.current) {
         try {
           wsRef.current.leaveRoom();
-        } catch {
-          /* empty */
+        } catch (e: any) {
+          console.error('Failed to leave room', e.message);
         }
-        wsRef.current.cleanup();
+        try {
+          wsRef.current.cleanup();
+        } catch (e: any) {
+          console.error('Failed to cleanup editor WS', e.message);
+        }
         wsRef.current = null;
       }
     } catch (e) {
@@ -251,6 +302,12 @@ export function PeerProgrammingRoom() {
       setWsConnectionStatus('disconnected');
       setEditorPeers([]);
       docVersionRef.current = null;
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        delete (window as any).wsRefForDebug;
+      } catch (e: any) {
+        console.error('Failed to delete wsRefForDebug', e.message);
+      }
     }
   }, []);
 
@@ -269,8 +326,8 @@ export function PeerProgrammingRoom() {
         sendDebounce.current = setTimeout(() => {
           try {
             wsRef.current?.sendUpdate(text, docVersionRef.current);
-          } catch (e) {
-            console.warn('sendUpdate failed', e);
+          } catch {
+            // ignore
           }
           sendDebounce.current = null;
         }, 300);
@@ -284,8 +341,7 @@ export function PeerProgrammingRoom() {
       if (!wsRef.current) return false;
       wsRef.current.sendRaw({ type: 'raw', payload: data });
       return true;
-    } catch (e) {
-      console.warn('sendData fallback failed', e);
+    } catch {
       return false;
     }
   }, []);
@@ -296,8 +352,8 @@ export function PeerProgrammingRoom() {
     sendDebounce.current = setTimeout(() => {
       try {
         wsRef.current?.sendUpdate(newCode, docVersionRef.current);
-      } catch (e) {
-        console.warn('sendUpdate failed', e);
+      } catch {
+        // ignore
       }
       sendDebounce.current = null;
     }, 300);
@@ -313,8 +369,6 @@ export function PeerProgrammingRoom() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const overallConnected = wsConnectionStatus === 'connected';
 
   return (
     <div className="flex flex-col h-screen bg-background">
@@ -334,11 +388,20 @@ export function PeerProgrammingRoom() {
       )}
 
       <div className="flex flex-1 overflow-hidden">
-        <PresencePanel
-          editorPeers={editorPeers}
-          userId={userId}
-          wsConnectionStatus={wsConnectionStatus}
-        />
+        <aside className="w-full md:w-1/4 border-r border-border p-4">
+          <PresencePanel
+            editorPeers={editorPeers}
+            userId={userId}
+            wsConnectionStatus={wsConnectionStatus}
+          />
+          <CallControls
+            call={call}
+            peers={editorPeers}
+            userId={userId}
+            roomConnected={overallConnected}
+          />
+        </aside>
+
         <PanelGroup direction="vertical" className="flex-1">
           <Panel defaultSize={70} minSize={30} className="overflow-hidden">
             <EditorPanel
@@ -351,7 +414,9 @@ export function PeerProgrammingRoom() {
               isExecuting={isExecuting}
             />
           </Panel>
+
           <PanelResizeHandle className="h-2 bg-gray-100 dark:bg-gray-800 hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors" />
+
           <Panel
             defaultSize={30}
             minSize={10}
