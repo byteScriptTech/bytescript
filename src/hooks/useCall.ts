@@ -36,6 +36,7 @@ export function useCall({
   const [inCallWith, setInCallWith] = useState<Set<string>>(new Set());
   const [incomingCalls, setIncomingCalls] = useState<string[]>([]);
   const [isCalling, setIsCalling] = useState(false);
+  const isMicMutedRef = useRef(false);
 
   // internal refs
   const localStreamRef = useRef<MediaStream | null>(null);
@@ -183,9 +184,24 @@ export function useCall({
       };
 
       if (localStreamRef.current) {
-        localStreamRef.current
-          .getTracks()
-          .forEach((t) => pc.addTrack(t, localStreamRef.current!));
+        localStreamRef.current.getTracks().forEach((t) => {
+          const senderExists = pc
+            .getSenders()
+            .some((sender) => sender.track && sender.track.id === t.id);
+
+          if (!senderExists) {
+            // Create a new track with the current mute state
+            const track = t.clone();
+            track.enabled = !isMicMutedRef.current;
+            pc.addTrack(track, localStreamRef.current!);
+          } else {
+            // Update existing track's enabled state
+            const sender = pc.getSenders().find((s) => s.track?.id === t.id);
+            if (sender?.track) {
+              sender.track.enabled = !isMicMutedRef.current;
+            }
+          }
+        });
       }
 
       pcsRef.current[peerId] = pc;
@@ -193,15 +209,58 @@ export function useCall({
     },
     [wsRef, userId]
   );
+  const toggleMicMute = useCallback((muted: boolean) => {
+    isMicMutedRef.current = muted;
+
+    // Update tracks in local stream
+    if (localStreamRef.current) {
+      localStreamRef.current.getAudioTracks().forEach((track) => {
+        track.enabled = !muted;
+      });
+    }
+
+    // Update tracks in all peer connections
+    Object.values(pcsRef.current).forEach((pc) => {
+      pc.getSenders().forEach((sender) => {
+        if (sender.track && sender.track.kind === 'audio') {
+          sender.track.enabled = !muted;
+        }
+      });
+    });
+
+    console.log(`Microphone ${muted ? 'muted' : 'unmuted'} globally`);
+  }, []);
 
   const ensureLocalStream = useCallback(async () => {
     if (localStreamRef.current) return localStreamRef.current;
     try {
       const s = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+      // Apply current mute state to all tracks
+      s.getAudioTracks().forEach((track) => {
+        track.enabled = !isMicMutedRef.current;
+      });
+
+      // Store the stream
       localStreamRef.current = s;
-      Object.values(pcsRef.current).forEach((pc) =>
-        s.getTracks().forEach((t) => pc.addTrack(t, s))
-      );
+
+      // Update all peer connections with the new stream
+      Object.values(pcsRef.current).forEach((pc) => {
+        // Remove any existing audio tracks
+        pc.getSenders().forEach((sender) => {
+          if (sender.track?.kind === 'audio') {
+            pc.removeTrack(sender);
+          }
+        });
+
+        // Add the new tracks with correct mute state
+        s.getTracks().forEach((track) => {
+          const newTrack = track.clone();
+          newTrack.enabled = !isMicMutedRef.current;
+          pc.addTrack(newTrack, s);
+        });
+      });
+
       return s;
     } catch (e) {
       console.error('useCall: getUserMedia failed', e);
@@ -345,7 +404,10 @@ export function useCall({
     });
 
     if (localStreamRef.current) {
-      localStreamRef.current.getTracks().forEach((t) => t.stop());
+      localStreamRef.current.getTracks().forEach((t) => {
+        t.stop(); // Stop the track
+        localStreamRef.current?.removeTrack(t); // Remove from stream
+      });
       localStreamRef.current = null;
     }
 
@@ -532,5 +594,6 @@ export function useCall({
     declineCall,
     hangup,
     handleSignal,
+    toggleMicMute,
   };
 }

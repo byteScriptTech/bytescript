@@ -9,6 +9,7 @@ type CallAPI = {
   acceptCall: (callerId: string) => Promise<void> | void;
   declineCall: (callerId: string) => void;
   hangup: () => void;
+  toggleMicMute: (muted: boolean) => void;
 };
 
 export default function CallControls({
@@ -30,11 +31,13 @@ export default function CallControls({
     acceptCall,
     declineCall,
     hangup,
+    toggleMicMute,
   } = call || ({} as CallAPI);
 
   const [showModal, setShowModal] = useState(false);
   const [ringing, setRinging] = useState(false);
   const [micMuted, setMicMuted] = useState(false);
+  const [isTogglingMic, setIsTogglingMic] = useState(false);
   const audioCtxRef = useRef<AudioContext | null>(null);
   const oscRef = useRef<OscillatorNode | null>(null);
   const gainRef = useRef<GainNode | null>(null);
@@ -177,18 +180,55 @@ export default function CallControls({
     return () => window.removeEventListener('incoming-call', onIncoming);
   }, []);
 
+  // Sync mute state with audio tracks
+  useEffect(() => {
+    const syncMuteState = () => {
+      const stream = getLocalStream?.();
+      if (stream) {
+        const audioTracks = stream.getAudioTracks();
+        if (audioTracks.length > 0) {
+          setMicMuted(!audioTracks[0].enabled);
+        }
+      }
+    };
+
+    // Initial sync
+    syncMuteState();
+
+    // Set up periodic sync in case the track state changes elsewhere
+    const interval = setInterval(syncMuteState, 1000);
+    return () => clearInterval(interval);
+  }, [getLocalStream]);
+
   // Toggle local mic mute/unmute by disabling audio tracks
   const toggleMic = async () => {
+    if (isTogglingMic) return;
+
     try {
-      const s = getLocalStream?.();
-      if (!s) return;
-      const tracks = s.getAudioTracks();
-      if (!tracks || !tracks.length) return;
-      const muted = !tracks[0].enabled;
-      tracks.forEach((t) => (t.enabled = muted));
-      setMicMuted(!muted);
-    } catch (err: any) {
-      console.warn('toggleMic·failed', err.message);
+      setIsTogglingMic(true);
+      const newMutedState = !micMuted; // Use the current state to determine the new state
+
+      // Update all tracks and peer connections
+      if (toggleMicMute) {
+        await toggleMicMute(newMutedState);
+      } else {
+        const s = getLocalStream?.();
+        if (s) {
+          s.getAudioTracks().forEach((track) => {
+            track.enabled = !newMutedState;
+          });
+        }
+      }
+
+      // Update state after successful operation
+      setMicMuted(newMutedState);
+      console.log(`Microphone ${newMutedState ? 'muted' : 'unmuted'}`);
+    } catch (err) {
+      console.error('toggleMic failed:', err);
+      // Revert state on error
+      setMicMuted((prev) => !prev);
+    } finally {
+      setIsTogglingMic(false);
     }
   };
 
@@ -243,13 +283,28 @@ export default function CallControls({
   return (
     <div className="p-3 border-t">
       <h4 className="font-semibold text-sm mb-1">Call</h4>
-      <div className="mb-3 text-xs text-muted">
-        {roomConnected ? 'Ready' : 'Join room to enable calls'}
+      <div
+        className={`mb-3 text-sm font-medium ${
+          roomConnected
+            ? 'text-green-600 dark:text-green-400'
+            : 'text-amber-600 dark:text-amber-400'
+        }`}
+      >
+        <div className="flex items-center gap-1.5">
+          <span
+            className={`inline-block w-2 h-2 rounded-full ${
+              roomConnected ? 'bg-green-500' : 'bg-amber-500'
+            }`}
+          ></span>
+          {roomConnected ? 'Ready for calls' : 'Join room to enable calls'}
+        </div>
       </div>
 
       <div className="mb-3">
         <div className="text-sm font-medium">Peers</div>
-        <div className="text-xs text-muted">{peers?.length ?? 0} peers</div>
+        <div className="text-sm text-gray-600 dark:text-gray-400 font-mono">
+          {peers?.length ?? 0} {peers?.length === 1 ? 'peer' : 'peers'}
+        </div>
       </div>
 
       <div className="flex gap-2 items-center">
@@ -272,13 +327,46 @@ export default function CallControls({
           </button>
         )}
 
-        <button
-          className="px-2 py-1 border rounded text-sm ml-auto"
-          onClick={toggleMic}
-          title={micMuted ? 'Unmute local mic' : 'Mute local mic'}
-        >
-          {micMuted ? 'Mic Off' : 'Mic On'}
-        </button>
+        {inCallCount > 0 && (
+          <button
+            className={`
+              relative px-4 py-1.5 rounded-lg text-sm font-medium ml-auto flex items-center gap-2 
+              transition-all duration-200 ease-in-out border
+              ${
+                micMuted
+                  ? 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/30 hover:bg-red-500/20 dark:bg-red-500/5 dark:hover:bg-red-500/10'
+                  : 'bg-white/80 dark:bg-white/5 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-white/10'
+              }
+              ${isTogglingMic ? 'opacity-70 cursor-wait' : 'hover:shadow-md'}
+              focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800
+            `}
+            onClick={toggleMic}
+            disabled={isTogglingMic}
+            title={micMuted ? 'Unmute microphone' : 'Mute microphone'}
+            aria-pressed={micMuted}
+            aria-label={micMuted ? 'Unmute microphone' : 'Mute microphone'}
+          >
+            {isTogglingMic ? (
+              <span className="w-4 h-4 border-2 border-gray-400 dark:border-gray-500 border-t-transparent rounded-full animate-spin"></span>
+            ) : micMuted ? (
+              <>
+                <span className="relative flex h-3 w-3">
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                </span>
+                <span className="font-medium">Muted</span>
+              </>
+            ) : (
+              <>
+                <span className="relative flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                </span>
+                <span className="font-medium">Mic On</span>
+              </>
+            )}
+          </button>
+        )}
       </div>
 
       {/* Incoming call modal */}
