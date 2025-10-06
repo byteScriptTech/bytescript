@@ -273,8 +273,12 @@ export function useCall({
       if (!roomConnected) throw new Error('Not connected to room');
       setIsCalling(true);
       await ensureLocalStream();
-      for (const target of targets) {
-        if (target === userId) continue;
+
+      // Update inCallWith with all valid targets
+      const validTargets = targets.filter((t) => t !== userId);
+      setInCallWith((prev) => new Set([...prev, ...validTargets]));
+
+      for (const target of validTargets) {
         const pc = ensurePeerConnection(target);
         try {
           const offer = await pc.createOffer();
