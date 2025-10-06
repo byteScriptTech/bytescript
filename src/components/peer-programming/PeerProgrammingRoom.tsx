@@ -14,7 +14,7 @@ import CallControls from './CallControls';
 import { ConsolePanel } from './ConsolePanel';
 import EditorPanel from './EditorPanel';
 import HeaderBar from './HeaderBar';
-import PresencePanel from './PresencePanel';
+// import PresencePanel from './PresencePanel';
 
 export function PeerProgrammingRoom() {
   const searchParams = useSearchParams();
@@ -389,11 +389,11 @@ export function PeerProgrammingRoom() {
 
       <div className="flex flex-1 overflow-hidden">
         <aside className="w-full md:w-1/4 border-r border-border p-4">
-          <PresencePanel
+          {/* <PresencePanel
             editorPeers={editorPeers}
             userId={userId}
             wsConnectionStatus={wsConnectionStatus}
-          />
+          /> */}
           <CallControls
             call={call}
             peers={editorPeers}
