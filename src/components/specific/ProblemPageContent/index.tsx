@@ -172,7 +172,9 @@ const ProblemPageContent = () => {
       } else if (typeof input === 'string') {
         try {
           // Parse the entire input string as JSON
+          console.log(input, ' this is input data!');
           const parsed = JSON.parse(input);
+          console.log(parsed, ' this is parsed data!');
           // If it's an array, use it directly, otherwise wrap it in an array
           fnArgs = Array.isArray(parsed) ? parsed : [parsed];
         } catch (e) {
