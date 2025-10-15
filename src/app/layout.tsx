@@ -1,3 +1,4 @@
+import { Analytics } from '@vercel/analytics/next';
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import NextTopLoader from 'nextjs-toploader';
@@ -39,8 +40,9 @@ export default function RootLayout({
       >
         <ThemeProvider>
           <NextTopLoader />
-          {children}
           <Toaster />
+          <Analytics />
+          {children}
         </ThemeProvider>
       </body>
     </html>
