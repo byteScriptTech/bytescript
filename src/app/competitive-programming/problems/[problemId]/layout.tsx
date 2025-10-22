@@ -1,7 +1,7 @@
 import React from 'react';
 
 export const metadata = {
-  title: 'Solve Problem - biteScript',
+  title: 'Solve Problem - byteScript',
   description: 'Solve competitive programming problems',
 };
 

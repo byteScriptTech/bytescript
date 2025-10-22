@@ -18,7 +18,7 @@ describe('Logo component', () => {
     const link = screen.getByRole('link');
     expect(link).toHaveClass('group');
 
-    // Test the "bite" text styling
+    // Test the "byte" text styling
     const biteText = screen.getByText('byte');
     expect(biteText).toHaveClass(
       'text-foreground',

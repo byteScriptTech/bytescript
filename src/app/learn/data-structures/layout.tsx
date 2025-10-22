@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import React from 'react';
 
 export const metadata: Metadata = {
-  title: 'Data Structures & Algorithms - biteScript',
+  title: 'Data Structures & Algorithms - byteScript',
   description: 'Learn Data Structures & Algorithms',
 };
 
