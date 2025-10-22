@@ -43,7 +43,7 @@ const getInitialTheme = (storageKey: string, defaultTheme: Theme): Theme => {
 export function ThemeProvider({
   children,
   defaultTheme = 'system',
-  storageKey = 'bitescript-theme',
+  storageKey = 'bytescript-theme',
   ...props
 }: ThemeProviderProps) {
   const [theme, setTheme] = React.useState<Theme>(() =>

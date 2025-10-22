@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 const CommunityPage = () => {
   const router = useRouter();
 
-  const handleExploreBiteScriptClick = () => {
+  const handleExploreByteScriptClick = () => {
     router.push('/login');
   };
 
@@ -24,7 +24,7 @@ const CommunityPage = () => {
     >
       <div className="layout-container flex h-full grow flex-col">
         <LandingPageHeader
-          handleExploreBiteScriptClick={handleExploreBiteScriptClick}
+          handleExploreByteScriptClick={handleExploreByteScriptClick}
         />
         <div className="px-4 sm:px-6 lg:px-40 flex flex-1 justify-center pb-5">
           <div className="layout-content-container flex flex-col max-w-[960px] flex-1">
@@ -35,7 +35,7 @@ const CommunityPage = () => {
                 </h1>
                 <h2 className="text-muted-foreground text-base font-normal leading-relaxed max-w-[600px] mx-auto @[480px]:text-xl @[480px]:font-normal @[480px]:leading-relaxed">
                   Connect with fellow learners, share your progress, and get the
-                  latest updates from the biteScript community.
+                  latest updates from the byteScript community.
                 </h2>
               </div>
 
@@ -67,12 +67,12 @@ const CommunityPage = () => {
                       community highlights.
                     </p>
                     <a
-                      href="https://instagram.com/bitescript.fun"
+                      href="https://instagram.com/bytescript.tech"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center justify-center w-full px-5 py-2.5 text-sm font-medium text-primary-foreground bg-gradient-to-br from-primary to-primary/80 rounded-lg hover:opacity-90 transition-opacity"
                     >
-                      Follow @bitescript.fun
+                      Follow @bytescript.tech
                     </a>
                   </div>
                 </div>
@@ -100,12 +100,12 @@ const CommunityPage = () => {
                       challenges, and community discussions.
                     </p>
                     <a
-                      href="https://twitter.com/bitescript"
+                      href="https://twitter.com/bytescriptTech"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center justify-center w-full px-5 py-2.5 text-sm font-medium text-primary-foreground bg-foreground rounded-lg hover:opacity-90 transition-opacity"
                     >
-                      Follow @bitescript
+                      Follow @bytescriptTech
                     </a>
                   </div>
                 </div>
@@ -113,14 +113,14 @@ const CommunityPage = () => {
 
               <div className="mt-12 text-center">
                 <h3 className="text-2xl font-bold text-card-foreground mb-4">
-                  #biteScriptCommunity
+                  #byteScriptCommunity
                 </h3>
                 <p className="text-muted-foreground max-w-2xl mx-auto mb-8">
-                  Share your coding journey with us using #biteScriptCommunity
+                  Share your coding journey with us using #byteScriptCommunity
                   for a chance to be featured on our social media!
                 </p>
                 <Button
-                  onClick={handleExploreBiteScriptClick}
+                  onClick={handleExploreByteScriptClick}
                   className="bg-[#00BFA6] hover:bg-[#00a38f] text-white font-medium py-2.5 px-6 rounded-lg transition-all duration-200 transform hover:scale-105"
                 >
                   Start Your Coding Journey

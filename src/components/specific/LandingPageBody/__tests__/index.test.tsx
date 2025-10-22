@@ -4,12 +4,12 @@ import React from 'react';
 import LandingPageBody from '../index';
 
 describe('LandingPageBody', () => {
-  const mockHandleExploreBiteScriptClick = jest.fn();
+  const mockHandleExploreByteScriptClick = jest.fn();
 
   beforeEach(() => {
     render(
       <LandingPageBody
-        handleExploreBiteScriptClick={mockHandleExploreBiteScriptClick}
+        handleExploreByteScriptClick={mockHandleExploreByteScriptClick}
       />
     );
   });
@@ -31,7 +31,7 @@ describe('LandingPageBody', () => {
     expect(heading).toHaveClass('text-4xl', 'font-black');
 
     const description = screen.getByText(
-      /biteScript is an interactive platform/i
+      /byteScript is an interactive platform/i
     );
     expect(description).toBeInTheDocument();
   });
@@ -57,7 +57,7 @@ describe('LandingPageBody', () => {
 
     // Verify card descriptions
     expect(interactiveCard).toHaveTextContent(
-      'Dive into bite‑sized exercises tailored to your level. Share your solutions, get community driven feedback, and learn together one challenge at a time.'
+      'Dive into byte‑sized exercises tailored to your level. Share your solutions, get community driven feedback, and learn together one challenge at a time.'
     );
     expect(problemSolvingCard).toHaveTextContent(
       'Tackle complex problems with adaptive learning paths, designed to challenge and improve your analytical abilities.'
@@ -74,6 +74,6 @@ describe('LandingPageBody', () => {
 
     // Test button click
     button.click();
-    expect(mockHandleExploreBiteScriptClick).toHaveBeenCalled();
+    expect(mockHandleExploreByteScriptClick).toHaveBeenCalled();
   });
 });
