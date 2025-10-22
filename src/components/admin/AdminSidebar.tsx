@@ -37,7 +37,7 @@ export function AdminSidebar() {
   return (
     <div className="w-64 bg-card border-r border-border h-full">
       <div className="p-4 border-b border-border">
-        <h1 className="text-xl font-bold text-foreground">biteScript Admin</h1>
+        <h1 className="text-xl font-bold text-foreground">byteScript Admin</h1>
       </div>
       <nav className="p-4 space-y-1">
         {navItems.map((item) => {

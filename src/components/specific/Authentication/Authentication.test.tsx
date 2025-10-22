@@ -27,11 +27,11 @@ describe('Authentication Component', () => {
     render(<Authentication />);
 
     // Check logo text
-    expect(screen.getByText('bite')).toBeInTheDocument();
+    expect(screen.getByText('byte')).toBeInTheDocument();
     expect(screen.getByText('Script.')).toBeInTheDocument();
 
     // Check heading
-    expect(screen.getByText('Sign in to biteScript')).toBeInTheDocument();
+    expect(screen.getByText('Sign in to byteScript')).toBeInTheDocument();
 
     // Check sign in button
     const signInButton = screen.getByRole('button', {
@@ -75,10 +75,10 @@ describe('Authentication Component', () => {
     render(<Authentication />);
 
     // Check logo text colors and sizes
-    const biteText = screen.getByText('bite');
+    const byteText = screen.getByText('byte');
     const scriptText = screen.getByText('Script.');
 
-    expect(biteText).toHaveClass('text-md');
+    expect(byteText).toHaveClass('text-md');
     expect(scriptText).toHaveClass('text-[#00BFA6]');
     expect(scriptText).toHaveClass('text-base');
     expect(scriptText).toHaveClass('sm:text-xl');
@@ -89,7 +89,7 @@ describe('Authentication Component', () => {
 
     // Check content container layout
     const contentContainer = screen
-      .getByText('Sign in to biteScript')
+      .getByText('Sign in to byteScript')
       .closest('div');
     expect(contentContainer).toHaveClass('layout-content-container');
     expect(contentContainer).toHaveClass('flex');
@@ -102,12 +102,12 @@ describe('Authentication Component', () => {
     expect(contentContainer).toHaveClass('items-center');
 
     // Check heading alignment
-    expect(screen.getByText('Sign in to biteScript')).toHaveClass(
+    expect(screen.getByText('Sign in to byteScript')).toHaveClass(
       'text-center'
     );
 
     // Check logo navigation
-    const logoLink = screen.getByText('bite');
+    const logoLink = screen.getByText('byte');
     expect(logoLink.closest('a')).toHaveAttribute('href', '/');
   });
 });
