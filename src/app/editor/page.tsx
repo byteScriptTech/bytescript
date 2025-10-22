@@ -55,7 +55,7 @@ export default function EditorPage() {
     <ThemeProvider>
       <div className="min-h-screen bg-background text-foreground">
         <LandingPageHeader
-          handleExploreBiteScriptClick={() => router.push('/login')}
+          handleExploreByteScriptClick={() => router.push('/login')}
         />
         <div className="container mx-auto p-2 sm:p-4 h-[calc(100vh-64px)] flex flex-col max-w-7xl">
           <div className="mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -96,7 +96,8 @@ export default function EditorPage() {
 
           <footer className="mt-4 sm:mt-6 text-center text-xs sm:text-sm text-muted-foreground px-2 sm:px-0">
             <p>
-              © {new Date().getFullYear()} @bityescript. All rights reserved.
+              © {new Date().getFullYear()} @bytescript.tech. All rights
+              reserved.
             </p>
           </footer>
         </div>

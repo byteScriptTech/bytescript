@@ -1,6 +1,6 @@
-# biteScript
+# byteScript
 
-bitescript.fun is a platform for developers who are passionate about learning programming, starting with JavaScript and soon expanding to TypeScript and Python. Whether you're just beginning or looking to sharpen your skills, we've designed the platform to guide you through a step-by-step journey. Each concept is presented with real-life examples, practical best practices, and lessons from common mistakes—so you can learn from others' experiences. You’ll also find an interactive code editor right in your browser, so you can practice and experiment without needing extra tools. Plus, with our wide range of coding challenges and a personalized dashboard to track your progress, you’ll stay motivated as you grow your skills and become a more confident programmer.
+bytescript.tech is a platform for developers who are passionate about learning programming, starting with JavaScript and soon expanding to TypeScript and Python. Whether you're just beginning or looking to sharpen your skills, we've designed the platform to guide you through a step-by-step journey. Each concept is presented with real-life examples, practical best practices, and lessons from common mistakes—so you can learn from others' experiences. You’ll also find an interactive code editor right in your browser, so you can practice and experiment without needing extra tools. Plus, with our wide range of coding challenges and a personalized dashboard to track your progress, you’ll stay motivated as you grow your skills and become a more confident programmer.
 
 ## Features
 
@@ -53,8 +53,8 @@ Setup
 ## Clone the repository:
 
 ```bash
-git clone https://github.com/yourusername/bitescript.fun.git
-cd bitescript.fun
+git clone https://github.com/yourusername/bytescript.tech.git
+cd bytescript.tech
 ```
 
 Install dependencies:

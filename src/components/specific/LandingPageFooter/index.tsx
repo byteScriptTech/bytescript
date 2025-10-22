@@ -9,7 +9,7 @@ const LandingPageFooter: React.FC = () => {
       >
         <div className="flex flex-col gap-6 px-5 py-10 text-center @container">
           <p className="text-muted-foreground text-base font-normal leading-normal">
-            © {new Date().getFullYear()} BiteScript. Open Source under the MIT
+            © {new Date().getFullYear()} ByteScript. Open Source under the MIT
             License.
           </p>
         </div>

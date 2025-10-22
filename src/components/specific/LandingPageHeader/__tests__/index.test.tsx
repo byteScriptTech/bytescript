@@ -4,12 +4,12 @@ import React from 'react';
 import LandingPageHeader from '../index';
 
 describe('LandingPageHeader', () => {
-  const mockHandleExploreBiteScriptClick = jest.fn();
+  const mockHandleExploreByteScriptClick = jest.fn();
 
   beforeEach(() => {
     render(
       <LandingPageHeader
-        handleExploreBiteScriptClick={mockHandleExploreBiteScriptClick}
+        handleExploreByteScriptClick={mockHandleExploreByteScriptClick}
       />
     );
   });
@@ -51,26 +51,7 @@ describe('LandingPageHeader', () => {
 
     // Test button click
     fireEvent.click(getStartedBtn);
-    expect(mockHandleExploreBiteScriptClick).toHaveBeenCalled();
-  });
-
-  it('handles mobile menu toggle', () => {
-    // Test mobile menu button
-    const mobileMenuBtn = screen.getByTestId('mobile-menu-toggle');
-    expect(mobileMenuBtn).toBeInTheDocument();
-
-    // Initially menu should be closed
-    const mobileMenu = screen.getByTestId('mobile-menu');
-    expect(mobileMenu).toBeInTheDocument();
-    expect(mobileMenu).toHaveClass('-translate-y-full');
-
-    // Click to open menu
-    fireEvent.click(mobileMenuBtn);
-    expect(mobileMenu).toHaveClass('translate-y-0');
-
-    // Click again to close menu
-    fireEvent.click(mobileMenuBtn);
-    expect(mobileMenu).toHaveClass('-translate-y-full');
+    expect(mockHandleExploreByteScriptClick).toHaveBeenCalled();
   });
 
   it('handles mobile menu toggle', () => {

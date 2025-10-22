@@ -11,7 +11,7 @@ describe('LandingPageFooter', () => {
 
     expect(
       screen.getByText(
-        `© ${currentYear} BiteScript. Open Source under the MIT License.`
+        `© ${currentYear} ByteScript. Open Source under the MIT License.`
       )
     ).toBeInTheDocument();
   });

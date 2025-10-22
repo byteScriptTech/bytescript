@@ -5,7 +5,7 @@ const Logo = () => {
   return (
     <Link href="/" className="group">
       <span className="text-foreground text-base font-bold transition-colors group-hover:opacity-80">
-        bite
+        byte
       </span>
       <span className="text-[#00BFA6] text-xl font-bold transition-colors group-hover:opacity-80">
         Script.

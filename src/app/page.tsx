@@ -7,7 +7,7 @@ import LandingPageHeader from '@/components/specific/LandingPageHeader';
 
 function LoginForm() {
   const router = useRouter();
-  const handleExploreBiteScriptClick = () => {
+  const handleExploreByteScriptClick = () => {
     router.push('/login');
   };
   return (
@@ -17,10 +17,10 @@ function LoginForm() {
     >
       <div className="layout-container flex h-full grow flex-col">
         <LandingPageHeader
-          handleExploreBiteScriptClick={handleExploreBiteScriptClick}
+          handleExploreByteScriptClick={handleExploreByteScriptClick}
         />
         <LandingPageBody
-          handleExploreBiteScriptClick={handleExploreBiteScriptClick}
+          handleExploreByteScriptClick={handleExploreByteScriptClick}
         />
         <LandingPageFooter />
       </div>
