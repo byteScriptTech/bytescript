@@ -7,6 +7,10 @@ module.exports = {
     './node_modules/@shadcn/ui/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
+    fontFamily: {
+      sans: ['var(--font-sans)', 'Poppins', 'sans-serif'],
+      mono: ['var(--font-geist-mono)', 'monospace'],
+    },
     extend: {
       borderRadius: {
         lg: 'var(--radius)',

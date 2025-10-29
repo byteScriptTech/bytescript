@@ -11,10 +11,7 @@ function LoginForm() {
     router.push('/login');
   };
   return (
-    <div
-      className="relative flex size-full min-h-screen flex-col bg-background text-foreground group/design-root overflow-x-hidden"
-      style={{ fontFamily: "Manrope, 'Noto Sans', sans-serif" }}
-    >
+    <div className="relative flex size-full min-h-screen flex-col bg-background text-foreground group/design-root overflow-x-hidden">
       <div className="layout-container flex h-full grow flex-col">
         <LandingPageHeader
           handleExploreBiteScriptClick={handleExploreBiteScriptClick}

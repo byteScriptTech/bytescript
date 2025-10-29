@@ -17,10 +17,9 @@ const CommunityPage = () => {
   return (
     <div
       className={cn(
-        'relative flex size-full min-h-screen flex-col group/design-root overflow-x-hidden transition-colors duration-200',
+        'relative flex size-full min-h-screen flex-col group/design-root overflow-x-hidden transition-colors duration-200 font-sans',
         'bg-background text-foreground'
       )}
-      style={{ fontFamily: "Manrope, 'Noto Sans', sans-serif" }}
     >
       <div className="layout-container flex h-full grow flex-col">
         <LandingPageHeader
