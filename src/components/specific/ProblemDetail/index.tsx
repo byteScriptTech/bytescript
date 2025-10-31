@@ -101,7 +101,7 @@ export default function ProblemDetail({ problem }: ProblemDetailProps) {
                           <span className="text-sm font-medium text-muted-foreground">
                             Explanation:
                           </span>
-                          <div className="rounded border border-primary/20 bg-primary/5 p-3 text-sm text-foreground">
+                          <div className="rounded border border-primary/20 bg-[#f0fdf9] dark:bg-primary/5 p-3 text-sm text-foreground">
                             {example.explanation}
                           </div>
                         </div>

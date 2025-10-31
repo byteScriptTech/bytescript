@@ -75,7 +75,7 @@ export const ExploreLanguages: FC = () => {
         </Card>
       </div>
 
-      <div className="bg-gradient-to-r from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/20 rounded-xl p-6 mt-8">
+      <div className="bg-gradient-to-r from-[#f0fdf9] to-[#e0faf5] dark:from-primary/10 dark:to-primary/20 rounded-xl p-6 mt-8">
         <div className="max-w-4xl mx-auto text-center">
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-background shadow-sm mb-4">
             <BookOpen className="h-6 w-6 text-primary" />
