@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import React from 'react';
 
 export const metadata: Metadata = {
-  title: 'Login - biteScript',
+  title: 'Login - byteScript',
   description: 'Login to your account',
 };
 

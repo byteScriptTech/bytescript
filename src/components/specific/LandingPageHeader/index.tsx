@@ -4,11 +4,11 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 
 interface LandingPageHeaderProps {
-  handleExploreBiteScriptClick: () => void;
+  handleExploreByteScriptClick: () => void;
 }
 
 const LandingPageHeader = ({
-  handleExploreBiteScriptClick,
+  handleExploreByteScriptClick,
 }: LandingPageHeaderProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuItems = [
@@ -30,7 +30,7 @@ const LandingPageHeader = ({
           className="hover:opacity-80 transition-opacity cursor-pointer"
         >
           <span className="text-md sm:text-lg font-bold text-foreground">
-            bite
+            byte
           </span>
           <span className="text-[#00BFA6] text-base sm:text-xl font-bold">
             Script.
@@ -55,7 +55,7 @@ const LandingPageHeader = ({
               </a>
             ))}
             <Button
-              onClick={handleExploreBiteScriptClick}
+              onClick={handleExploreByteScriptClick}
               className="min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden h-10 px-4 bg-[#00BFA6] hover:bg-[#00A38C] text-white text-sm font-bold leading-normal tracking-[0.015em]"
             >
               <span className="truncate">Get Started</span>
@@ -96,7 +96,7 @@ const LandingPageHeader = ({
         <div className="p-4">
           <div className="flex justify-between items-center mb-6">
             <div>
-              <span className="text-md text-foreground font-bold">bite</span>
+              <span className="text-md text-foreground font-bold">byte</span>
               <span className="text-primary text-base font-bold">Script.</span>
             </div>
             <button
@@ -132,7 +132,7 @@ const LandingPageHeader = ({
               </a>
             ))}
             <Button
-              onClick={handleExploreBiteScriptClick}
+              onClick={handleExploreByteScriptClick}
               className="w-full mt-4 min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden h-10 px-4 bg-[#00BFA6] hover:bg-[#00A38C] text-white text-sm font-bold leading-normal tracking-[0.015em]"
             >
               <span className="truncate">Get Started</span>

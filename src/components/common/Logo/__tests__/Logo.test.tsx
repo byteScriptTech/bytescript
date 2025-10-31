@@ -18,8 +18,8 @@ describe('Logo component', () => {
     const link = screen.getByRole('link');
     expect(link).toHaveClass('group');
 
-    // Test the "bite" text styling
-    const biteText = screen.getByText('bite');
+    // Test the "byte" text styling
+    const biteText = screen.getByText('byte');
     expect(biteText).toHaveClass(
       'text-foreground',
       'text-base',
@@ -44,7 +44,7 @@ describe('Logo component', () => {
     const { container } = render(<Logo />);
 
     // Verify the text is visible
-    expect(container).toHaveTextContent('bite');
+    expect(container).toHaveTextContent('byte');
     expect(container).toHaveTextContent('Script.');
 
     // Verify the link has proper classes
@@ -52,7 +52,7 @@ describe('Logo component', () => {
     expect(link).toHaveClass('group');
 
     // Verify text elements have proper classes
-    const biteText = screen.getByText('bite');
+    const biteText = screen.getByText('byte');
     const scriptText = screen.getByText('Script.');
 
     expect(biteText).toHaveClass(

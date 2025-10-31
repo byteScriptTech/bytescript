@@ -4,11 +4,11 @@ import { VideoPlayer } from '@/components/common/VideoPlayer/VideoPlayer';
 import { Button } from '@/components/ui/button';
 
 interface LandingPageBodyProps {
-  handleExploreBiteScriptClick: () => void;
+  handleExploreByteScriptClick: () => void;
 }
 
 const LandingPageBody: React.FC<LandingPageBodyProps> = ({
-  handleExploreBiteScriptClick,
+  handleExploreByteScriptClick,
 }) => {
   return (
     <div className="min-h-screen bg-background font-sans">
@@ -43,9 +43,9 @@ const LandingPageBody: React.FC<LandingPageBodyProps> = ({
                 Master Programming Through Practice
               </h1>
               <h2 className="text-base font-normal leading-relaxed max-w-[600px] mx-auto @[480px]:text-xl @[480px]:font-normal @[480px]:leading-relaxed text-muted-foreground">
-                biteScript is an interactive platform built to make learning
+                byteScript is an interactive platform built to make learning
                 programming easy, engaging, and effective. Whether you&apos;re
-                just starting out or looking to level up your skills, biteScript
+                just starting out or looking to level up your skills, byteScript
                 guides you through hands-on coding and real-world problem
                 solving.
               </h2>
@@ -76,7 +76,7 @@ const LandingPageBody: React.FC<LandingPageBodyProps> = ({
                     Interactive Coding Challenges
                   </h2>
                   <p className="text-muted-foreground text-sm font-normal leading-normal">
-                    Dive into bite‑sized exercises tailored to your level. Share
+                    Dive into byte‑sized exercises tailored to your level. Share
                     your solutions, get community driven feedback, and learn
                     together one challenge at a time.
                   </p>
@@ -151,7 +151,7 @@ const LandingPageBody: React.FC<LandingPageBodyProps> = ({
                   Ready to Start Your Coding Journey?
                 </h1>
                 <p className="text-muted-foreground text-base font-normal leading-relaxed">
-                  biteScript is a free, open-source platform built by
+                  byteScript is a free, open-source platform built by
                   developers, for learners like you. Join our growing community
                   and start mastering coding, problem-solving, and AI—one step
                   at a time.
@@ -159,7 +159,7 @@ const LandingPageBody: React.FC<LandingPageBodyProps> = ({
               </div>
               <div className="flex flex-col @[480px]:flex-row @[480px]:justify-center items-center gap-4 @[480px]:gap-6">
                 <Button
-                  onClick={handleExploreBiteScriptClick}
+                  onClick={handleExploreByteScriptClick}
                   className="flex items-center justify-center w-full @[480px]:w-auto max-w-[320px] h-10 @[480px]:h-12 px-4 @[480px]:px-6 rounded-lg bg-[#00BFA6] hover:bg-[#00A38C] text-white text-sm @[480px]:text-base font-semibold tracking-[0.015em] transition-all duration-200 ease-out transform hover:scale-[1.02] active:scale-[0.98]"
                 >
                   <span className="truncate">Get Started</span>

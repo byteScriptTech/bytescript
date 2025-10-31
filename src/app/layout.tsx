@@ -26,7 +26,7 @@ const fontSans = Poppins({
 // });
 
 export const metadata: Metadata = {
-  title: 'biteScript',
+  title: 'byteScript',
   description: 'code like a pro!',
   icons: {
     icon: [{ url: '/favicon.png', sizes: 'any' }],

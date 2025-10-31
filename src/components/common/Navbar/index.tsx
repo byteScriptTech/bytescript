@@ -122,7 +122,7 @@ const Navbar = () => {
             className="hover:opacity-80 transition-opacity cursor-pointer"
           >
             <span className="text-md sm:text-lg font-bold text-foreground">
-              bite
+              byte
             </span>
             <span className="text-[#00BFA6] text-base sm:text-xl font-bold">
               Script.

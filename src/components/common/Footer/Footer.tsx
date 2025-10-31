@@ -10,7 +10,7 @@ export function Footer() {
         <div className="flex flex-col items-center justify-between gap-4 md:flex-row md:gap-8">
           <div className="flex flex-col items-center gap-4 md:flex-row md:gap-8">
             <p className="text-sm text-muted-foreground">
-              © {currentYear} biteScript. All rights reserved.
+              © {currentYear} byteScript. All rights reserved.
             </p>
             <div className="flex items-center space-x-4">
               <Link
@@ -29,7 +29,7 @@ export function Footer() {
           </div>
           <div className="flex items-center space-x-4">
             <a
-              href="https://github.com/yourusername/bitescript"
+              href="https://github.com/bytescript/bytescript.tech"
               target="_blank"
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-foreground transition-colors"
@@ -38,7 +38,7 @@ export function Footer() {
               <FaGithub className="h-5 w-5" />
             </a>
             <a
-              href="https://twitter.com/yourhandle"
+              href="https://twitter.com/bytescriptTech"
               target="_blank"
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-foreground transition-colors"
@@ -47,7 +47,7 @@ export function Footer() {
               <FaTwitter className="h-5 w-5" />
             </a>
             <a
-              href="https://discord.gg/yourinvite"
+              href="https://discord.gg/bytescript"
               target="_blank"
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-foreground transition-colors"

@@ -27,7 +27,7 @@ const Authentication = () => {
               className="hover:opacity-80 transition-opacity cursor-pointer"
             >
               <span className="text-md sm:text-lg font-bold text-foreground">
-                bite
+                byte
               </span>
               <span className="text-[#00BFA6] text-base sm:text-xl font-bold">
                 Script.
@@ -39,7 +39,7 @@ const Authentication = () => {
           <div className="layout-content-container flex flex-col w-full max-w-[512px] py-4 sm:py-5 justify-center items-center">
             {error && <p className="text-red-500">{error}</p>}
             <h2 className="text-white tracking-light text-[28px] font-semibold leading-tight px-4 text-center pb-3 pt-5">
-              Sign in to biteScript
+              Sign in to byteScript
             </h2>
             <div className="flex px-4 py-3 justify-center">
               <button
