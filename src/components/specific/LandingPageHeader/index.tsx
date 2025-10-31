@@ -20,7 +20,7 @@ const LandingPageHeader = ({
   ];
 
   return (
-    <header className="border-b border-solid border-border bg-background">
+    <header className="border-b border-solid border-border">
       <div
         data-testid="header-container"
         className="flex items-center justify-between px-3 py-3 sm:px-8 sm:py-3"

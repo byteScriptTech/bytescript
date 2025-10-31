@@ -13,7 +13,7 @@ const LandingPageBody: React.FC<LandingPageBodyProps> = ({
   return (
     <div className="min-h-screen bg-background font-sans">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-primary/5 to-background">
+      <section className="relative overflow-hidden bg-[#f0fdf9] dark:bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32">
           <div className="text-center space-y-8">
             <div className="space-y-4">
@@ -213,7 +213,7 @@ const LandingPageBody: React.FC<LandingPageBodyProps> = ({
           <div className="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {/* Feature 1 */}
             <div className="group bg-background p-8 rounded-2xl border border-border/50 hover:border-primary/30 transition-all duration-300 hover:-translate-y-1">
-              <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
+              <div className="w-16 h-16 bg-[#d9f7f0] dark:bg-primary/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-[#c2f0e6] dark:group-hover:bg-primary/20 transition-colors">
                 <svg
                   className="w-8 h-8 text-primary"
                   fill="none"
@@ -240,7 +240,7 @@ const LandingPageBody: React.FC<LandingPageBodyProps> = ({
 
             {/* Feature 2 */}
             <div className="group bg-background p-8 rounded-2xl border border-border/50 hover:border-primary/30 transition-all duration-300 hover:-translate-y-1">
-              <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
+              <div className="w-16 h-16 bg-[#d9f7f0] dark:bg-primary/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-[#c2f0e6] dark:group-hover:bg-primary/20 transition-colors">
                 <svg
                   className="w-8 h-8 text-primary"
                   fill="none"
@@ -267,7 +267,7 @@ const LandingPageBody: React.FC<LandingPageBodyProps> = ({
 
             {/* Feature 3 */}
             <div className="group bg-background p-8 rounded-2xl border border-border/50 hover:border-primary/30 transition-all duration-300 hover:-translate-y-1">
-              <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
+              <div className="w-16 h-16 bg-[#d9f7f0] dark:bg-primary/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-[#c2f0e6] dark:group-hover:bg-primary/20 transition-colors">
                 <svg
                   className="w-8 h-8 text-primary"
                   fill="none"
@@ -308,7 +308,7 @@ const LandingPageBody: React.FC<LandingPageBodyProps> = ({
 
           <div className="mt-16 grid md:grid-cols-3 gap-8">
             <div className="group text-center p-8 rounded-2xl bg-card/50 border border-border/50 hover:border-primary/30 transition-all duration-300">
-              <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-primary/20 transition-colors">
+              <div className="w-20 h-20 bg-[#d9f7f0] dark:bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-[#c2f0e6] dark:group-hover:bg-primary/20 transition-colors">
                 <span className="text-3xl font-bold text-primary">1</span>
               </div>
               <h3 className="text-2xl font-bold mb-4 text-foreground">
@@ -320,7 +320,7 @@ const LandingPageBody: React.FC<LandingPageBodyProps> = ({
               </p>
             </div>
             <div className="group text-center p-8 rounded-2xl bg-card/50 border border-border/50 hover:border-primary/30 transition-all duration-300">
-              <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-primary/20 transition-colors">
+              <div className="w-20 h-20 bg-[#d9f7f0] dark:bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-[#c2f0e6] dark:group-hover:bg-primary/20 transition-colors">
                 <span className="text-3xl font-bold text-primary">2</span>
               </div>
               <h3 className="text-2xl font-bold mb-4 text-foreground">
@@ -332,7 +332,7 @@ const LandingPageBody: React.FC<LandingPageBodyProps> = ({
               </p>
             </div>
             <div className="group text-center p-8 rounded-2xl bg-card/50 border border-border/50 hover:border-primary/30 transition-all duration-300">
-              <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-primary/20 transition-colors">
+              <div className="w-20 h-20 bg-[#d9f7f0] dark:bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-[#c2f0e6] dark:group-hover:bg-primary/20 transition-colors">
                 <span className="text-3xl font-bold text-primary">3</span>
               </div>
               <h3 className="text-2xl font-bold mb-4 text-foreground">
@@ -348,7 +348,7 @@ const LandingPageBody: React.FC<LandingPageBodyProps> = ({
       </section>
 
       {/* CTA Section */}
-      <section className="bg-primary/5 py-20">
+      <section className="bg-[#f0fdf9] dark:bg-primary/5 py-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
             Ready to transform how you learn to code?

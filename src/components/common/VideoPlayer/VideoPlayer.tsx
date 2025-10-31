@@ -28,7 +28,7 @@ export function VideoPlayer({
 
   return (
     <div
-      className={`w-full max-w-4xl mx-auto rounded-xl overflow-hidden shadow-2xl bg-black/5 ${className}`}
+      className={`w-full max-w-4xl mx-auto rounded-xl overflow-hidden shadow-[0_20px_50px_rgba(0,191,166,0.15)] hover:shadow-[0_25px_60px_rgba(0,191,166,0.2)] transition-shadow duration-300 bg-white/80 backdrop-blur-sm ${className}`}
     >
       <div className="aspect-video w-full bg-black relative">
         {isLoading && (
