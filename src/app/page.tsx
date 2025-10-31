@@ -14,10 +14,10 @@ function LoginForm() {
     <div className="relative flex size-full min-h-screen flex-col bg-background text-foreground group/design-root overflow-x-hidden">
       <div className="layout-container flex h-full grow flex-col">
         <LandingPageHeader
-          handleExploreByteScriptClick={handleExploreByteScriptClick}
+          handleExploreByteScriptClick={handleExploreBiteScriptClick}
         />
         <LandingPageBody
-          handleExploreByteScriptClick={handleExploreByteScriptClick}
+          handleExploreByteScriptClick={handleExploreBiteScriptClick}
         />
         <LandingPageFooter />
       </div>

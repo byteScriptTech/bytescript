@@ -23,7 +23,7 @@ const CommunityPage = () => {
     >
       <div className="layout-container flex h-full grow flex-col">
         <LandingPageHeader
-          handleExploreByteScriptClick={handleExploreByteScriptClick}
+          handleExploreByteScriptClick={handleExploreBiteScriptClick}
         />
         <div className="px-4 sm:px-6 lg:px-40 flex flex-1 justify-center pb-5">
           <div className="layout-content-container flex flex-col max-w-[960px] flex-1">
@@ -119,7 +119,7 @@ const CommunityPage = () => {
                   for a chance to be featured on our social media!
                 </p>
                 <Button
-                  onClick={handleExploreByteScriptClick}
+                  onClick={handleExploreBiteScriptClick}
                   className="bg-[#00BFA6] hover:bg-[#00a38f] text-white font-medium py-2.5 px-6 rounded-lg transition-all duration-200 transform hover:scale-105"
                 >
                   Start Your Coding Journey

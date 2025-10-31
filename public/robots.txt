@@ -1,0 +1,45 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+
+# Allow search engines to index the main content
+Allow: /
+Allow: /learn
+Allow: /community
+Allow: /competitive-programming
+Allow: /data-structures
+
+# Disallow crawling of admin and private pages
+Disallow: /admin/
+Disallow: /api/
+Disallow: /dashboard
+Disallow: /editor
+Disallow: /settings
+Disallow: /peer-programming
+Disallow: /practice/
+Disallow: /interview/
+Disallow: /test-cases/
+Disallow: /test-runtime/
+
+# Dynamic content that shouldn't be indexed
+Disallow: /*?*
+Disallow: /*/edit/
+Disallow: /*/new/
+
+# Sitemap location (uncomment and update with your actual sitemap URL once deployed)
+# Sitemap: https://byteScript.tech/sitemap.xml
+
+# Crawl-delay: 10
+
+# Block specific bots if needed
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+# Allow Google and Bing
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
