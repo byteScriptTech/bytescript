@@ -29,7 +29,7 @@ const LandingPageBody: React.FC<LandingPageBodyProps> = ({
             </p>
             <div className="pt-4 flex justify-center">
               <Button
-                onClick={handleExploreBiteScriptClick}
+                onClick={handleExploreByteScriptClick}
                 className="px-10 py-7 text-lg font-semibold bg-primary hover:bg-primary/90 transition-all transform hover:scale-105"
                 size="lg"
               >
@@ -360,7 +360,7 @@ const LandingPageBody: React.FC<LandingPageBodyProps> = ({
           </p>
           <div className="flex justify-center">
             <Button
-              onClick={handleExploreBiteScriptClick}
+              onClick={handleExploreByteScriptClick}
               className="px-8 py-6 text-lg font-semibold bg-primary hover:bg-primary/90 text-white dark:text-black"
             >
               Start Coding for Free
