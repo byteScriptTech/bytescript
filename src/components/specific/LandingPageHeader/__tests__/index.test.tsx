@@ -19,7 +19,7 @@ describe('LandingPageHeader', () => {
     expect(menuContainer).toBeInTheDocument();
 
     const menuItems = menuContainer.querySelectorAll('a');
-    expect(menuItems.length).toBe(4);
+    expect(menuItems.length).toBe(5);
 
     const learnLink = menuItems[0];
     expect(learnLink).toBeInTheDocument();
@@ -35,7 +35,11 @@ describe('LandingPageHeader', () => {
     expect(communityLink).toBeInTheDocument();
     expect(communityLink).toHaveAttribute('href', '/community');
     expect(communityLink).toHaveTextContent(/community/i);
-    const editorLink = menuItems[3];
+    const peerProgrammingLink = menuItems[3];
+    expect(peerProgrammingLink).toBeInTheDocument();
+    expect(peerProgrammingLink).toHaveAttribute('href', '/peer-programming');
+    expect(peerProgrammingLink).toHaveTextContent(/peer programming/i);
+    const editorLink = menuItems[4];
     expect(editorLink).toBeInTheDocument();
     expect(editorLink).toHaveAttribute('href', '/editor');
     expect(editorLink).toHaveTextContent(/editor/i);

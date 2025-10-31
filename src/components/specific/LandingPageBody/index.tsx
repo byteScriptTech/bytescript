@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { VideoPlayer } from '@/components/common/VideoPlayer/VideoPlayer';
 import { Button } from '@/components/ui/button';
 
 interface LandingPageBodyProps {
@@ -14,30 +15,25 @@ const LandingPageBody: React.FC<LandingPageBodyProps> = ({
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-b from-primary/5 to-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32">
-          <div className="text-center space-y-6">
-            <h1 className="text-5xl md:text-7xl font-bold leading-tight tracking-tight text-foreground">
-              Code Together,
-              <span className="text-primary"> Grow Together</span>
-            </h1>
+          <div className="text-center space-y-8">
+            <div className="space-y-4">
+              <h1 className="text-5xl md:text-7xl font-bold leading-tight tracking-tight text-foreground">
+                Code Together,
+                <span className="text-primary"> Grow Together</span>
+              </h1>
+            </div>
             <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
               Master programming through collaborative coding with peers. Get
               real-time feedback, solve problems together, and build projects
               that matter.
             </p>
-            <div className="pt-4 flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="pt-4 flex justify-center">
               <Button
                 onClick={handleExploreBiteScriptClick}
                 className="px-10 py-7 text-lg font-semibold bg-primary hover:bg-primary/90 transition-all transform hover:scale-105"
                 size="lg"
               >
                 Start Pair Programming Now
-              </Button>
-              <Button
-                variant="outline"
-                className="px-10 py-7 text-lg font-semibold border-2 hover:bg-accent/50 transition-all transform hover:scale-105"
-                size="lg"
-              >
-                Watch Demo
               </Button>
             </div>
           </div>
@@ -174,6 +170,34 @@ const LandingPageBody: React.FC<LandingPageBodyProps> = ({
         </div>
       </section>
 
+      {/* Video Demo Section */}
+      <section className="py-16 md:py-24 bg-background">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground mb-4">
+              See ByteScript in Action
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+              Watch how ByteScript makes collaborative coding and learning more
+              effective
+            </p>
+          </div>
+          <div className="px-4">
+            <VideoPlayer
+              videoUrl="/videos/demo.mp4"
+              thumbnailUrl="/images/video-thumbnail.jpg"
+              title="ByteScript Demo: Real-time Collaborative Coding"
+            />
+            <div className="mt-6 text-center">
+              <p className="text-muted-foreground text-sm">
+                This demo showcases the core features of ByteScript&apos;s pair
+                programming environment
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Features Section */}
       <section className="py-24 bg-card/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -208,8 +232,9 @@ const LandingPageBody: React.FC<LandingPageBodyProps> = ({
                 Pair Programming
               </h3>
               <p className="text-muted-foreground leading-relaxed">
-                Team up with peers in real-time coding sessions. Share your
-                screen, edit code together, and learn from each other.
+                Team up with peers in real-time coding sessions with built-in
+                voice chat. Collaborate on code together and communicate
+                seamlessly without leaving the platform.
               </p>
             </div>
 
@@ -231,11 +256,12 @@ const LandingPageBody: React.FC<LandingPageBodyProps> = ({
                 </svg>
               </div>
               <h3 className="text-2xl font-bold mb-4 text-foreground">
-                Smart Challenges
+                Real-world Challenges
               </h3>
               <p className="text-muted-foreground leading-relaxed">
-                Solve real-world coding challenges with instant feedback. Our AI
-                helps you improve with personalized suggestions.
+                Solve practical coding challenges with instant feedback. Improve
+                your skills through hands-on practice and structured learning
+                paths.
               </p>
             </div>
 
@@ -328,21 +354,16 @@ const LandingPageBody: React.FC<LandingPageBodyProps> = ({
             Ready to transform how you learn to code?
           </h2>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Join thousands of developers who are improving their skills through
-            collaborative coding.
+            Join our growing community of developers improving their skills
+            through collaborative coding. Be among the first to experience the
+            future of learning.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex justify-center">
             <Button
               onClick={handleExploreBiteScriptClick}
-              className="px-8 py-6 text-lg font-semibold bg-primary hover:bg-primary/90 text-white"
+              className="px-8 py-6 text-lg font-semibold bg-primary hover:bg-primary/90 text-white dark:text-black"
             >
               Start Coding for Free
-            </Button>
-            <Button
-              variant="outline"
-              className="px-8 py-6 text-lg font-semibold"
-            >
-              Schedule a Demo
             </Button>
           </div>
         </div>

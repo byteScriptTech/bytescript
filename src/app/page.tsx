@@ -8,7 +8,7 @@ import LandingPageHeader from '@/components/specific/LandingPageHeader';
 function LoginForm() {
   const router = useRouter();
   const handleExploreBiteScriptClick = () => {
-    router.push('/login');
+    router.push('/login?callbackUrl=/peer-programming');
   };
   return (
     <div className="relative flex size-full min-h-screen flex-col bg-background text-foreground group/design-root overflow-x-hidden">

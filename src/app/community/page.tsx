@@ -11,7 +11,7 @@ const CommunityPage = () => {
   const router = useRouter();
 
   const handleExploreBiteScriptClick = () => {
-    router.push('/login');
+    router.push('/login?callbackUrl=/peer-programming');
   };
 
   return (
