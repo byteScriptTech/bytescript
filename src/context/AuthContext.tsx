@@ -42,18 +42,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const auth = getAuth();
 
   useEffect(() => {
+    let isMounted = true;
+
     const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!isMounted) return;
       setCurrentUser(user);
+      if (user && window.location.pathname === '/login') {
+        const urlParams = new URLSearchParams(window.location.search);
+        const callbackUrl = urlParams.get('callbackUrl') || '/dashboard';
+        router.replace(callbackUrl);
+      }
     });
-    return () => unsubscribe();
-  }, [auth]);
+
+    return () => {
+      isMounted = false;
+      unsubscribe();
+    };
+  }, [auth, router]);
 
   const saveUser = async (user: UserInfo) => {
     const userDocRef = doc(db, 'users', user.uid);
-    const userDoc = await getDoc(userDocRef); // Check if the user exists
-
+    const userDoc = await getDoc(userDocRef);
     if (!userDoc.exists()) {
-      // User doesn't exist, save them
       try {
         await setDoc(userDocRef, {
           uid: user.uid,
@@ -84,13 +94,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       await saveUser(importantUserInfo);
       setCurrentUser(user);
       console.log('Github User:', user);
-      if (user) {
-        // Only redirect if we're not already on the dashboard
-        const currentPath = window.location.pathname;
-        if (currentPath !== '/dashboard') {
-          router.push('/dashboard');
-        }
-      }
     } catch (error: any) {
       toast.error(error.message);
       console.error('Github Sign In Error:', error);
