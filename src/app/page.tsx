@@ -11,7 +11,7 @@ function LoginForm() {
     router.push('/login?callbackUrl=/peer-programming');
   };
   return (
-    <div className="relative flex size-full min-h-screen flex-col bg-background text-foreground group/design-root overflow-x-hidden">
+    <div className="relative flex size-full min-h-screen flex-col bg-[hsl(var(--landing-bg))] dark:bg-background text-foreground group/design-root overflow-x-hidden">
       <div className="layout-container flex h-full grow flex-col">
         <LandingPageHeader
           handleExploreByteScriptClick={handleExploreBiteScriptClick}
