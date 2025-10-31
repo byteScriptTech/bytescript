@@ -9,6 +9,7 @@ export function Navbar() {
   const isInterviewPage = pathname?.startsWith('/interview');
 
   const navItems = [
+    { name: 'Pair Programming', href: '/pair-programming' },
     { name: 'Interview', href: '/interview' },
     { name: 'Practice', href: '/practice' },
     { name: 'Learn', href: '/learn' },

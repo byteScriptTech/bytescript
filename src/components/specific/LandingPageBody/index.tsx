@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { VideoPlayer } from '@/components/common/VideoPlayer/VideoPlayer';
 import { Button } from '@/components/ui/button';
 
 interface LandingPageBodyProps {
@@ -10,25 +11,30 @@ const LandingPageBody: React.FC<LandingPageBodyProps> = ({
   handleExploreByteScriptClick,
 }) => {
   return (
-    <>
-      <div className="px-4 sm:px-6 lg:px-40 flex flex-1 justify-center py-5">
-        <div
-          role="main"
-          className="layout-content-container flex flex-col max-w-[960px] flex-1"
-        >
-          <div className="@container">
-            <div className="@[480px]:p-4 @[480px]:overflow-hidden">
-              <div
-                data-testid="hero-section"
-                className="flex flex-col gap-6 @[480px]:gap-8 @[480px]:rounded-xl @[480px]:overflow-hidden @[480px]:shadow-lg @[480]:min-h-[480px] items-start justify-end px-4 pb-10 @[480px]:px-10 @[480px]:pb-12 bg-card/50"
-                style={{
-                  backgroundImage: `url('/images/undraw_firmware_3fxd.svg')`,
-                  backgroundSize: 'contain',
-                  backgroundPosition: 'center',
-                  backgroundRepeat: 'no-repeat',
-                  minHeight: '350px',
-                }}
-              ></div>
+    <div className="min-h-screen bg-background font-sans">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-primary/5 to-background">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32">
+          <div className="text-center space-y-8">
+            <div className="space-y-4">
+              <h1 className="text-5xl md:text-7xl font-bold leading-tight tracking-tight text-foreground">
+                Code Together,
+                <span className="text-primary"> Grow Together</span>
+              </h1>
+            </div>
+            <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+              Master programming through collaborative coding with peers. Get
+              real-time feedback, solve problems together, and build projects
+              that matter.
+            </p>
+            <div className="pt-4 flex justify-center">
+              <Button
+                onClick={handleExploreBiteScriptClick}
+                className="px-10 py-7 text-lg font-semibold bg-primary hover:bg-primary/90 transition-all transform hover:scale-105"
+                size="lg"
+              >
+                Start Pair Programming Now
+              </Button>
             </div>
           </div>
           <div className="flex flex-col gap-10 px-4 py-10 @container">
@@ -162,8 +168,207 @@ const LandingPageBody: React.FC<LandingPageBodyProps> = ({
             </div>
           </div>
         </div>
-      </div>
-    </>
+      </section>
+
+      {/* Video Demo Section */}
+      <section className="py-16 md:py-24 bg-background">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground mb-4">
+              See ByteScript in Action
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+              Watch how ByteScript makes collaborative coding and learning more
+              effective
+            </p>
+          </div>
+          <div className="px-4">
+            <VideoPlayer
+              videoUrl="/videos/demo.mp4"
+              thumbnailUrl="/images/video-thumbnail.jpg"
+              title="ByteScript Demo: Real-time Collaborative Coding"
+            />
+            <div className="mt-6 text-center">
+              <p className="text-muted-foreground text-sm">
+                This demo showcases the core features of ByteScript&apos;s pair
+                programming environment
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-24 bg-card/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center space-y-4 max-w-4xl mx-auto">
+            <h2 className="text-4xl font-bold tracking-tight text-foreground">
+              Why Developers Love ByteScript
+            </h2>
+            <p className="text-xl text-muted-foreground">
+              Everything you need to become a better developer, together
+            </p>
+          </div>
+
+          <div className="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {/* Feature 1 */}
+            <div className="group bg-background p-8 rounded-2xl border border-border/50 hover:border-primary/30 transition-all duration-300 hover:-translate-y-1">
+              <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
+                <svg
+                  className="w-8 h-8 text-primary"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.75"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold mb-4 text-foreground">
+                Pair Programming
+              </h3>
+              <p className="text-muted-foreground leading-relaxed">
+                Team up with peers in real-time coding sessions with built-in
+                voice chat. Collaborate on code together and communicate
+                seamlessly without leaving the platform.
+              </p>
+            </div>
+
+            {/* Feature 2 */}
+            <div className="group bg-background p-8 rounded-2xl border border-border/50 hover:border-primary/30 transition-all duration-300 hover:-translate-y-1">
+              <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
+                <svg
+                  className="w-8 h-8 text-primary"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.75"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold mb-4 text-foreground">
+                Real-world Challenges
+              </h3>
+              <p className="text-muted-foreground leading-relaxed">
+                Solve practical coding challenges with instant feedback. Improve
+                your skills through hands-on practice and structured learning
+                paths.
+              </p>
+            </div>
+
+            {/* Feature 3 */}
+            <div className="group bg-background p-8 rounded-2xl border border-border/50 hover:border-primary/30 transition-all duration-300 hover:-translate-y-1">
+              <div className="w-16 h-16 bg-primary/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
+                <svg
+                  className="w-8 h-8 text-primary"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.75"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-2xl font-bold mb-4 text-foreground">
+                Project Collaboration
+              </h3>
+              <p className="text-muted-foreground leading-relaxed">
+                Build real projects with teammates. Manage tasks, track
+                progress, and deploy together—all in one place.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section className="py-24 bg-background">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center space-y-4 max-w-4xl mx-auto">
+            <h2 className="text-4xl font-bold tracking-tight text-foreground">
+              How It Works
+            </h2>
+            <p className="text-xl text-muted-foreground">
+              Get started with ByteScript in just a few simple steps
+            </p>
+          </div>
+
+          <div className="mt-16 grid md:grid-cols-3 gap-8">
+            <div className="group text-center p-8 rounded-2xl bg-card/50 border border-border/50 hover:border-primary/30 transition-all duration-300">
+              <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-primary/20 transition-colors">
+                <span className="text-3xl font-bold text-primary">1</span>
+              </div>
+              <h3 className="text-2xl font-bold mb-4 text-foreground">
+                Create Your Profile
+              </h3>
+              <p className="text-muted-foreground leading-relaxed">
+                Sign up and set up your developer profile in seconds. Connect
+                with other developers at your skill level.
+              </p>
+            </div>
+            <div className="group text-center p-8 rounded-2xl bg-card/50 border border-border/50 hover:border-primary/30 transition-all duration-300">
+              <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-primary/20 transition-colors">
+                <span className="text-3xl font-bold text-primary">2</span>
+              </div>
+              <h3 className="text-2xl font-bold mb-4 text-foreground">
+                Join or Start a Session
+              </h3>
+              <p className="text-muted-foreground leading-relaxed">
+                Find a coding partner or join an existing session. Work on
+                challenges or real projects together.
+              </p>
+            </div>
+            <div className="group text-center p-8 rounded-2xl bg-card/50 border border-border/50 hover:border-primary/30 transition-all duration-300">
+              <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-primary/20 transition-colors">
+                <span className="text-3xl font-bold text-primary">3</span>
+              </div>
+              <h3 className="text-2xl font-bold mb-4 text-foreground">
+                Grow Together
+              </h3>
+              <p className="text-muted-foreground leading-relaxed">
+                Learn, build, and get better together. Track your progress and
+                celebrate your achievements.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="bg-primary/5 py-20">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
+            Ready to transform how you learn to code?
+          </h2>
+          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+            Join our growing community of developers improving their skills
+            through collaborative coding. Be among the first to experience the
+            future of learning.
+          </p>
+          <div className="flex justify-center">
+            <Button
+              onClick={handleExploreBiteScriptClick}
+              className="px-8 py-6 text-lg font-semibold bg-primary hover:bg-primary/90 text-white dark:text-black"
+            >
+              Start Coding for Free
+            </Button>
+          </div>
+        </div>
+      </section>
+    </div>
   );
 };
 

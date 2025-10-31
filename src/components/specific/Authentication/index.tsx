@@ -18,10 +18,7 @@ const Authentication = () => {
   };
 
   return (
-    <div
-      className="relative flex size-full min-h-screen flex-col bg-[#111418] dark group/design-root overflow-x-hidden"
-      style={{ fontFamily: 'Manrope, "Noto Sans", sans-serif' }}
-    >
+    <div className="relative flex size-full min-h-screen flex-col bg-[#111418] dark group/design-root overflow-x-hidden font-sans">
       <div className="layout-container flex h-full grow flex-col">
         <header className="border-b border-solid border-border bg-background">
           <div className="flex items-center justify-between px-3 py-3 sm:px-8 sm:py-3">

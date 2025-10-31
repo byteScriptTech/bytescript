@@ -14,17 +14,6 @@ describe('LandingPageBody', () => {
     );
   });
 
-  it('renders hero section with background image', () => {
-    const heroSection = screen.getByTestId('hero-section');
-    expect(heroSection).toHaveStyle({
-      backgroundImage: 'url(/images/undraw_firmware_3fxd.svg)',
-      backgroundSize: 'contain',
-      backgroundPosition: 'center',
-      backgroundRepeat: 'no-repeat',
-      minHeight: '350px',
-    });
-  });
-
   it('displays main heading and description', () => {
     const heading = screen.getByText(/Master Programming Through Practice/i);
     expect(heading).toBeInTheDocument();
