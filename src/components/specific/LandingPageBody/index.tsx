@@ -19,7 +19,7 @@ const LandingPageBody: React.FC<LandingPageBodyProps> = ({
             <div className="space-y-4">
               <h1 className="text-5xl md:text-7xl font-bold leading-tight tracking-tight text-foreground">
                 Code Together,
-                <span className="text-primary"> Grow Together</span>
+                <span className="text-[#00BFA6]"> Grow Together</span>
               </h1>
             </div>
             <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
@@ -289,7 +289,6 @@ const LandingPageBody: React.FC<LandingPageBodyProps> = ({
               <ul className="text-muted-foreground leading-relaxed space-y-2 list-disc pl-5">
                 <li>Interactive coding challenges with instant feedback</li>
                 <li>Data structures & algorithms explained simply</li>
-                <li>JavaScript, Python, and more programming languages</li>
               </ul>
             </div>
           </div>
