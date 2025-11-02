@@ -1,8 +1,14 @@
 'use client';
 
+import { Maximize2, Minimize2 } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import {
+  Panel,
+  PanelGroup,
+  PanelResizeHandle,
+  PanelResizeHandleProps,
+} from 'react-resizable-panels';
 import { v4 as uuidv4 } from 'uuid';
 
 import { useCall } from '@/hooks/useCall';
@@ -25,6 +31,7 @@ export function PeerProgrammingRoom() {
   const [wsConnectionStatus, setWsConnectionStatus] =
     useState<ConnectionStatus>('disconnected');
   const [editorPeers, setEditorPeers] = useState<string[]>([]);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [logs, setLogs] = useState<
     Array<{
@@ -370,63 +377,150 @@ export function PeerProgrammingRoom() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return (
-    <div className="flex flex-col h-screen bg-background">
-      <HeaderBar
-        roomId={roomId}
-        setRoomId={setRoomId}
-        joinRoom={joinRoom}
-        leaveRoom={leaveRoom}
-        overallConnected={overallConnected}
-        editorPeersCount={editorPeers.length}
-      />
+  const toggleFullscreen = useCallback((e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setIsFullscreen((prev) => !prev);
+  }, []);
 
-      {error && (
-        <div className="bg-destructive/10 text-destructive p-4 text-center">
-          {error}
-        </div>
+  // Add keyboard shortcut for fullscreen (F11)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'F11' || (e.key === 'Escape' && isFullscreen)) {
+        e.preventDefault();
+        toggleFullscreen();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isFullscreen, toggleFullscreen]);
+
+  // Custom resize handle that can be hidden when in fullscreen
+  const ResizeHandle = useCallback(
+    (props: PanelResizeHandleProps) => (
+      <PanelResizeHandle
+        {...props}
+        className={`${isFullscreen ? 'hidden' : ''} ${props.className || ''}`}
+      />
+    ),
+    [isFullscreen]
+  );
+
+  return (
+    <div
+      className={`flex flex-col h-screen bg-background ${isFullscreen ? 'fixed inset-0 z-50' : ''}`}
+    >
+      {!isFullscreen && (
+        <>
+          <HeaderBar
+            roomId={roomId}
+            setRoomId={setRoomId}
+            joinRoom={joinRoom}
+            leaveRoom={leaveRoom}
+            overallConnected={overallConnected}
+            editorPeersCount={editorPeers.length}
+          />
+          {error && (
+            <div className="bg-destructive/10 text-destructive p-4 text-center">
+              {error}
+            </div>
+          )}
+        </>
       )}
 
       <div className="flex flex-1 overflow-hidden">
-        <aside className="w-full md:w-1/4 border-r border-border flex flex-col">
-          <div className="h-1/2 p-4 overflow-y-auto">
-            <PresencePanel
-              editorPeers={editorPeers}
-              userId={userId}
-              wsConnectionStatus={wsConnectionStatus}
-            />
-          </div>
-          <div className="h-1/2 p-4 overflow-y-auto">
-            <CallControls
-              call={call}
-              peers={editorPeers}
-              userId={userId}
-              roomConnected={overallConnected}
-            />
-          </div>
-        </aside>
-
-        <PanelGroup direction="vertical" className="flex-1">
-          <Panel defaultSize={70} minSize={30} className="overflow-hidden">
-            <EditorPanel
-              code={code}
-              onCodeChange={handleCodeChange}
-              onRunCode={executeCode}
-              sendData={sendData}
-              wsConnectionStatus={wsConnectionStatus}
-              userId={userId}
-              isExecuting={isExecuting}
-            />
+        <PanelGroup direction="horizontal" className="flex-1">
+          {/* Left Sidebar - Participants and Controls */}
+          <Panel
+            defaultSize={20}
+            minSize={1}
+            maxSize={30}
+            className={`${isFullscreen ? 'hidden' : ''} border-r border-border flex flex-col bg-card`}
+            collapsedSize={0}
+          >
+            <div className="h-1/2 p-4 overflow-y-auto border-b border-border">
+              <h3 className="font-semibold mb-3 text-sm uppercase tracking-wider text-muted-foreground">
+                Participants ({editorPeers.length + 1})
+              </h3>
+              <PresencePanel
+                editorPeers={editorPeers}
+                userId={userId}
+                wsConnectionStatus={wsConnectionStatus}
+              />
+            </div>
+            <div className="h-1/2 p-4 overflow-y-auto">
+              <h3 className="font-semibold mb-3 text-sm uppercase tracking-wider text-muted-foreground">
+                Call Controls
+              </h3>
+              <CallControls
+                call={call}
+                peers={editorPeers}
+                userId={userId}
+                roomConnected={overallConnected}
+              />
+            </div>
           </Panel>
 
-          <PanelResizeHandle className="h-2 bg-gray-100 dark:bg-gray-800 hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors" />
+          {/* Resize handle between sidebar and editor */}
+          <ResizeHandle className="w-2 bg-gray-100 dark:bg-gray-700 hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors" />
 
-          <Panel
-            defaultSize={30}
-            minSize={10}
-            className="overflow-hidden border-t border-gray-200 dark:border-gray-700"
-          >
-            <ConsolePanel logs={logs} onClear={clearLogs} />
+          {/* Main content area with vertical split */}
+          <Panel defaultSize={80} minSize={50} className="flex flex-col">
+            <PanelGroup direction="vertical" className="flex-1">
+              <Panel
+                defaultSize={70}
+                minSize={30}
+                className={`overflow-hidden relative group ${isFullscreen ? '!h-screen' : ''}`}
+              >
+                <button
+                  onClick={toggleFullscreen}
+                  className="absolute top-2 right-2 z-10 p-2 rounded-md bg-background/80 hover:bg-accent text-foreground/70 hover:text-foreground transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-primary"
+                  aria-label={
+                    isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'
+                  }
+                  title={
+                    isFullscreen
+                      ? 'Exit fullscreen (Esc)'
+                      : 'Enter fullscreen (F11)'
+                  }
+                >
+                  {isFullscreen ? (
+                    <Minimize2 size={16} />
+                  ) : (
+                    <Maximize2 size={16} />
+                  )}
+                </button>
+                <EditorPanel
+                  code={code}
+                  onCodeChange={handleCodeChange}
+                  onRunCode={executeCode}
+                  sendData={sendData}
+                  wsConnectionStatus={wsConnectionStatus}
+                  userId={userId}
+                  isExecuting={isExecuting}
+                  className={isFullscreen ? 'h-full' : ''}
+                />
+              </Panel>
+
+              <ResizeHandle className="h-2 bg-gray-100 dark:bg-gray-800 hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors" />
+
+              <Panel
+                defaultSize={30}
+                minSize={10}
+                className={`overflow-hidden border-t border-gray-200 dark:border-gray-700 ${isFullscreen ? 'flex-1' : ''}`}
+              >
+                <div className="h-full flex flex-col">
+                  <div className="p-2 border-b border-border">
+                    <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">
+                      Console Output
+                    </h3>
+                  </div>
+                  <div className="flex-1 overflow-auto">
+                    <ConsolePanel logs={logs} onClear={clearLogs} />
+                  </div>
+                </div>
+              </Panel>
+            </PanelGroup>
           </Panel>
         </PanelGroup>
       </div>

@@ -10,6 +10,7 @@ type Props = {
   wsConnectionStatus: 'disconnected' | 'connecting' | 'connected';
   userId: string;
   isExecuting?: boolean;
+  className?: string;
 };
 
 export default function EditorPanel({
@@ -20,13 +21,14 @@ export default function EditorPanel({
   wsConnectionStatus,
   userId,
   isExecuting = false,
+  className = '',
 }: Props) {
   const handleRun = () => {
     onRunCode(code);
   };
 
   return (
-    <section className="flex-1 flex flex-col h-full">
+    <section className={`flex-1 flex flex-col h-full ${className}`}>
       <div className="p-4 border-b border-border flex justify-between items-center gap-2">
         <h2 className="text-lg font-semibold">Collaborative Editor</h2>
         <div className="flex items-center gap-2">
