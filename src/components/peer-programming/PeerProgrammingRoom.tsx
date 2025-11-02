@@ -388,45 +388,65 @@ export function PeerProgrammingRoom() {
       )}
 
       <div className="flex flex-1 overflow-hidden">
-        <aside className="w-full md:w-1/4 border-r border-border flex flex-col">
-          <div className="h-1/2 p-4 overflow-y-auto">
-            <PresencePanel
-              editorPeers={editorPeers}
-              userId={userId}
-              wsConnectionStatus={wsConnectionStatus}
-            />
-          </div>
-          <div className="h-1/2 p-4 overflow-y-auto">
-            <CallControls
-              call={call}
-              peers={editorPeers}
-              userId={userId}
-              roomConnected={overallConnected}
-            />
-          </div>
-        </aside>
-
-        <PanelGroup direction="vertical" className="flex-1">
-          <Panel defaultSize={70} minSize={30} className="overflow-hidden">
-            <EditorPanel
-              code={code}
-              onCodeChange={handleCodeChange}
-              onRunCode={executeCode}
-              sendData={sendData}
-              wsConnectionStatus={wsConnectionStatus}
-              userId={userId}
-              isExecuting={isExecuting}
-            />
+        <PanelGroup direction="horizontal" className="flex-1">
+          {/* Left Sidebar - Participants and Controls */}
+          <Panel
+            defaultSize={20}
+            minSize={1}
+            maxSize={30}
+            className="border-r border-border flex flex-col bg-card"
+          >
+            <div className="h-1/2 p-4 overflow-y-auto border-b border-border">
+              <h3 className="font-semibold mb-3 text-sm uppercase tracking-wider text-muted-foreground">
+                Participants ({editorPeers.length + 1})
+              </h3>
+              <PresencePanel
+                editorPeers={editorPeers}
+                userId={userId}
+                wsConnectionStatus={wsConnectionStatus}
+              />
+            </div>
+            <div className="h-1/2 p-4 overflow-y-auto">
+              <h3 className="font-semibold mb-3 text-sm uppercase tracking-wider text-muted-foreground">
+                Call Controls
+              </h3>
+              <CallControls
+                call={call}
+                peers={editorPeers}
+                userId={userId}
+                roomConnected={overallConnected}
+              />
+            </div>
           </Panel>
 
-          <PanelResizeHandle className="h-2 bg-gray-100 dark:bg-gray-800 hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors" />
+          {/* Resize handle between sidebar and editor */}
+          <PanelResizeHandle className="w-2 bg-gray-100 dark:bg-gray-700 hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors" />
 
-          <Panel
-            defaultSize={30}
-            minSize={10}
-            className="overflow-hidden border-t border-gray-200 dark:border-gray-700"
-          >
-            <ConsolePanel logs={logs} onClear={clearLogs} />
+          {/* Main content area with vertical split */}
+          <Panel defaultSize={80} minSize={50} className="flex flex-col">
+            <PanelGroup direction="vertical" className="flex-1">
+              <Panel defaultSize={70} minSize={30} className="overflow-hidden">
+                <EditorPanel
+                  code={code}
+                  onCodeChange={handleCodeChange}
+                  onRunCode={executeCode}
+                  sendData={sendData}
+                  wsConnectionStatus={wsConnectionStatus}
+                  userId={userId}
+                  isExecuting={isExecuting}
+                />
+              </Panel>
+
+              <PanelResizeHandle className="h-2 bg-gray-100 dark:bg-gray-800 hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors" />
+
+              <Panel
+                defaultSize={30}
+                minSize={10}
+                className="overflow-hidden border-t border-gray-200 dark:border-gray-700"
+              >
+                <ConsolePanel logs={logs} onClear={clearLogs} />
+              </Panel>
+            </PanelGroup>
           </Panel>
         </PanelGroup>
       </div>
