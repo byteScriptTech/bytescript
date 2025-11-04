@@ -72,8 +72,8 @@ export const Content: React.FC<ContentProps> = ({
             </h2>
             {subtopic.content && (
               <div className="mb-6 prose-p:leading-relaxed">
-                {subtopic.content_md ? (
-                  <MarkdownRenderer>{subtopic.content_md}</MarkdownRenderer>
+                {subtopic.content ? (
+                  <MarkdownRenderer>{subtopic.content}</MarkdownRenderer>
                 ) : subtopic.content ? (
                   <div
                     className="prose-p:mb-4 last:prose-p:mb-0"
