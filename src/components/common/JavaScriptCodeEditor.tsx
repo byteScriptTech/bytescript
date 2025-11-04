@@ -2,7 +2,8 @@
 
 import { Copy, Loader2, Play } from 'lucide-react';
 import dynamic from 'next/dynamic';
-import { useRef, useState } from 'react';
+import * as React from 'react';
+import { useCallback } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -17,6 +18,8 @@ interface JavaScriptCodeEditorProps {
   readOnly?: boolean;
   className?: string;
   onRun?: (code: string) => Promise<void>;
+  showRunButton?: boolean;
+  showOutput?: boolean;
 }
 
 export const JavaScriptCodeEditor = ({
@@ -24,17 +27,17 @@ export const JavaScriptCodeEditor = ({
   readOnly = true,
   className,
   onRun,
+  showRunButton = true,
+  showOutput = true,
 }: JavaScriptCodeEditorProps) => {
-  const editorRef = useRef<any>(null);
-  const [isRunning, setIsRunning] = useState(false);
-  const [output, setOutput] = useState<string>('');
-  const [isMounted, setIsMounted] = useState(false);
-
+  const editorRef = React.useRef<any>(null);
+  const [isRunning, setIsRunning] = React.useState(false);
+  const [output, setOutput] = React.useState<string>('');
+  const [isMounted, setIsMounted] = React.useState(false);
+  console.log(output, 'output');
   // Handle editor mount
   const handleEditorDidMount = (editor: any, monaco: any) => {
     editorRef.current = editor;
-
-    // Configure theme
     monaco.editor.defineTheme('vs-dark-custom', {
       base: 'vs-dark',
       inherit: true,
@@ -49,22 +52,80 @@ export const JavaScriptCodeEditor = ({
     setIsMounted(true);
   };
 
-  const handleRun = async () => {
-    if (!editorRef.current || !onRun) return;
+  const executeCode = useCallback(
+    async (code: string) => {
+      setIsRunning(true);
+      setOutput('Running...');
 
-    setIsRunning(true);
-    setOutput('Running...');
+      try {
+        if (onRun) {
+          await onRun(code);
+          return;
+        }
+        const logs: string[] = [];
+        const safeConsole = {
+          log: (...args: unknown[]) => {
+            const logMessage = args
+              .map((arg) => {
+                try {
+                  return typeof arg === 'object'
+                    ? JSON.stringify(arg, null, 2)
+                    : String(arg);
+                } catch {
+                  return String(arg);
+                }
+              })
+              .join(' ');
+            logs.push(logMessage);
+          },
+        };
 
-    try {
-      await onRun(editorRef.current.getValue());
-    } catch (error) {
-      setOutput(
-        `Error: ${error instanceof Error ? error.message : 'Unknown error'}`
-      );
-    } finally {
-      setIsRunning(false);
-    }
-  };
+        const result = await new Promise<string>((resolve) => {
+          try {
+            const execute = new Function(
+              'console',
+              `
+                try {
+                  ${code.includes('return ') ? '' : 'return '}${code}
+                } catch (e) {
+                  return 'Error: ' + (e instanceof Error ? e.message : String(e));
+                }
+              `
+            );
+
+            const executionResult = execute(safeConsole);
+
+            if (logs.length > 0) {
+              resolve(logs.join('\n'));
+            } else if (executionResult !== undefined) {
+              resolve(String(executionResult));
+            } else {
+              resolve('Code executed successfully (no output)');
+            }
+          } catch (error) {
+            resolve(
+              'Error: ' +
+                (error instanceof Error ? error.message : 'Unknown error')
+            );
+          }
+        });
+
+        setOutput(result);
+      } catch (error) {
+        setOutput(
+          `Error: ${error instanceof Error ? error.message : 'Unknown error'}`
+        );
+      } finally {
+        setIsRunning(false);
+      }
+    },
+    [onRun]
+  );
+
+  const handleRun = React.useCallback(async () => {
+    if (!editorRef.current) return;
+    await executeCode(editorRef.current.getValue());
+  }, [executeCode]);
 
   const copyToClipboard = async () => {
     if (editorRef.current) {
@@ -93,7 +154,7 @@ export const JavaScriptCodeEditor = ({
             <Copy className="h-3 w-3 mr-1" />
             Copy
           </Button>
-          {onRun && (
+          {showRunButton && (
             <Button
               variant="default"
               size="sm"
@@ -142,24 +203,39 @@ export const JavaScriptCodeEditor = ({
           </div>
         )}
       </div>
-      {output && (
-        <div className="p-4 bg-gray-100 dark:bg-gray-800 border-t">
-          <div className="flex justify-between items-center mb-2">
+      {showOutput && (
+        <div className="border-t border-border bg-background/50">
+          <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-muted/30">
             <span className="text-xs font-medium text-muted-foreground">
               Output
             </span>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-6 px-2 text-xs"
-              onClick={() => setOutput('')}
-            >
-              Clear
-            </Button>
+            {output && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground"
+                onClick={() => setOutput('')}
+              >
+                Clear
+              </Button>
+            )}
           </div>
-          <pre className="text-xs font-mono whitespace-pre-wrap break-words">
-            {output}
-          </pre>
+          <div
+            className="p-4 overflow-auto"
+            style={{ minHeight: '80px', maxHeight: '300px' }}
+          >
+            {output ? (
+              <div className="font-mono text-sm">
+                <pre className="whitespace-pre-wrap break-words text-foreground">
+                  {output}
+                </pre>
+              </div>
+            ) : (
+              <div className="flex items-center justify-center h-16 text-sm text-muted-foreground italic">
+                Run the code to see the output here
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

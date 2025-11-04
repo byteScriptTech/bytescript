@@ -2,7 +2,7 @@
 
 import { CheckCircle2, ChevronLeft, ChevronRight, Menu, X } from 'lucide-react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import React, { useEffect, useState, useCallback } from 'react';
+import { FC, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 
 import { JavaScriptCodeEditor } from '@/components/common/JavaScriptCodeEditor';
 import { Content } from '@/components/specific/LearnContent/Content';
@@ -28,16 +28,16 @@ interface Example {
 interface LearnContentInnerProps {
   initialTopicId?: string | null;
   initialSubtopicId?: string | null;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }
 
-const LearnContentInner: React.FC<LearnContentInnerProps> = ({
+const LearnContentInner: FC<LearnContentInnerProps> = ({
   initialTopicId: _initialTopicId = null,
   initialSubtopicId: _initialSubtopicId = null,
 }) => {
   // Use refs to store the initial values to avoid re-running effects
-  const initialTopicId = React.useRef(_initialTopicId);
-  const initialSubtopicId = React.useRef(_initialSubtopicId);
+  const initialTopicId = useRef(_initialTopicId);
+  const initialSubtopicId = useRef(_initialSubtopicId);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [content, setContent] = useState<LanguageContent | null>(null);
@@ -96,8 +96,6 @@ const LearnContentInner: React.FC<LearnContentInnerProps> = ({
   const scrollToSubtopic = useCallback(
     (subtopicId: string) => {
       setActiveSubtopic(subtopicId);
-
-      // Update URL with the new subtopic
       const params = new URLSearchParams(searchParams.toString());
       params.set('subtopic', subtopicId);
       router.push(`${pathname}?${params.toString()}`, { scroll: false });
@@ -107,14 +105,13 @@ const LearnContentInner: React.FC<LearnContentInnerProps> = ({
         const element = document.getElementById(`subtopic-${subtopicId}`);
         if (element) {
           element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          // Small offset to account for fixed header
           window.scrollBy(0, -20);
         }
       }, 100);
 
       return () => clearTimeout(timer);
     },
-    [router, pathname, searchParams, setActiveSubtopic]
+    [pathname, router, searchParams, setActiveSubtopic]
   );
 
   const fetchContent = useCallback(async () => {
@@ -198,169 +195,34 @@ const LearnContentInner: React.FC<LearnContentInnerProps> = ({
     />
   );
 
-  // Track the state of each code block by its index
-  const [codeStates, setCodeStates] = useState<
-    Record<number, { output: string; isRunning: boolean; key?: string }>
-  >({});
-
-  const runCode = useCallback(async (code: string, index: number) => {
-    // Generate a unique key for this code block based on its content and index
-    const blockKey = `${index}_${code.length}`;
-
-    // Update state for this specific code block
-    setCodeStates((prev) => {
-      const currentState = prev[index] || { output: '', isRunning: false };
-      return {
-        ...prev,
-        [index]: {
-          ...currentState,
-          isRunning: true,
-          output: 'Running...',
-          key: blockKey, // Add the key to track the current execution
-        },
-      };
-    });
-
-    try {
-      const result = await new Promise<string>((resolve) => {
-        try {
-          const logs: string[] = [];
-          const safeConsole = {
-            log: (...args: unknown[]) => {
-              const logMessage = args
-                .map((arg) => {
-                  try {
-                    return typeof arg === 'object'
-                      ? JSON.stringify(arg, null, 2)
-                      : String(arg);
-                  } catch {
-                    return String(arg);
-                  }
-                })
-                .join(' ');
-              logs.push(logMessage);
-              return logMessage;
-            },
-          };
-          const executeCode = new Function(
-            'console',
-            `
-              try {
-                ${code.includes('return ') ? '' : 'return '}${code}
-              } catch (e) {
-                return 'Error: ' + (e instanceof Error ? e.message : String(e));
-              }
-            `
-          );
-          const executionResult = executeCode(safeConsole);
-          if (logs.length > 0) {
-            resolve(logs.join('\n'));
-          } else if (executionResult !== undefined) {
-            resolve(String(executionResult));
-          } else {
-            resolve('Code executed successfully (no output)');
-          }
-        } catch (error) {
-          resolve(
-            'Error: ' +
-              (error instanceof Error ? error.message : 'Unknown error')
-          );
-        }
-      });
-
-      // Update only this code block's output if the key hasn't changed
-      setCodeStates((prev) => {
-        // Only update if this is still the same code block (prevent race conditions)
-        if (prev[index]?.key === blockKey) {
-          return {
-            ...prev,
-            [index]: {
-              ...prev[index],
-              output: result,
-              isRunning: false,
-            },
-          };
-        }
-        return prev;
-      });
-    } catch (error) {
-      setCodeStates((prev) => ({
-        ...prev,
-        [index]: {
-          ...prev[index],
-          output:
-            'Error: ' +
-            (error instanceof Error ? error.message : 'Unknown error'),
-          isRunning: false,
-        },
-      }));
+  const renderExamples = useCallback((examples: Example[] = []) => {
+    if (!examples || examples.length === 0) {
+      return null;
     }
+
+    return (
+      <div className="space-y-6">
+        {examples.map((example, index) => (
+          <div key={`example-${index}`} className="space-y-2">
+            {example.description && (
+              <p className="text-sm text-muted-foreground">
+                {example.description}
+              </p>
+            )}
+            <div className="w-full min-h-[300px] overflow-visible">
+              <JavaScriptCodeEditor
+                initialCode={example.code}
+                readOnly={false}
+                className="w-full"
+                showRunButton={true}
+                showOutput={true}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
   }, []);
-
-  const renderExamples = useCallback(
-    (examples: Example[] = []) => {
-      // Create a stable reference to the examples array
-      return (
-        <div className="space-y-6">
-          {examples.map((example, index) => {
-            // Get the current state for this specific code block
-            const blockState = codeStates[index] || {};
-
-            return (
-              <div key={`example-${index}`} className="space-y-2">
-                {example.description && (
-                  <p className="text-sm text-muted-foreground">
-                    {example.description}
-                  </p>
-                )}
-                <div className="relative">
-                  <JavaScriptCodeEditor
-                    key={`editor-${index}`}
-                    initialCode={example.code}
-                    readOnly={false}
-                    onRun={async (code) => runCode(code, index)}
-                    className="w-full h-64"
-                  />
-                  {blockState.isRunning && (
-                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
-                    </div>
-                  )}
-                </div>
-                {blockState.output && (
-                  <div className="mt-2 p-3 bg-gray-100 dark:bg-gray-800 rounded-md">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-mono text-muted-foreground">
-                        Output:
-                      </span>
-                      <button
-                        onClick={() => {
-                          setCodeStates((prev) => ({
-                            ...prev,
-                            [index]: { ...prev[index], output: '' },
-                          }));
-                        }}
-                        className="text-xs text-muted-foreground hover:text-foreground"
-                        title="Clear output"
-                      >
-                        Clear
-                      </button>
-                    </div>
-                    <pre className="font-mono text-sm whitespace-pre-wrap break-words">
-                      {blockState.output}
-                    </pre>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      );
-    },
-    [codeStates, runCode]
-  );
-
-  // Removed unused _renderObjectives function
 
   if (loading) {
     return (
@@ -527,14 +389,6 @@ const LearnContentInner: React.FC<LearnContentInnerProps> = ({
                   topicId={activeTopic || ''}
                   subtopicId={activeSubtopic || ''}
                   content={currentTopic}
-                  onTopicClick={(topicId) => {
-                    setActiveTopic(topicId);
-                    setActiveSubtopic(null);
-                  }}
-                  onSubtopicClick={(subtopicId) => {
-                    setActiveSubtopic(subtopicId);
-                    scrollToSubtopic(subtopicId);
-                  }}
                   renderExamples={renderExamples}
                 />
               )}
