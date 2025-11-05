@@ -2,7 +2,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 
-import { AuthContext, AuthContextType } from '@/context/AuthContext';
+import { AuthContext, AuthContextType, AppUser } from '@/context/AuthContext';
 
 // ——— Mock Logo component ———
 jest.mock('@/components/common/Logo', () => {
@@ -63,6 +63,17 @@ Object.defineProperty(window, 'history', {
 import Navbar from './index';
 
 describe('Navbar', () => {
+  const createMockAuthContext = (
+    overrides: Partial<AuthContextType> = {}
+  ): AuthContextType => ({
+    currentUser: null,
+    loading: false,
+    isAdmin: false,
+    signInWithGithub: jest.fn().mockResolvedValue(undefined),
+    signOut: jest.fn().mockResolvedValue(undefined),
+    ...overrides,
+  });
+
   let authContextValue: AuthContextType;
 
   beforeEach(() => {
@@ -71,11 +82,8 @@ describe('Navbar', () => {
     mockHistory.length = 1;
     mockHistory.state = { forward: null };
 
-    authContextValue = {
-      currentUser: null,
-      signInWithGithub: jest.fn(),
-      signOut: jest.fn(),
-    };
+    // Create a fresh mock for each test
+    authContextValue = createMockAuthContext();
   });
 
   it('disables Back when history.length ≤ 1', () => {
@@ -161,7 +169,10 @@ describe('Navbar', () => {
 
     render(
       <AuthContext.Provider
-        value={{ ...authContextValue, currentUser: { uid: '123' } }}
+        value={{
+          ...authContextValue,
+          currentUser: createMockUser({ uid: '123' }),
+        }}
       >
         <Navbar />
       </AuthContext.Provider>
@@ -185,7 +196,10 @@ describe('Navbar', () => {
   it('renders UserDropDown when there is a current user', () => {
     render(
       <AuthContext.Provider
-        value={{ ...authContextValue, currentUser: { uid: '123' } }}
+        value={{
+          ...authContextValue,
+          currentUser: createMockUser({ uid: '123' }),
+        }}
       >
         <Navbar />
       </AuthContext.Provider>
@@ -198,9 +212,31 @@ describe('Navbar', () => {
     expect(userButtons[0]).toBeInTheDocument();
   });
 
+  // Helper function to create a mock user for testing
+  const createMockUser = (overrides: Partial<AppUser> = {}): AppUser => ({
+    uid: '123',
+    displayName: 'Test User',
+    email: 'test@example.com',
+    emailVerified: true,
+    isAnonymous: false,
+    providerData: [],
+    metadata: {},
+    refreshToken: '',
+    tenantId: null,
+    delete: jest.fn(),
+    getIdToken: jest.fn(),
+    getIdTokenResult: jest.fn(),
+    reload: jest.fn(),
+    toJSON: jest.fn(),
+    phoneNumber: null,
+    photoURL: null,
+    providerId: '',
+    ...overrides,
+  });
+
   it('calls signOut and navigates to /login on Sign Out', async () => {
     // Set up a mock current user for the sign out test
-    authContextValue.currentUser = { uid: '123', displayName: 'Test User' };
+    authContextValue.currentUser = createMockUser();
 
     render(
       <AuthContext.Provider value={authContextValue}>
