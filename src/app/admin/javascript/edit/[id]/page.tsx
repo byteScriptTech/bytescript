@@ -1,18 +1,73 @@
-import { notFound } from 'next/navigation';
+'use client';
+
+import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 
 import { javascriptService } from '@/services/javascriptService';
 
 import { JavaScriptContentForm } from '../../JavaScriptContentForm';
 
-export default async function EditJavaScriptContentPage({
+export default function EditJavaScriptContentPage({
   params,
 }: {
   params: { id: string };
 }) {
-  const content = await javascriptService.getTopicById(params.id);
+  const router = useRouter();
+  const [content, setContent] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchContent = async () => {
+      try {
+        const data = await javascriptService.getTopicById(params.id);
+        if (!data) {
+          router.push('/404');
+          return;
+        }
+        setContent(data);
+      } catch (error) {
+        console.error('Error fetching content:', error);
+        router.push('/500');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchContent();
+  }, [params.id, router]);
+
+  const handleSuccess = async () => {
+    try {
+      const updatedContent = await javascriptService.getTopicById(params.id);
+      setContent(updatedContent);
+      toast.success('Content updated successfully!');
+    } catch (error) {
+      console.error('Error refetching content:', error);
+      toast.error('Failed to refresh content');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   if (!content) {
-    notFound();
+    return (
+      <div className="text-center py-10">
+        <h2 className="text-xl font-semibold">Content not found</h2>
+        <button
+          onClick={() => router.push('/admin/javascript')}
+          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
+          Back to JavaScript Content
+        </button>
+      </div>
+    );
   }
 
   // Transform the content to match the form's expected shape
@@ -28,12 +83,12 @@ export default async function EditJavaScriptContentPage({
     commonMistakes: content.commonMistakes || [],
     resources: content.resources || [],
     examples: content.examples || [],
-    subtopics: (content.subtopics || []).map((subtopic) => ({
+    subtopics: (content.subtopics || []).map((subtopic: any) => ({
       id: subtopic.id || '',
       name: subtopic.name || '',
       content: subtopic.content || '',
       recommended_resources: subtopic.recommended_resources || [],
-      examples: (subtopic.examples || []).map((example) => ({
+      examples: (subtopic.examples || []).map((example: any) => ({
         code: example.code || '',
         description: example.description,
       })),
@@ -48,7 +103,10 @@ export default async function EditJavaScriptContentPage({
     <div className="container mx-auto py-10">
       <h1 className="text-2xl font-bold mb-6">Edit JavaScript Content</h1>
       <div className="bg-white dark:bg-gray-900 rounded-lg shadow p-6">
-        <JavaScriptContentForm content={formContent} />
+        <JavaScriptContentForm
+          content={formContent}
+          onSuccess={handleSuccess}
+        />
       </div>
     </div>
   );

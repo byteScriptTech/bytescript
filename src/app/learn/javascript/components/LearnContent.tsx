@@ -1,15 +1,13 @@
 'use client';
 
-import { CheckCircle2, ChevronLeft, ChevronRight, Menu, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Menu, X } from 'lucide-react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { FC, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 
 import { JavaScriptCodeEditor } from '@/components/common/JavaScriptCodeEditor';
 import { Content } from '@/components/specific/LearnContent/Content';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Tooltip,
   TooltipContent,
@@ -392,121 +390,6 @@ const LearnContentInner: FC<LearnContentInnerProps> = ({
                   renderExamples={renderExamples}
                 />
               )}
-
-              <Tabs defaultValue="resources" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 max-w-xs mb-8">
-                  <TabsTrigger value="resources">Resources</TabsTrigger>
-                  <TabsTrigger value="about">About JavaScript</TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="resources" className="space-y-6">
-                  <h2 className="text-2xl font-bold">Learning Resources</h2>
-                  {content.recommended_resources?.length > 0 ? (
-                    <div className="grid gap-4">
-                      {content.recommended_resources.map(
-                        (
-                          resource: {
-                            title: string;
-                            type?: string;
-                            description?: string;
-                            url?: string;
-                          },
-                          index: number
-                        ) => (
-                          <Card key={index}>
-                            <CardHeader>
-                              <div className="flex items-center justify-between">
-                                <CardTitle className="text-lg">
-                                  {resource.title}
-                                </CardTitle>
-                                <span className="text-sm text-muted-foreground">
-                                  {resource.type || 'Resource'}
-                                </span>
-                              </div>
-                            </CardHeader>
-                            <CardContent>
-                              {resource.description && (
-                                <p className="text-sm text-muted-foreground mt-2">
-                                  {resource.description}
-                                </p>
-                              )}
-                              <Button
-                                asChild
-                                variant="link"
-                                className="p-0 h-auto"
-                              >
-                                <a
-                                  href={resource.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-primary"
-                                >
-                                  View Resource
-                                </a>
-                              </Button>
-                            </CardContent>
-                          </Card>
-                        )
-                      )}
-                    </div>
-                  ) : (
-                    <p className="text-muted-foreground">
-                      No resources available at the moment.
-                    </p>
-                  )}
-                </TabsContent>
-
-                <TabsContent value="about" className="space-y-6">
-                  <h2 className="text-2xl font-bold">About JavaScript</h2>
-                  <Card>
-                    <CardContent className="pt-6 space-y-6">
-                      <div>
-                        <h3 className="text-lg font-semibold mb-2">
-                          What is JavaScript?
-                        </h3>
-                        <div className="prose dark:prose-invert max-w-none">
-                          {content.explanation?.map((paragraph, idx) => (
-                            <p key={idx} className="mb-4">
-                              {paragraph}
-                            </p>
-                          ))}
-                        </div>
-                      </div>
-
-                      {content.applications?.length > 0 && (
-                        <div>
-                          <h3 className="text-lg font-semibold mb-2">
-                            Applications
-                          </h3>
-                          <ul className="list-disc pl-6 space-y-1">
-                            {content.applications.map((app, idx) => (
-                              <li key={idx}>{app}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-
-                      {content.learning_objectives?.length > 0 && (
-                        <div>
-                          <h3 className="text-lg font-semibold mb-2">
-                            Learning Objectives
-                          </h3>
-                          <ul className="space-y-2">
-                            {content.learning_objectives.map(
-                              (objective: string, idx: number) => (
-                                <li key={idx} className="flex items-start">
-                                  <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                                  <span>{objective}</span>
-                                </li>
-                              )
-                            )}
-                          </ul>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-              </Tabs>
             </div>
           )}
         </div>

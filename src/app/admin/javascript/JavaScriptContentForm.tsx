@@ -44,21 +44,25 @@ type ContentFormValues = Omit<Topic, 'id' | 'createdAt' | 'updatedAt'> & {
   learningObjectives: string[];
   commonMistakes: string[];
   resources: Array<{
+    id?: string;
     title: string;
     url: string;
     type: 'documentation' | 'video' | 'article';
     description?: string;
   }>;
   examples: Array<{
+    id?: string;
     code: string;
     description?: string;
   }>;
   subtopics: Array<{
+    id?: string;
     name: string;
     content: string;
-    examples: Array<{ code: string; description?: string }>;
+    examples: Array<{ id?: string; code: string; description?: string }>;
   }>;
   exercises: Array<{
+    id?: string;
     title: string;
     prompt: string;
     difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
@@ -96,11 +100,13 @@ const contentSchema = z.object({
   subtopics: z
     .array(
       z.object({
+        id: z.string().optional(),
         name: z.string().min(1, 'Name is required'),
         content: z.string().min(1, 'Content is required'),
         examples: z
           .array(
             z.object({
+              id: z.string().optional(),
               code: z.string().min(1, 'Example code is required'),
               description: z.string().optional(),
             })
@@ -123,10 +129,12 @@ const contentSchema = z.object({
 
 interface JavaScriptContentFormProps {
   content?: Partial<ContentFormValues> & { id?: string };
+  onSuccess?: () => void;
 }
 
 export function JavaScriptContentForm({
   content,
+  onSuccess,
 }: JavaScriptContentFormProps): JSX.Element {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -144,10 +152,51 @@ export function JavaScriptContentForm({
       timeToComplete: content?.timeToComplete || 30,
       learningObjectives: content?.learningObjectives || [],
       commonMistakes: content?.commonMistakes || [],
-      resources: content?.resources || [],
-      examples: content?.examples || [],
-      subtopics: content?.subtopics || [],
-      exercises: content?.exercises || [],
+      resources:
+        content?.resources?.map((resource) => ({
+          ...resource,
+          id: resource.id || `res-${Date.now()}`,
+        })) || [],
+      examples:
+        content?.examples?.map(
+          (example: { id?: string; code: string; description?: string }) => ({
+            ...example,
+            id: example?.id ? String(example.id) : `ex-${Date.now()}`,
+          })
+        ) || [],
+      subtopics:
+        content?.subtopics?.map(
+          (subtopic: {
+            id?: string;
+            name: string;
+            content?: string;
+            examples?: Array<{
+              id?: string;
+              code: string;
+              description?: string;
+            }>;
+            [key: string]: any;
+          }) => ({
+            ...subtopic,
+            id: subtopic?.id ? String(subtopic.id) : `st-${Date.now()}`,
+            examples:
+              subtopic.examples?.map(
+                (example: {
+                  id?: string;
+                  code: string;
+                  description?: string;
+                }) => ({
+                  ...example,
+                  id: example?.id ? String(example.id) : `ex-${Date.now()}`,
+                })
+              ) || [],
+          })
+        ) || [],
+      exercises:
+        content?.exercises?.map((exercise) => ({
+          ...exercise,
+          id: exercise.id || `ex-${Date.now()}`,
+        })) || [],
     },
   });
 
@@ -219,6 +268,37 @@ export function JavaScriptContentForm({
     }
   };
 
+  const addSubtopic = () => {
+    appendSubtopic({
+      id: `st-${Date.now()}`,
+      name: '',
+      content: '',
+      examples: [],
+    });
+  };
+
+  const addExample = (subtopicIndex: number, exampleIndex?: number) => {
+    const currentExamples =
+      form.getValues(`subtopics.${subtopicIndex}.examples`) || [];
+    const newExample = { id: `ex-${Date.now()}`, code: '', description: '' };
+
+    if (exampleIndex !== undefined) {
+      // Update existing example
+      const updatedExamples = [...currentExamples];
+      updatedExamples[exampleIndex] = newExample;
+      form.setValue(`subtopics.${subtopicIndex}.examples`, updatedExamples, {
+        shouldDirty: true,
+      });
+    } else {
+      // Add new example
+      form.setValue(
+        `subtopics.${subtopicIndex}.examples`,
+        [...currentExamples, newExample],
+        { shouldDirty: true }
+      );
+    }
+  };
+
   const onSubmit = async (data: ContentFormValues) => {
     try {
       setLoading(true);
@@ -231,10 +311,12 @@ export function JavaScriptContentForm({
       if (content?.id) {
         await javascriptService.updateTopic(content.id, topicData);
         toast.success('Topic updated successfully');
+        if (onSuccess) onSuccess();
       } else {
         await javascriptService.createTopic(topicData);
         toast.success('Topic created successfully');
         form.reset();
+        if (onSuccess) onSuccess();
       }
 
       router.push('/admin/javascript');
@@ -565,13 +647,7 @@ export function JavaScriptContentForm({
             type="button"
             variant="outline"
             size="sm"
-            onClick={() =>
-              appendSubtopic({
-                name: '',
-                content: '',
-                examples: [],
-              })
-            }
+            onClick={addSubtopic}
           >
             <Plus className="h-4 w-4 mr-1" /> Add Subtopic
           </Button>
@@ -628,17 +704,7 @@ export function JavaScriptContentForm({
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() =>
-                    form.setValue(
-                      `subtopics.${index}.examples`,
-                      [
-                        ...(form.getValues(`subtopics.${index}.examples`) ||
-                          []),
-                        { code: '', description: '' },
-                      ],
-                      { shouldDirty: true }
-                    )
-                  }
+                  onClick={() => addExample(index)}
                 >
                   <Plus className="h-4 w-4 mr-1" /> Add Example
                 </Button>

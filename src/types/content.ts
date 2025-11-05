@@ -66,6 +66,7 @@ export interface Topic {
   learningObjectives?: string[];
   commonMistakes?: string[];
   resources?: Array<{
+    id: string;
     title: string;
     url: string;
     type: 'documentation' | 'video' | 'article';
