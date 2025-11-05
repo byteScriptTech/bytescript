@@ -60,24 +60,28 @@ export const isUserAdmin = async (userId: string): Promise<boolean> => {
 };
 
 /**
- * Get all admin users
+ * Get all users
  */
 export const getAdminUsers = async (): Promise<UserData[]> => {
   try {
-    const snapshot = await adminDb
-      .collection('users')
-      .where('role', '==', 'admin')
-      .get();
+    const snapshot = await adminDb.collection('users').get();
 
-    return snapshot.docs.map(
-      (doc) =>
-        ({
-          uid: doc.id,
-          ...doc.data(),
-        }) as UserData
-    );
+    return snapshot.docs
+      .map(
+        (doc) =>
+          ({
+            uid: doc.id,
+            ...doc.data(),
+          }) as UserData
+      )
+      .sort((a, b) => {
+        // Sort admins first, then by display name
+        if (a.role === 'admin' && b.role !== 'admin') return -1;
+        if (a.role !== 'admin' && b.role === 'admin') return 1;
+        return (a.displayName || '').localeCompare(b.displayName || '');
+      });
   } catch (error) {
-    console.error('Error getting admin users:', error);
+    console.error('Error getting users:', error);
     return [];
   }
 };
