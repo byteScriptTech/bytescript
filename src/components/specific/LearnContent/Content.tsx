@@ -14,16 +14,14 @@ interface ContentProps {
   topicId: string;
   subtopicId: string;
   content: any; // TODO: Replace 'any' with proper type
-  onTopicClick: (topicId: string) => void;
-  onSubtopicClick: (subtopicId: string) => void;
+  onTopicClick?: (topicId: string) => void;
+  onSubtopicClick?: (subtopicId: string) => void;
   renderExamples: (examples: any[]) => React.ReactNode;
 }
 
 export const Content: React.FC<ContentProps> = ({
   subtopicId: _subtopicId,
   content: currentTopic,
-  onTopicClick: _onTopicClick,
-  onSubtopicClick: _onSubtopicClick,
   renderExamples,
 }) => {
   // Scroll to the active subtopic when it changes
@@ -74,8 +72,8 @@ export const Content: React.FC<ContentProps> = ({
             </h2>
             {subtopic.content && (
               <div className="mb-6 prose-p:leading-relaxed">
-                {subtopic.content_md ? (
-                  <MarkdownRenderer>{subtopic.content_md}</MarkdownRenderer>
+                {subtopic.content ? (
+                  <MarkdownRenderer>{subtopic.content}</MarkdownRenderer>
                 ) : subtopic.content ? (
                   <div
                     className="prose-p:mb-4 last:prose-p:mb-0"
