@@ -1,5 +1,11 @@
-import { signInWithPopup, onAuthStateChanged, getAuth } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import {
+  signInWithPopup,
+  onAuthStateChanged,
+  getAuth,
+  User,
+  signOut as firebaseSignOut,
+} from 'firebase/auth';
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import {
   createContext,
@@ -12,17 +18,20 @@ import { toast } from 'sonner';
 
 import { db, githubProvider } from '@/firebase/config';
 
+export type UserRole = 'admin' | 'user';
+
+export interface AppUser extends User {
+  role?: UserRole;
+}
+
 export interface AuthContextType {
-  currentUser: any;
+  currentUser: AppUser | null;
+  loading: boolean;
+  isAdmin: boolean;
   signInWithGithub: () => Promise<void>;
   signOut: () => Promise<void>;
 }
-interface UserInfo {
-  uid: string;
-  displayName: string;
-  email: string;
-  photoURL: string | null;
-}
+
 export const AuthContext = createContext<AuthContextType | undefined>(
   undefined
 );
@@ -36,22 +45,85 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [currentUser, setCurrentUser] = useState<AppUser | null>(null);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
-
   const auth = getAuth();
+  const createUserDocument = async (user: User) => {
+    if (!user.uid) return user;
+
+    const userDocRef = doc(db, 'users', user.uid);
+    const userDoc = await getDoc(userDocRef);
+
+    if (!userDoc.exists()) {
+      await setDoc(userDocRef, {
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName,
+        photoURL: user.photoURL,
+        role: 'user',
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+    } else {
+      await setDoc(
+        userDocRef,
+        {
+          lastLogin: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        },
+        { merge: true }
+      );
+    }
+
+    const updatedUserDoc = await getDoc(userDocRef);
+    return {
+      ...user,
+      ...updatedUserDoc.data(),
+    } as AppUser;
+  };
+
+  const signInWithGithub = async () => {
+    try {
+      const result = await signInWithPopup(auth, githubProvider);
+      const userWithRole = await createUserDocument(result.user);
+      setCurrentUser(userWithRole);
+      toast.success('Signed in successfully!');
+      router.push('/dashboard');
+    } catch (error) {
+      console.error('Error signing in with GitHub:', error);
+      toast.error('Failed to sign in with GitHub');
+    }
+  };
+
+  const signOut = async () => {
+    try {
+      await firebaseSignOut(auth);
+      setCurrentUser(null);
+      toast.success('Signed out successfully!');
+      router.push('/login');
+    } catch (error) {
+      console.error('Error signing out:', error);
+      toast.error('Failed to sign out');
+    }
+  };
 
   useEffect(() => {
     let isMounted = true;
 
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (!isMounted) return;
-      setCurrentUser(user);
-      if (user && window.location.pathname === '/login') {
-        const urlParams = new URLSearchParams(window.location.search);
-        const callbackUrl = urlParams.get('callbackUrl') || '/dashboard';
-        router.replace(callbackUrl);
+
+      if (user) {
+        const userWithRole = await createUserDocument(user);
+        setCurrentUser(userWithRole);
+        if (window.location.pathname === '/login') {
+          router.push('/dashboard');
+        }
+      } else {
+        setCurrentUser(null);
       }
+      setLoading(false);
     });
 
     return () => {
@@ -60,70 +132,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, [auth, router]);
 
-  const saveUser = async (user: UserInfo) => {
-    const userDocRef = doc(db, 'users', user.uid);
-    const userDoc = await getDoc(userDocRef);
-    if (!userDoc.exists()) {
-      try {
-        await setDoc(userDocRef, {
-          uid: user.uid,
-          displayName: user.displayName,
-          email: user.email,
-          photoURL: user.photoURL,
-        });
-        console.log('User saved to Firestore:', user);
-      } catch (error) {
-        console.error('Error saving user to Firestore:', error);
-      }
-    } else {
-      console.log('User already exists in Firestore');
-    }
+  const authValue = {
+    currentUser,
+    loading,
+    isAdmin: currentUser?.role === 'admin',
+    signInWithGithub,
+    signOut,
   };
-
-  const signInWithGithub = async () => {
-    try {
-      const result = await signInWithPopup(auth, githubProvider);
-      const user = result.user;
-      const importantUserInfo: UserInfo = {
-        uid: user.uid,
-        displayName: user.displayName || 'Anonymous',
-        email: user.email || 'No Email',
-        photoURL: user.photoURL,
-      };
-      localStorage.setItem('user', JSON.stringify(importantUserInfo));
-      await saveUser(importantUserInfo);
-      setCurrentUser(user);
-      console.log('Github User:', user);
-    } catch (error: any) {
-      toast.error(error.message);
-      console.error('Github Sign In Error:', error);
-    }
-  };
-
-  const signOut = async () => {
-    try {
-      await auth.signOut();
-      setCurrentUser(null);
-      router.push('/');
-    } catch (error: any) {
-      toast.error(error.message);
-      console.error('Sign Out Error:', error);
-    }
-  };
-
-  useEffect(() => {
-    setCurrentUser(auth.currentUser);
-  }, [auth.currentUser]);
 
   return (
-    <AuthContext.Provider
-      value={{
-        currentUser,
-        signInWithGithub,
-        signOut,
-      }}
-    >
-      {children}
+    <AuthContext.Provider value={authValue}>
+      {!loading && children}
     </AuthContext.Provider>
   );
 };

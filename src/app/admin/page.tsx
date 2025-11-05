@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import type { ComponentType } from 'react';
 
+import { AdminRoute } from '@/components/auth/ProtectedRoute';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { dsaService } from '@/services/firebase/dsaService';
 import { problemsService } from '@/services/firebase/problemsService';
@@ -101,6 +102,12 @@ function AdminDashboard() {
   );
 }
 
-export default function AdminPage() {
-  return <AdminDashboard />;
-}
+const AdminPage = () => {
+  return (
+    <AdminRoute>
+      <AdminDashboard />
+    </AdminRoute>
+  );
+};
+
+export default AdminPage;
