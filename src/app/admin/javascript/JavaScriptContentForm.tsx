@@ -67,6 +67,8 @@ type ContentFormValues = Omit<Topic, 'id' | 'createdAt' | 'updatedAt'> & {
     prompt: string;
     difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
     hint?: string;
+    solution?: string;
+    code?: string;
   }>;
 };
 
@@ -122,6 +124,8 @@ const contentSchema = z.object({
         prompt: z.string().min(1, 'Prompt is required'),
         difficulty: z.enum(difficultyLevels),
         hint: z.string().optional(),
+        solution: z.string().optional(),
+        code: z.string().optional(),
       })
     )
     .default([]),
@@ -788,6 +792,8 @@ export function JavaScriptContentForm({
                 prompt: '',
                 difficulty: 'Beginner',
                 hint: '',
+                solution: '',
+                code: '',
               })
             }
           >
@@ -857,6 +863,26 @@ export function JavaScriptContentForm({
                   placeholder="Provide a hint to help the user (optional)"
                   rows={2}
                   {...form.register(`exercises.${index}.hint`)}
+                />
+              </div>
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor={`exercises.${index}.solution`}>Solution</Label>
+                <Textarea
+                  id={`exercises.${index}.solution`}
+                  placeholder="Provide the solution code (optional)"
+                  rows={4}
+                  {...form.register(`exercises.${index}.solution`)}
+                  className="font-mono text-sm"
+                />
+              </div>
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor={`exercises.${index}.code`}>Initial Code</Label>
+                <Textarea
+                  id={`exercises.${index}.code`}
+                  placeholder="Provide initial code for the exercise (optional)"
+                  rows={4}
+                  {...form.register(`exercises.${index}.code`)}
+                  className="font-mono text-sm"
                 />
               </div>
             </div>

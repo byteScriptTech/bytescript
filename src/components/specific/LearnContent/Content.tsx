@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 
 import { MarkdownRenderer } from '@/components/markdown/MarkdownRenderer';
+import { Exercise } from '@/components/specific/Exercise';
 
 interface _Subtopic {
   id: string;
@@ -10,10 +11,23 @@ interface _Subtopic {
   examples?: any[];
 }
 
+interface ExerciseType {
+  id: string;
+  title: string;
+  prompt: string;
+  difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
+  hint?: string;
+  solution?: string;
+  code?: string;
+  initialCode?: string;
+}
+
 interface ContentProps {
   topicId: string;
   subtopicId: string;
-  content: any; // TODO: Replace 'any' with proper type
+  content: any & {
+    exercises?: ExerciseType[];
+  };
   onTopicClick?: (topicId: string) => void;
   onSubtopicClick?: (subtopicId: string) => void;
   renderExamples: (examples: any[]) => React.ReactNode;
@@ -95,6 +109,31 @@ export const Content: React.FC<ContentProps> = ({
           </div>
         ))}
       </div>
+
+      {/* Exercises Section - Moved to topic level */}
+      {currentTopic.exercises && currentTopic.exercises.length > 0 && (
+        <div className="mt-12">
+          <h2 className="text-2xl font-bold mb-6 pb-2 border-b border-border">
+            Exercises
+          </h2>
+          <div className="space-y-8">
+            {currentTopic.exercises.map((exercise: ExerciseType) => (
+              <Exercise
+                key={exercise.id}
+                title={exercise.title}
+                prompt={exercise.prompt}
+                difficulty={exercise.difficulty}
+                hint={exercise.hint}
+                solution={exercise.solution}
+                code={exercise.code}
+                initialCode={
+                  exercise.initialCode || '// Write your code here\n'
+                }
+              />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

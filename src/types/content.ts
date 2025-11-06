@@ -98,6 +98,8 @@ export interface Topic {
     prompt: string;
     difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
     hint?: string;
+    solution?: string;
+    code?: string;
   }>;
   quizzes?: Array<{
     id: string;

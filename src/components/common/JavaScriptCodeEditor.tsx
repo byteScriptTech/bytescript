@@ -62,59 +62,60 @@ export const JavaScriptCodeEditor = ({
           await onRun(code);
           return;
         }
+
+        // Simple execution without any wrapping
+        const execute = new Function('console', code);
+
+        // Create a console that captures output
         const logs: string[] = [];
         const safeConsole = {
+          ...console,
           log: (...args: unknown[]) => {
-            const logMessage = args
-              .map((arg) => {
-                try {
-                  return typeof arg === 'object'
-                    ? JSON.stringify(arg, null, 2)
-                    : String(arg);
-                } catch {
-                  return String(arg);
-                }
-              })
+            const message = args
+              .map((arg) =>
+                typeof arg === 'object' && arg !== null
+                  ? JSON.stringify(arg, null, 2)
+                  : String(arg)
+              )
               .join(' ');
-            logs.push(logMessage);
+            logs.push(message);
+            console.log(...args);
           },
         };
 
-        const result = await new Promise<string>((resolve) => {
+        // Execute the code
+        const result = execute(safeConsole);
+
+        // Handle both sync and async results
+        if (result && typeof result.then === 'function') {
+          // For async code
           try {
-            const execute = new Function(
-              'console',
-              `
-                try {
-                  ${code.includes('return ') ? '' : 'return '}${code}
-                } catch (e) {
-                  return 'Error: ' + (e instanceof Error ? e.message : String(e));
-                }
-              `
-            );
-
-            const executionResult = execute(safeConsole);
-
-            if (logs.length > 0) {
-              resolve(logs.join('\n'));
-            } else if (executionResult !== undefined) {
-              resolve(String(executionResult));
-            } else {
-              resolve('Code executed successfully (no output)');
-            }
+            const asyncResult = await result;
+            const output = [
+              ...logs,
+              asyncResult !== undefined ? String(asyncResult) : '',
+            ]
+              .filter(Boolean)
+              .join('\n');
+            setOutput(output || 'Async code executed successfully');
           } catch (error) {
-            resolve(
-              'Error: ' +
-                (error instanceof Error ? error.message : 'Unknown error')
+            const errorMessage =
+              error instanceof Error ? error.message : String(error);
+            setOutput(
+              [...logs, `Error: ${errorMessage}`].filter(Boolean).join('\n')
             );
           }
-        });
-
-        setOutput(result);
+        } else {
+          // For sync code
+          const output = [...logs, result !== undefined ? String(result) : '']
+            .filter(Boolean)
+            .join('\n');
+          setOutput(output || 'Code executed successfully');
+        }
       } catch (error) {
-        setOutput(
-          `Error: ${error instanceof Error ? error.message : 'Unknown error'}`
-        );
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+        setOutput(`Error: ${errorMessage}`);
       } finally {
         setIsRunning(false);
       }
