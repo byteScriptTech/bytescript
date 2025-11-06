@@ -57,6 +57,8 @@ type ContentFormValues = Omit<Topic, 'id' | 'createdAt' | 'updatedAt'> & {
     prompt: string;
     difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
     hint?: string;
+    solution?: string;
+    code?: string;
   }>;
 };
 
@@ -115,6 +117,8 @@ const contentSchema = z.object({
         prompt: z.string().min(1, 'Prompt is required'),
         difficulty: z.enum(difficultyLevels),
         hint: z.string().optional(),
+        solution: z.string().optional(),
+        code: z.string().optional(),
       })
     )
     .default([]),
@@ -734,6 +738,8 @@ export function PythonContentForm({
                 prompt: '',
                 difficulty: 'Beginner',
                 hint: '',
+                solution: '',
+                code: '',
               })
             }
           >
@@ -789,6 +795,24 @@ export function PythonContentForm({
                   {...form.register(`exercises.${index}.hint` as const)}
                   placeholder="Provide a hint to help the user if they get stuck"
                   rows={2}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Solution (Optional)</Label>
+                <Textarea
+                  {...form.register(`exercises.${index}.solution` as const)}
+                  placeholder="Provide the solution code"
+                  rows={4}
+                  className="font-mono text-sm"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Initial Code (Optional)</Label>
+                <Textarea
+                  {...form.register(`exercises.${index}.code` as const)}
+                  placeholder="Provide initial code for the exercise"
+                  rows={4}
+                  className="font-mono text-sm"
                 />
               </div>
               <Button
