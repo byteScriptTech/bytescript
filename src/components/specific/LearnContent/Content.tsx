@@ -112,7 +112,7 @@ export const Content: React.FC<ContentProps> = ({
 
       {/* Exercises Section - Moved to topic level */}
       {currentTopic.exercises && currentTopic.exercises.length > 0 && (
-        <div className="mt-12">
+        <div id="exercises-section" className="mt-12">
           <h2 className="text-2xl font-bold mb-6 pb-2 border-b border-border">
             Exercises
           </h2>

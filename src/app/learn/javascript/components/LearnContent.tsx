@@ -112,6 +112,15 @@ const LearnContentInner: FC<LearnContentInnerProps> = ({
     [pathname, router, searchParams, setActiveSubtopic]
   );
 
+  const scrollToExercises = useCallback(() => {
+    const exercisesSection = document.getElementById('exercises-section');
+    if (exercisesSection) {
+      exercisesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      window.scrollBy(0, -20);
+      setActiveSubtopic(null);
+    }
+  }, []);
+
   const fetchContent = useCallback(async () => {
     try {
       const data = await getJavascriptContent();
@@ -339,34 +348,51 @@ const LearnContentInner: FC<LearnContentInnerProps> = ({
                     </Tooltip>
                   </TooltipProvider>
                 ) : (
-                  <Button
-                    variant={activeTopic === topic.id ? 'secondary' : 'ghost'}
-                    className="w-full justify-start text-left"
-                    onClick={() => {
-                      setActiveTopic(topic.id);
-                      setActiveSubtopic(null);
-                    }}
-                  >
-                    {topic.name}
-                  </Button>
-                )}
-                {activeTopic === topic.id && topic.subtopics && sidebarOpen && (
-                  <div className="ml-4 mt-1 space-y-1">
-                    {topic.subtopics.map((subtopic) => (
-                      <Button
-                        key={subtopic.id}
-                        variant={
-                          activeSubtopic === subtopic.id ? 'secondary' : 'ghost'
-                        }
-                        size="sm"
-                        className="w-full justify-start text-muted-foreground hover:text-foreground"
-                        onClick={() => scrollToSubtopic(subtopic.id)}
-                      >
-                        {subtopic.name}
-                      </Button>
-                    ))}
+                  <div className="flex items-center gap-2 w-full">
+                    <Button
+                      variant={activeTopic === topic.id ? 'secondary' : 'ghost'}
+                      className="flex-1 justify-start text-left"
+                      onClick={() => {
+                        setActiveTopic(topic.id);
+                        setActiveSubtopic(null);
+                      }}
+                    >
+                      {topic.name}
+                    </Button>
                   </div>
                 )}
+                {activeTopic === topic.id &&
+                  ((topic.subtopics && topic.subtopics.length > 0) ||
+                    (topic.exercises && topic.exercises.length > 0)) &&
+                  sidebarOpen && (
+                    <div className="ml-4 mt-1 space-y-1">
+                      {topic.subtopics?.map((subtopic) => (
+                        <Button
+                          key={subtopic.id}
+                          variant={
+                            activeSubtopic === subtopic.id
+                              ? 'secondary'
+                              : 'ghost'
+                          }
+                          size="sm"
+                          className="w-full justify-start text-muted-foreground hover:text-foreground"
+                          onClick={() => scrollToSubtopic(subtopic.id)}
+                        >
+                          {subtopic.name}
+                        </Button>
+                      ))}
+                      {topic.exercises && topic.exercises?.length > 0 && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="w-full justify-start text-muted-foreground hover:text-foreground"
+                          onClick={scrollToExercises}
+                        >
+                          Exercises ({topic.exercises?.length || 0})
+                        </Button>
+                      )}
+                    </div>
+                  )}
               </div>
             ))}
           </div>
