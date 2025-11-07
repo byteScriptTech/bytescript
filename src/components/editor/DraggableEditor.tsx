@@ -91,6 +91,14 @@ export function DraggableEditor({
   const [pythonCode, setPythonCode] = useState(defaultPythonCode);
   const [dimensions, setDimensions] = useState(defaultSize);
   const [position, setPosition] = useState(defaultPosition);
+
+  useEffect(() => {
+    setPosition(defaultPosition);
+  }, [defaultPosition]);
+
+  useEffect(() => {
+    setDimensions(defaultSize);
+  }, [defaultSize]);
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, _setIsResizing] = useState(false);
   const [dragStart, _setDragStart] = useState({ x: 0, y: 0 });
@@ -142,22 +150,10 @@ export function DraggableEditor({
     );
   };
 
-  // Mouse down handler is now handled by individual interactive elements
-  const centerEditor = useCallback(() => {
-    if (typeof window !== 'undefined' && editorRef.current) {
-      const { innerWidth, innerHeight } = window;
-      setPosition({
-        x: (innerWidth - dimensions.width) / 2,
-        y: (innerHeight - dimensions.height) / 2,
-      });
-    }
-  }, [dimensions]);
-
   useEffect(() => {
-    centerEditor();
-  }, [centerEditor]);
+    setPosition(defaultPosition);
+  }, [defaultPosition]);
 
-  // Handle mouse move for both dragging and resizing
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (isDragging) {
@@ -215,7 +211,29 @@ export function DraggableEditor({
       tabIndex={-1}
     >
       <div className="flex flex-col h-full bg-background border rounded-lg overflow-hidden">
-        <div className="flex items-center justify-between px-4 py-2 bg-muted border-b">
+        <div
+          role="button"
+          tabIndex={0}
+          aria-label="Move editor"
+          className="flex items-center justify-between px-4 py-2 bg-muted border-b cursor-move focus:outline-none focus:ring-2 focus:ring-primary"
+          onMouseDown={(e) => {
+            e.stopPropagation();
+            setIsDragging(true);
+            _setDragStart({
+              x: e.clientX - position.x,
+              y: e.clientY - position.y,
+            });
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              setIsDragging(true);
+            }
+          }}
+          onBlur={() => {
+            setIsDragging(false);
+          }}
+        >
           {!hideTabs ? (
             <Tabs
               value={editorType}

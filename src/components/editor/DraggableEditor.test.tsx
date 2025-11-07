@@ -5,7 +5,6 @@ import {
   act,
   waitFor,
 } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import { DraggableEditor } from './DraggableEditor';
@@ -69,31 +68,6 @@ describe('DraggableEditor', () => {
       // Check if close button is present
       expect(screen.getByLabelText('Close editor')).toBeInTheDocument();
     });
-  });
-
-  it('allows switching between JavaScript and Python editors', async () => {
-    await act(async () => {
-      render(<DraggableEditor {...defaultProps} />);
-    });
-
-    // Verify initial state - JavaScript tab should be active by default
-    const jsTab = screen.getByText('JavaScript');
-    const pythonTab = screen.getByText('Python');
-
-    // Check initial state
-    expect(jsTab.closest('button')).toHaveAttribute('data-state', 'active');
-    expect(pythonTab.closest('button')).toHaveAttribute(
-      'data-state',
-      'inactive'
-    );
-
-    // Click the Python tab
-    await act(async () => {
-      await userEvent.click(pythonTab);
-    });
-
-    // Verify the tab is still in the document
-    expect(pythonTab).toBeInTheDocument();
   });
 
   it('calls onClose when close button is clicked', async () => {

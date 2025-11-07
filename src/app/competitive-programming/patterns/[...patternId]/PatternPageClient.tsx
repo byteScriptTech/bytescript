@@ -46,8 +46,10 @@ export function PatternPageClient({ children }: PatternPageClientProps) {
       <div>{children}</div>
       {showEditor && (
         <DraggableEditor
+          defaultPosition={{ x: 200, y: 70 }}
           defaultEditorType="javascript"
           defaultPythonCode={editorCode}
+          defaultSize={{ width: 800, height: 500 }}
           onClose={() => setShowEditor(false)}
           showAlgorithm={true}
           hideTabs={false}
