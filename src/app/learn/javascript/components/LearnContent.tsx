@@ -1,6 +1,7 @@
 'use client';
 
 import { ChevronLeft, ChevronRight, Menu, X } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { FC, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 
@@ -17,6 +18,22 @@ import {
 import { cn } from '@/lib/utils';
 import { getJavascriptContent } from '@/services/javascriptService';
 import type { LanguageContent } from '@/types/content';
+
+const DraggableCircle = dynamic(
+  () =>
+    import('@/components/ui/DraggableCircle').then(
+      (mod) => mod.DraggableCircle
+    ),
+  { ssr: false }
+);
+
+const DraggableEditor = dynamic(
+  () =>
+    import('@/components/editor/DraggableEditor').then(
+      (mod) => mod.DraggableEditor
+    ),
+  { ssr: false, loading: () => <div className="w-full h-full bg-background" /> }
+);
 
 interface Example {
   code: string;
@@ -43,6 +60,7 @@ const LearnContentInner: FC<LearnContentInnerProps> = ({
   const [activeSubtopic, setActiveSubtopic] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [showEditor, setShowEditor] = useState(false);
 
   // Check if mobile view on component mount and window resize
   useEffect(() => {
@@ -111,6 +129,15 @@ const LearnContentInner: FC<LearnContentInnerProps> = ({
     },
     [pathname, router, searchParams, setActiveSubtopic]
   );
+
+  const scrollToExercises = useCallback(() => {
+    const exercisesSection = document.getElementById('exercises-section');
+    if (exercisesSection) {
+      exercisesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      window.scrollBy(0, -20);
+      setActiveSubtopic(null);
+    }
+  }, []);
 
   const fetchContent = useCallback(async () => {
     try {
@@ -267,6 +294,8 @@ const LearnContentInner: FC<LearnContentInnerProps> = ({
         {sidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
       </Button>
 
+      <DraggableCircle onClick={() => setShowEditor(true)} />
+
       {/* Mobile overlay */}
       {isMobile && sidebarOpen && (
         <button
@@ -339,34 +368,51 @@ const LearnContentInner: FC<LearnContentInnerProps> = ({
                     </Tooltip>
                   </TooltipProvider>
                 ) : (
-                  <Button
-                    variant={activeTopic === topic.id ? 'secondary' : 'ghost'}
-                    className="w-full justify-start text-left"
-                    onClick={() => {
-                      setActiveTopic(topic.id);
-                      setActiveSubtopic(null);
-                    }}
-                  >
-                    {topic.name}
-                  </Button>
-                )}
-                {activeTopic === topic.id && topic.subtopics && sidebarOpen && (
-                  <div className="ml-4 mt-1 space-y-1">
-                    {topic.subtopics.map((subtopic) => (
-                      <Button
-                        key={subtopic.id}
-                        variant={
-                          activeSubtopic === subtopic.id ? 'secondary' : 'ghost'
-                        }
-                        size="sm"
-                        className="w-full justify-start text-muted-foreground hover:text-foreground"
-                        onClick={() => scrollToSubtopic(subtopic.id)}
-                      >
-                        {subtopic.name}
-                      </Button>
-                    ))}
+                  <div className="flex items-center gap-2 w-full">
+                    <Button
+                      variant={activeTopic === topic.id ? 'secondary' : 'ghost'}
+                      className="flex-1 justify-start text-left"
+                      onClick={() => {
+                        setActiveTopic(topic.id);
+                        setActiveSubtopic(null);
+                      }}
+                    >
+                      {topic.name}
+                    </Button>
                   </div>
                 )}
+                {activeTopic === topic.id &&
+                  ((topic.subtopics && topic.subtopics.length > 0) ||
+                    (topic.exercises && topic.exercises.length > 0)) &&
+                  sidebarOpen && (
+                    <div className="ml-4 mt-1 space-y-1">
+                      {topic.subtopics?.map((subtopic) => (
+                        <Button
+                          key={subtopic.id}
+                          variant={
+                            activeSubtopic === subtopic.id
+                              ? 'secondary'
+                              : 'ghost'
+                          }
+                          size="sm"
+                          className="w-full justify-start text-muted-foreground hover:text-foreground"
+                          onClick={() => scrollToSubtopic(subtopic.id)}
+                        >
+                          {subtopic.name}
+                        </Button>
+                      ))}
+                      {topic.exercises && topic.exercises?.length > 0 && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="w-full justify-start text-muted-foreground hover:text-foreground"
+                          onClick={scrollToExercises}
+                        >
+                          Exercises ({topic.exercises?.length || 0})
+                        </Button>
+                      )}
+                    </div>
+                  )}
               </div>
             ))}
           </div>
@@ -374,7 +420,7 @@ const LearnContentInner: FC<LearnContentInnerProps> = ({
       </div>
 
       {/* Main content */}
-      <div className="flex-1 overflow-auto p-4 md:p-8">
+      <div className="flex-1 overflow-y-auto p-4 md:p-8 h-[calc(100vh-64px)]">
         <div className="max-w-4xl mx-auto">
           {error ? (
             <div className="bg-destructive/10 border border-destructive text-destructive px-4 py-3 rounded-md mb-6">
@@ -394,6 +440,19 @@ const LearnContentInner: FC<LearnContentInnerProps> = ({
           )}
         </div>
       </div>
+
+      {showEditor && (
+        <div className="fixed z-50">
+          <DraggableEditor
+            defaultPosition={{ x: 100, y: 100 }}
+            defaultSize={{ width: 800, height: 500 }}
+            onClose={() => setShowEditor(false)}
+            defaultEditorType="javascript"
+            hideTabs={true}
+            showAlgorithm={false}
+          />
+        </div>
+      )}
     </div>
   );
 };

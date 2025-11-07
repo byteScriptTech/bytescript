@@ -16,6 +16,9 @@ const DraggableEditor = dynamic(
           defaultEditorType?: string;
           defaultPythonCode?: string;
           onClose?: () => void;
+          showAlgorithm?: boolean;
+          hideTabs?: boolean;
+          onPythonCodeChange?: (code: string) => void;
         }>
     ),
   {
@@ -43,9 +46,13 @@ export function PatternPageClient({ children }: PatternPageClientProps) {
       <div>{children}</div>
       {showEditor && (
         <DraggableEditor
+          defaultPosition={{ x: 200, y: 70 }}
           defaultEditorType="javascript"
           defaultPythonCode={editorCode}
+          defaultSize={{ width: 800, height: 500 }}
           onClose={() => setShowEditor(false)}
+          showAlgorithm={true}
+          hideTabs={false}
         />
       )}
     </div>

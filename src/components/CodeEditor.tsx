@@ -15,12 +15,14 @@ interface CodeEditorProps {
   code?: string;
   onCodeChange?: (code: string) => void;
   initialCode?: string;
+  showAlgorithm?: boolean;
 }
 
 export default function CodeEditor({
   code: externalCode,
   onCodeChange,
   initialCode = '// Write your JavaScript code here\nconsole.log("Hello, World!");',
+  showAlgorithm = false,
 }: CodeEditorProps) {
   const [internalCode, setInternalCode] = useState(initialCode);
 
@@ -152,131 +154,143 @@ export default function CodeEditor({
   );
 
   return (
-    <div className="flex flex-col h-full bg-background rounded-lg overflow-hidden border">
-      <PanelGroup direction="horizontal" className="flex-1">
-        {/* Algorithm Editor Panel */}
-        <Panel
-          defaultSize={30}
-          minSize={0}
-          className="flex flex-col border-r border-border"
-        >
-          <div className="flex items-center justify-between p-2 border-b bg-muted/10">
-            <div className="text-sm font-medium px-2">Algorithm</div>
-            <div className="flex items-center text-xs text-muted-foreground"></div>
-          </div>
-          <div className="flex-1 overflow-auto">
-            <textarea
-              value={algorithm}
-              onChange={(e) => setAlgorithm(e.target.value)}
-              className="w-full h-full p-4 font-mono text-sm bg-background text-foreground outline-none resize-none"
-              spellCheck={false}
-              placeholder="// Write your algorithm or notes here..."
-              style={{
-                tabSize: 2,
-                lineHeight: '1.5',
-                fontFeatureSettings: '"rlig" 1, "calt" 1',
-              }}
-            />
-          </div>
-        </Panel>
-
-        <PanelResizeHandle className="w-2 bg-border/50 hover:bg-primary/50 transition-colors relative group">
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-0.5 h-12 bg-gray-400 dark:bg-gray-400 rounded-full group-hover:bg-primary dark:group-hover:bg-primary" />
-        </PanelResizeHandle>
-
-        {/* Main Content */}
-        <Panel defaultSize={70} minSize={30} className="flex flex-col">
-          <PanelGroup direction="vertical" className="flex-1">
-            {/* Editor Panel */}
-            <Panel defaultSize={70} minSize={30} className="flex flex-col">
-              <div className="flex items-center justify-between p-2 border-b bg-muted/10">
-                <div className="text-sm font-medium px-2">
-                  JavaScript Editor
-                </div>
-                <div className="flex space-x-2">
-                  <button
-                    onClick={handleRunCode}
-                    disabled={isRunning}
-                    className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-3 text-xs"
-                  >
-                    {isRunning ? 'Running...' : 'Run (Ctrl+Enter)'}
-                  </button>
-                  <button
-                    onClick={clearOutput}
-                    disabled={!result}
-                    className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-3 text-xs"
-                  >
-                    Clear
-                  </button>
-                </div>
-              </div>
-              <div className="flex-1 overflow-auto">
-                <textarea
-                  ref={textareaRef}
-                  value={code}
-                  onChange={(e) => handleCodeChange(e.target.value)}
-                  className="w-full h-full p-4 font-mono text-sm bg-background text-foreground outline-none resize-none"
-                  spellCheck={false}
-                  placeholder="// Enter your JavaScript code here..."
-                  style={{
-                    tabSize: 2,
-                    lineHeight: '1.5',
-                    fontFeatureSettings: '"rlig" 1, "calt" 1',
-                  }}
-                />
-              </div>
-            </Panel>
-
-            {/* Output Panel */}
-            <PanelResizeHandle className="h-2 w-full bg-border/50 dark:bg-gray-600 hover:bg-primary/50 dark:hover:bg-primary/70 transition-colors relative group">
-              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-0.5 bg-gray-400 dark:bg-gray-400 rounded-full group-hover:bg-primary dark:group-hover:bg-primary" />
-            </PanelResizeHandle>
-            <Panel defaultSize={30} minSize={20} className="flex flex-col">
-              <div className="flex items-center justify-between p-2 border-b bg-muted/10">
-                <div className="text-sm font-medium px-2">Console Output</div>
-                <div className="flex space-x-2">
-                  <button
-                    onClick={clearOutput}
-                    disabled={!result}
-                    className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-3 text-xs"
-                  >
-                    Clear
-                  </button>
-                </div>
-              </div>
-              <div
-                ref={outputRef}
-                className="flex-1 overflow-auto p-4 text-sm font-mono bg-background text-foreground whitespace-pre-wrap"
+    <div className="h-full w-full flex flex-col">
+      <div className="flex flex-col h-full bg-background rounded-lg overflow-hidden border">
+        <PanelGroup direction="horizontal" className="flex-1">
+          {/* Algorithm Editor Panel */}
+          {showAlgorithm && (
+            <>
+              <Panel
+                defaultSize={30}
+                minSize={0}
+                className="flex flex-col border-r border-border"
               >
-                {isRunning ? (
-                  <div className="flex items-center justify-center h-full text-muted-foreground">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mr-2" />
-                    Running...
+                <div className="flex items-center justify-between p-2 border-b bg-muted/10">
+                  <div className="text-sm font-medium px-2">Algorithm</div>
+                  <div className="flex items-center text-xs text-muted-foreground"></div>
+                </div>
+                <div className="flex-1 overflow-auto">
+                  <textarea
+                    value={algorithm}
+                    onChange={(e) => setAlgorithm(e.target.value)}
+                    className="w-full h-full p-4 font-mono text-sm bg-background text-foreground outline-none resize-none"
+                    spellCheck={false}
+                    placeholder="// Write your algorithm or notes here..."
+                    style={{
+                      tabSize: 2,
+                      lineHeight: '1.5',
+                      fontFeatureSettings: '"rlig" 1, "calt" 1',
+                    }}
+                  />
+                </div>
+              </Panel>
+              <PanelResizeHandle className="w-2 bg-border/50 hover:bg-primary/50 transition-colors relative group">
+                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-0.5 h-12 bg-gray-400 dark:bg-gray-400 rounded-full group-hover:bg-primary dark:group-hover:bg-primary" />
+              </PanelResizeHandle>
+            </>
+          )}
+
+          {/* Main Content */}
+          <Panel defaultSize={70} minSize={30} className="flex flex-col">
+            <PanelGroup direction="vertical" className="flex-1">
+              {/* Editor Panel */}
+              <Panel defaultSize={70} minSize={30} className="flex flex-col">
+                <div className="flex items-center justify-between p-2 border-b bg-muted/10">
+                  <div className="text-sm font-medium px-2">
+                    JavaScript Editor
                   </div>
-                ) : result ? (
-                  result.error ? (
-                    <div className="text-red-500">
-                      <div className="font-semibold">Error:</div>
-                      <div>{result.error}</div>
-                      {result.stack && (
-                        <pre className="mt-2 text-xs text-red-400">
-                          {result.stack}
-                        </pre>
-                      )}
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={handleRunCode}
+                      disabled={isRunning}
+                      className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-3 text-xs"
+                    >
+                      {isRunning ? 'Running...' : 'Run (Ctrl+Enter)'}
+                    </button>
+                    <button
+                      onClick={clearOutput}
+                      disabled={!result}
+                      className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-3 text-xs"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                </div>
+                <div className="flex-1 overflow-auto">
+                  <textarea
+                    ref={textareaRef}
+                    value={code}
+                    onChange={(e) => handleCodeChange(e.target.value)}
+                    className="w-full h-full p-4 font-mono text-sm bg-background text-foreground outline-none resize-none"
+                    spellCheck={false}
+                    placeholder="// Enter your JavaScript code here..."
+                    style={{
+                      tabSize: 2,
+                      lineHeight: '1.5',
+                      fontFeatureSettings: '"rlig" 1, "calt" 1',
+                    }}
+                  />
+                </div>
+              </Panel>
+
+              {/* Output Panel */}
+              <PanelResizeHandle className="h-2 w-full bg-border/50 dark:bg-gray-600 hover:bg-primary/50 dark:hover:bg-primary/70 transition-colors relative group">
+                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-0.5 bg-gray-400 dark:bg-gray-400 rounded-full group-hover:bg-primary dark:group-hover:bg-primary" />
+              </PanelResizeHandle>
+              <Panel defaultSize={30} minSize={20} className="flex flex-col">
+                <div className="flex items-center justify-between p-2 border-b bg-muted/10">
+                  <div className="text-sm font-medium px-2">Console Output</div>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={clearOutput}
+                      disabled={!result}
+                      className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 px-3 text-xs"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                </div>
+                <div
+                  ref={outputRef}
+                  className="flex-1 overflow-auto p-4 text-sm font-mono bg-background text-foreground whitespace-pre-wrap"
+                >
+                  {isRunning ? (
+                    <div className="flex items-center justify-center h-full text-muted-foreground">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mr-2" />
+                      Running...
                     </div>
-                  ) : (
-                    <div className="whitespace-pre-wrap">{result.output}</div>
-                  )
-                ) : (
-                  <div className="text-muted-foreground">
-                    Run the code to see the output here
-                  </div>
-                )}
-              </div>
-            </Panel>
-          </PanelGroup>
-        </Panel>
-      </PanelGroup>
+                  ) : result ? (
+                    result.error ? (
+                      <div className="text-red-500">
+                        <div className="font-semibold">Error:</div>
+                        <div>{result.error}</div>
+                        {result.stack && (
+                          <pre className="mt-2 text-xs text-red-400">
+                            {result.stack}
+                          </pre>
+                        )}
+                      </div>
+                    ) : (
+                      <div>
+                        {result.output && (
+                          <div className="whitespace-pre-wrap">
+                            {result.output}
+                          </div>
+                        )}
+                        {result.executionTime && (
+                          <div className="mt-2 text-xs text-muted-foreground">
+                            Execution time: {result.executionTime.toFixed(2)}ms
+                          </div>
+                        )}
+                      </div>
+                    )
+                  ) : null}
+                </div>
+              </Panel>
+            </PanelGroup>
+          </Panel>
+        </PanelGroup>
+      </div>
     </div>
   );
 }
