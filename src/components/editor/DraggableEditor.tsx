@@ -9,11 +9,20 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 const JsEditor = dynamic(
   () =>
     import('@/components/CodeEditor').then((mod) => {
-      const JsEditorComponent = (props: { initialCode?: string }) => {
+      const JsEditorComponent = (props: {
+        initialCode?: string;
+        showAlgorithm?: boolean;
+      }) => {
         const [code, setCode] = React.useState(
           props.initialCode || '// Write your JavaScript code here'
         );
-        return <mod.default code={code} onCodeChange={setCode} />;
+        return (
+          <mod.default
+            code={code}
+            onCodeChange={setCode}
+            showAlgorithm={props.showAlgorithm}
+          />
+        );
       };
       return JsEditorComponent;
     }),
@@ -64,6 +73,8 @@ interface DraggableEditorProps {
   defaultPythonCode?: string;
   onClose?: () => void;
   onPythonCodeChange?: (code: string) => void;
+  hideTabs?: boolean;
+  showAlgorithm?: boolean;
 }
 
 export function DraggableEditor({
@@ -73,16 +84,18 @@ export function DraggableEditor({
   defaultPythonCode = '# Write your Python code here and click Run to execute it',
   onClose,
   onPythonCodeChange,
+  hideTabs = false,
+  showAlgorithm = false,
 }: DraggableEditorProps) {
   const [editorType, setEditorType] = useState<EditorType>(defaultEditorType);
   const [pythonCode, setPythonCode] = useState(defaultPythonCode);
   const [dimensions, setDimensions] = useState(defaultSize);
   const [position, setPosition] = useState(defaultPosition);
   const [isDragging, setIsDragging] = useState(false);
-  const [isResizing, setIsResizing] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [resizeStart, setResizeStart] = useState({ x: 0, y: 0 });
-  const [startDimensions, setStartDimensions] = useState({
+  const [isResizing, _setIsResizing] = useState(false);
+  const [dragStart, _setDragStart] = useState({ x: 0, y: 0 });
+  const [resizeStart, _setResizeStart] = useState({ x: 0, y: 0 });
+  const [startDimensions, _setStartDimensions] = useState({
     width: 0,
     height: 0,
   });
@@ -95,6 +108,39 @@ export function DraggableEditor({
     },
     [onPythonCodeChange]
   );
+
+  const renderEditor = () => {
+    const editorContent = (type: EditorType) => {
+      if (type === 'javascript') {
+        return (
+          <JsEditor
+            initialCode="// Write your JavaScript code here"
+            showAlgorithm={showAlgorithm}
+          />
+        );
+      } else {
+        return (
+          <PythonEditor
+            initialCode={pythonCode}
+            onCodeChange={handlePythonCodeChange}
+            showAlgorithm={showAlgorithm}
+          />
+        );
+      }
+    };
+
+    if (hideTabs) {
+      return (
+        <div className="flex-1 overflow-hidden">
+          {editorContent(defaultEditorType)}
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex-1 overflow-hidden">{editorContent(editorType)}</div>
+    );
+  };
 
   // Mouse down handler is now handled by individual interactive elements
   const centerEditor = useCallback(() => {
@@ -137,7 +183,7 @@ export function DraggableEditor({
 
     const handleMouseUp = () => {
       setIsDragging(false);
-      setIsResizing(false);
+      _setIsResizing(false);
     };
 
     if (isDragging || isResizing) {
@@ -168,92 +214,44 @@ export function DraggableEditor({
       aria-label="Code editor"
       tabIndex={-1}
     >
-      {/* Header with drag handle and close button */}
-      <div className="flex items-center justify-between h-10 bg-muted/50 border-b border-border">
+      <div className="flex flex-col h-full bg-background border rounded-lg overflow-hidden">
+        <div className="flex items-center justify-between px-4 py-2 bg-muted border-b">
+          {!hideTabs ? (
+            <Tabs
+              value={editorType}
+              onValueChange={(value) => setEditorType(value as EditorType)}
+              className="w-full"
+            >
+              <TabsList className="grid w-[200px] grid-cols-2">
+                <TabsTrigger value="javascript">JavaScript</TabsTrigger>
+                <TabsTrigger value="python">Python</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          ) : (
+            <div className="text-sm font-medium">Code Editor</div>
+          )}
+          <button
+            onClick={onClose}
+            className="p-1 rounded-full hover:bg-muted-foreground/10"
+            aria-label="Close editor"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+        {renderEditor()}
         <div
-          className="flex-1 h-full flex items-center px-4 cursor-move"
+          className="absolute bottom-1 right-1 w-2 h-2 border-r-2 border-b-2 border-muted-foreground"
           onMouseDown={(e) => {
-            // Only start dragging if clicking on the header itself, not on buttons
-            if (
-              e.target === e.currentTarget ||
-              (e.target as HTMLElement).closest('button') === null
-            ) {
-              setIsDragging(true);
-              setDragStart({
-                x: e.clientX - position.x,
-                y: e.clientY - position.y,
-              });
-            }
-          }}
-          onKeyDown={(e) => {
-            if (
-              (e.key === 'Enter' || e.key === ' ') &&
-              e.target === e.currentTarget
-            ) {
-              e.preventDefault();
-              onClose?.();
-            }
+            e.stopPropagation();
+            e.preventDefault();
+            _setIsResizing(true);
+            _setResizeStart({ x: e.clientX, y: e.clientY });
+            _setStartDimensions(dimensions);
           }}
           role="button"
-          tabIndex={0}
-          aria-label="Drag to move editor"
-        >
-          <Tabs
-            value={editorType}
-            onValueChange={(value) => {
-              setEditorType(value as EditorType);
-            }}
-            className="h-full"
-            aria-label="Editor language tabs"
-          >
-            <TabsList className="h-8">
-              <TabsTrigger value="javascript">JavaScript</TabsTrigger>
-              <TabsTrigger value="python">Python</TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </div>
-        <button
-          type="button"
-          onClick={onClose}
-          className="text-muted-foreground hover:text-foreground p-1 rounded-full hover:bg-muted focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary mr-2"
-          aria-label="Close editor"
-        >
-          <X className="h-4 w-4" />
-        </button>
-      </div>
-
-      {/* Editor content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {editorType === 'javascript' ? (
-          <div className="flex-1 overflow-auto">
-            <JsEditor initialCode="// Write your JavaScript code here" />
-          </div>
-        ) : (
-          <div className="flex-1 overflow-auto">
-            <PythonEditor
-              initialCode={pythonCode}
-              onCodeChange={handlePythonCodeChange}
-              showAlgorithm={true}
-            />
-          </div>
-        )}
-      </div>
-
-      {/* Resize handle */}
-      <div
-        className="resize-handle absolute bottom-0 right-0 w-4 h-4 cursor-se-resize"
-        onMouseDown={(e) => {
-          e.stopPropagation();
-          e.preventDefault();
-          setIsResizing(true);
-          setResizeStart({ x: e.clientX, y: e.clientY });
-          setStartDimensions(dimensions);
-        }}
-        role="button"
-        tabIndex={-1}
-        aria-label="Resize editor"
-      >
-        <div className="absolute bottom-1 right-1 w-2 h-2 border-r-2 border-b-2 border-muted-foreground" />
+          tabIndex={-1}
+          aria-label="Resize editor"
+        />
       </div>
     </div>
   );

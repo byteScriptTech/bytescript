@@ -117,7 +117,12 @@ describe('DraggableEditor', () => {
     });
 
     // Wait for the component to be fully loaded
-    const header = await screen.findByLabelText('Drag to move editor');
+    const editor = await screen.findByRole('dialog', { name: 'Code editor' });
+    const header = editor.querySelector('div > div:first-child'); // Get the header div
+
+    if (!header) {
+      throw new Error('Header element not found');
+    }
 
     await act(async () => {
       // Simulate mouse down on header

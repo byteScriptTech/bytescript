@@ -60,6 +60,8 @@ export function DSATopicClient({
             defaultSize={{ width: 800, height: 500 }}
             onClose={() => setShowEditor(false)}
             defaultPythonCode="# Start coding here..."
+            showAlgorithm={true}
+            hideTabs={false}
           />
         )}
         {children}
