@@ -156,6 +156,7 @@ const Navbar = () => {
               </div>
             </div>
             <NavLink href="/practice">Practice</NavLink>
+            <NavLink href="/peer-programming">Peer Programming</NavLink>
             <NavigationControls
               canGoBack={canGoBack}
               canGoForward={canGoForward}

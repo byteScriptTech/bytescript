@@ -93,7 +93,7 @@ describe('Navbar', () => {
       </AuthContext.Provider>
     );
     const buttons = screen.getAllByRole('button');
-    const backButton = buttons[3];
+    const backButton = buttons[4];
     expect(backButton).toBeDisabled();
   });
 
@@ -123,7 +123,7 @@ describe('Navbar', () => {
     );
 
     const buttons = screen.getAllByRole('button');
-    fireEvent.click(buttons[3]);
+    fireEvent.click(buttons[4]);
     expect(window.history.back).toHaveBeenCalled();
 
     backSpy.mockRestore();
@@ -148,7 +148,7 @@ describe('Navbar', () => {
       </AuthContext.Provider>
     );
     const buttons = screen.getAllByRole('button');
-    const forwardButton = buttons[4];
+    const forwardButton = buttons[5];
     expect(forwardButton).toBeEnabled();
   });
 
@@ -179,11 +179,9 @@ describe('Navbar', () => {
     );
 
     const buttons = screen.getAllByRole('button');
-    // Forward button is now at index 4 (after Dashboard, Learn, Practice, Back)
-    fireEvent.click(buttons[4]);
+    fireEvent.click(buttons[5]);
     expect(window.history.forward).toHaveBeenCalled();
 
-    // Restore original implementation
     forwardSpy.mockRestore();
     Object.defineProperty(window, 'history', {
       value: {
