@@ -1,21 +1,15 @@
 'use client';
 
-import { ChevronLeft, ChevronRight, Menu } from 'lucide-react';
-import React, { useEffect, useState, useCallback } from 'react';
+import { Menu } from 'lucide-react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 
+import CollapsibleSidebar from '@/components/common/CollapsibleSidebar/CollapsibleSidebar';
 import { PythonCodeEditor } from '@/components/common/PythonCodeEditor';
 import { Content } from '@/components/specific/LearnContent/Content';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { getPythonContent } from '@/services/pythonService';
 import type { LanguageContent } from '@/types/content';
+import type { SidebarItem } from '@/types/practice';
 
 interface LearnContentInnerProps {
   initialTopicId?: string | null;
@@ -37,15 +31,15 @@ const LearnContentInner = ({
   const [activeSubtopic, setActiveSubtopic] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [_activeItemId, setActiveItemId] = useState<string | null>(null);
 
   // Check if mobile view on component mount and window resize
   useEffect(() => {
     const checkIfMobile = () => {
-      setIsMobile(window.innerWidth < 768); // md breakpoint
-      if (window.innerWidth >= 768) {
+      const mobile = window.innerWidth < 768; // md breakpoint
+      setIsMobile(mobile);
+      if (!mobile) {
         setSidebarOpen(true);
-      } else {
-        setSidebarOpen(false);
       }
     };
 
@@ -58,28 +52,6 @@ const LearnContentInner = ({
     // Cleanup
     return () => window.removeEventListener('resize', checkIfMobile);
   }, []);
-
-  // Close sidebar when clicking outside on mobile
-  useEffect(() => {
-    if (!isMobile) return;
-
-    const handleClickOutside = (event: MouseEvent) => {
-      const sidebar = document.getElementById('python-sidebar');
-      const menuButton = document.getElementById('python-menu-button');
-      if (
-        sidebarOpen &&
-        sidebar &&
-        !sidebar.contains(event.target as Node) &&
-        menuButton &&
-        !menuButton.contains(event.target as Node)
-      ) {
-        setSidebarOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [sidebarOpen, isMobile]);
 
   const scrollToSubtopic = useCallback((subtopicId: string) => {
     setActiveSubtopic(subtopicId);
@@ -120,6 +92,32 @@ const LearnContentInner = ({
       }
     }
   }, [activeSubtopic, activeTopic]);
+
+  const sidebarItems = useMemo<SidebarItem[]>(() => {
+    if (!content?.topics) return [];
+
+    return content.topics.map((topic) => ({
+      id: topic.id,
+      name: topic.name,
+      isActive: activeTopic === topic.id,
+      onClick: () => {
+        setActiveTopic(topic.id);
+        setActiveSubtopic(null);
+        if (isMobile) setSidebarOpen(false);
+      },
+      children: topic.subtopics?.map((subtopic) => ({
+        id: subtopic.id || `${topic.id}-${subtopic.id}`,
+        name: subtopic.name || 'Untitled',
+        isActive: activeSubtopic === subtopic.id,
+        onClick: () => {
+          setActiveTopic(topic.id);
+          setActiveSubtopic(subtopic.id);
+          scrollToSubtopic(subtopic.id);
+          if (isMobile) setSidebarOpen(false);
+        },
+      })),
+    }));
+  }, [content?.topics, activeTopic, activeSubtopic, isMobile]);
 
   const currentTopic = content?.topics?.find(
     (topic) => topic.id === activeTopic
@@ -205,101 +203,24 @@ const LearnContentInner = ({
         />
       )}
 
-      {/* Sidebar */}
-      <div
-        id="python-sidebar"
+      <CollapsibleSidebar
+        items={sidebarItems}
+        header="Python Topics"
+        defaultOpen={true}
+        isMobile={isMobile}
+        collapsible={true}
+        activeItemId={activeTopic}
+        activeChildId={activeSubtopic}
+        onItemClick={(item) => {
+          setActiveItemId(item.id);
+          if (item.onClick) item.onClick();
+        }}
         className={cn(
           'fixed inset-y-0 left-0 z-50 w-72 border-r bg-background transition-transform duration-300 ease-in-out md:relative md:z-40',
           !sidebarOpen && '-translate-x-full md:translate-x-0 md:w-20',
-          'flex flex-col h-full shadow-lg md:shadow-none',
           isMobile ? 'w-4/5 max-w-xs' : ''
         )}
-      >
-        <div className="flex items-center justify-between p-4 border-b h-16">
-          {sidebarOpen ? (
-            <h2 className="text-lg font-semibold">Python Topics</h2>
-          ) : (
-            <div className="w-6" /> // Spacer for alignment
-          )}
-          <Button
-            variant="ghost"
-            size="sm"
-            className={cn(
-              'ml-auto transition-opacity',
-              !sidebarOpen && 'opacity-0 md:opacity-100'
-            )}
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            aria-label={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
-          >
-            {sidebarOpen ? (
-              <ChevronLeft className="h-5 w-5" />
-            ) : (
-              <ChevronRight className="h-5 w-5" />
-            )}
-          </Button>
-        </div>
-        <ScrollArea className="flex-1">
-          <div className="p-4 space-y-2">
-            {content.topics?.map((topic) => (
-              <div key={topic.id} className="space-y-1">
-                {!sidebarOpen ? (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant={
-                            activeTopic === topic.id ? 'secondary' : 'ghost'
-                          }
-                          className="justify-center px-0 w-10 h-10 rounded-full mx-auto"
-                          onClick={() => {
-                            setActiveTopic(topic.id);
-                            setActiveSubtopic(null);
-                          }}
-                        >
-                          <span className="text-sm font-medium">
-                            {topic.name.charAt(0)}
-                          </span>
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent side="right" sideOffset={10}>
-                        <p>{topic.name}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                ) : (
-                  <Button
-                    variant={activeTopic === topic.id ? 'secondary' : 'ghost'}
-                    className="w-full justify-start text-left"
-                    onClick={() => {
-                      setActiveTopic(topic.id);
-                      setActiveSubtopic(null);
-                    }}
-                  >
-                    {topic.name}
-                  </Button>
-                )}
-                {activeTopic === topic.id && topic.subtopics && sidebarOpen && (
-                  <div className="ml-4 mt-1 space-y-1">
-                    {topic.subtopics.map((subtopic) => (
-                      <Button
-                        key={subtopic.id}
-                        variant={
-                          activeSubtopic === subtopic.id ? 'secondary' : 'ghost'
-                        }
-                        size="sm"
-                        className="w-full justify-start text-muted-foreground hover:text-foreground"
-                        onClick={() => scrollToSubtopic(subtopic.id)}
-                      >
-                        {subtopic.name}
-                      </Button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </ScrollArea>
-      </div>
+      />
 
       {/* Main Content */}
       <div className="flex-1 overflow-auto p-4 md:p-8">
