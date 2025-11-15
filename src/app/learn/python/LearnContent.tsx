@@ -1,9 +1,9 @@
 'use client';
 
-import { Menu } from 'lucide-react';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 
 import CollapsibleSidebar from '@/components/common/CollapsibleSidebar/CollapsibleSidebar';
+import { FloatingMenuButton } from '@/components/common/FloatingMenuButton/FloatingMenuButton';
 import { PythonCodeEditor } from '@/components/common/PythonCodeEditor';
 import { Content } from '@/components/specific/LearnContent/Content';
 import { cn } from '@/lib/utils';
@@ -179,21 +179,7 @@ const LearnContentInner = ({
   );
 
   return (
-    <div className="flex h-screen bg-background">
-      {/* Mobile menu button */}
-      <button
-        type="button"
-        className={cn(
-          'fixed left-4 top-4 z-50 rounded-md p-2 text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary md:hidden',
-          isMobile && sidebarOpen && 'hidden'
-        )}
-        onClick={() => setSidebarOpen(true)}
-      >
-        <span className="sr-only">Open sidebar</span>
-        <Menu className="h-6 w-6" />
-      </button>
-
-      {/* Mobile overlay */}
+    <div className="relative flex h-screen bg-background">
       {isMobile && sidebarOpen && (
         <button
           type="button"
@@ -202,6 +188,13 @@ const LearnContentInner = ({
           aria-label="Close menu"
         />
       )}
+
+      <div className="fixed bottom-4 left-4 md:hidden">
+        <FloatingMenuButton
+          isOpen={sidebarOpen}
+          onToggle={() => setSidebarOpen(!sidebarOpen)}
+        />
+      </div>
 
       <CollapsibleSidebar
         items={sidebarItems}

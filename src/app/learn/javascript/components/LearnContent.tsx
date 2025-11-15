@@ -1,14 +1,13 @@
 'use client';
 
-import { Menu, X } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { FC, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 
 import CollapsibleSidebar from '@/components/common/CollapsibleSidebar';
+import { FloatingMenuButton } from '@/components/common/FloatingMenuButton/FloatingMenuButton';
 import { JavaScriptCodeEditor } from '@/components/common/JavaScriptCodeEditor';
 import { Content } from '@/components/specific/LearnContent/Content';
-import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { cn } from '@/lib/utils';
 import { getJavascriptContent } from '@/services/javascriptService';
@@ -266,20 +265,11 @@ const LearnContentInner: FC<LearnContentInnerProps> = ({
   return (
     <div className="flex h-[calc(100vh-64px)] overflow-hidden relative">
       {/* Mobile menu button */}
-      <Button
-        id="js-menu-button"
-        onClick={() => setSidebarOpen(!sidebarOpen)}
-        className={cn(
-          'fixed bottom-4 left-4 z-50 md:hidden p-3 rounded-full bg-primary text-primary-foreground shadow-lg transition-transform',
-          sidebarOpen && 'transform rotate-90',
-          'md:hidden'
-        )}
-        aria-label={sidebarOpen ? 'Close menu' : 'Open menu'}
-        variant="default"
-        size="icon"
-      >
-        {sidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-      </Button>
+
+      <FloatingMenuButton
+        isOpen={sidebarOpen}
+        onToggle={() => setSidebarOpen(!sidebarOpen)}
+      />
 
       <DraggableCircle onClick={() => setShowEditor(true)} />
 
