@@ -1,20 +1,14 @@
 'use client';
 
-import { ChevronLeft, ChevronRight, Menu, X } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { FC, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 
+import CollapsibleSidebar from '@/components/common/CollapsibleSidebar';
+import { FloatingMenuButton } from '@/components/common/FloatingMenuButton/FloatingMenuButton';
 import { JavaScriptCodeEditor } from '@/components/common/JavaScriptCodeEditor';
 import { Content } from '@/components/specific/LearnContent/Content';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { useIsMobile } from '@/hooks/useIsMobile';
 import { cn } from '@/lib/utils';
 import { getJavascriptContent } from '@/services/javascriptService';
 import type { LanguageContent } from '@/types/content';
@@ -59,29 +53,17 @@ const LearnContentInner: FC<LearnContentInnerProps> = ({
   const [activeTopic, setActiveTopic] = useState<string | null>(null);
   const [activeSubtopic, setActiveSubtopic] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
   const [showEditor, setShowEditor] = useState(false);
+  const isMobile = useIsMobile();
 
-  // Check if mobile view on component mount and window resize
+  // Auto-open sidebar on desktop
   useEffect(() => {
-    const checkIfMobile = () => {
-      setIsMobile(window.innerWidth < 768); // md breakpoint
-      if (window.innerWidth >= 768) {
-        setSidebarOpen(true);
-      } else {
-        setSidebarOpen(false);
-      }
-    };
-
-    // Initial check
-    checkIfMobile();
-
-    // Add event listener for window resize
-    window.addEventListener('resize', checkIfMobile);
-
-    // Cleanup
-    return () => window.removeEventListener('resize', checkIfMobile);
-  }, []);
+    if (!isMobile) {
+      setSidebarOpen(true);
+    } else {
+      setSidebarOpen(false);
+    }
+  }, [isMobile]);
 
   // Close sidebar when clicking outside on mobile
   useEffect(() => {
@@ -283,16 +265,11 @@ const LearnContentInner: FC<LearnContentInnerProps> = ({
   return (
     <div className="flex h-[calc(100vh-64px)] overflow-hidden relative">
       {/* Mobile menu button */}
-      <Button
-        id="js-menu-button"
-        onClick={() => setSidebarOpen(!sidebarOpen)}
-        className="fixed bottom-4 left-4 z-50 md:hidden p-3 rounded-full bg-primary text-primary-foreground shadow-lg"
-        aria-label="Toggle menu"
-        variant="default"
-        size="icon"
-      >
-        {sidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-      </Button>
+
+      <FloatingMenuButton
+        isOpen={sidebarOpen}
+        onToggle={() => setSidebarOpen(!sidebarOpen)}
+      />
 
       <DraggableCircle onClick={() => setShowEditor(true)} />
 
@@ -307,117 +284,56 @@ const LearnContentInner: FC<LearnContentInnerProps> = ({
       )}
 
       {/* Sidebar */}
-      <div
-        id="js-sidebar"
+      <CollapsibleSidebar
+        defaultOpen={sidebarOpen}
+        isMobile={isMobile}
+        header="JavaScript Topics"
         className={cn(
-          'fixed inset-y-0 left-0 z-50 w-72 border-r bg-background transition-transform duration-300 ease-in-out md:relative md:z-40',
-          !sidebarOpen && '-translate-x-full md:translate-x-0 md:w-20',
-          'flex flex-col h-full shadow-lg md:shadow-none',
-          isMobile ? 'w-4/5 max-w-xs' : ''
+          isMobile ? 'w-4/5 max-w-xs' : '',
+          isMobile && 'fixed z-50',
+          isMobile && !sidebarOpen && '-translate-x-full',
+          isMobile && 'transition-transform duration-300 ease-in-out'
         )}
-      >
-        <div className="flex items-center justify-between p-4 border-b h-16">
-          {sidebarOpen ? (
-            <h2 className="text-lg font-semibold">JavaScript Topics</h2>
-          ) : (
-            <div className="w-6" aria-hidden="true" />
-          )}
-          <Button
-            variant="ghost"
-            size="sm"
-            className={cn(
-              'ml-auto transition-opacity',
-              !sidebarOpen && 'opacity-0 md:opacity-100'
-            )}
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            aria-label={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
-          >
-            {sidebarOpen ? (
-              <ChevronLeft className="h-5 w-5" />
-            ) : (
-              <ChevronRight className="h-5 w-5" />
-            )}
-          </Button>
-        </div>
-        <ScrollArea className="flex-1">
-          <div className="p-4 space-y-2">
-            {content.topics?.map((topic) => (
-              <div key={topic.id} className="space-y-1">
-                {!sidebarOpen ? (
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant={
-                            activeTopic === topic.id ? 'secondary' : 'ghost'
-                          }
-                          className="justify-center px-0 w-10 h-10 rounded-full mx-auto"
-                          onClick={() => {
-                            setActiveTopic(topic.id);
-                            setActiveSubtopic(null);
-                          }}
-                        >
-                          <span className="text-sm font-medium">
-                            {topic.name.charAt(0)}
-                          </span>
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent side="right" sideOffset={10}>
-                        <p>{topic.name}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                ) : (
-                  <div className="flex items-center gap-2 w-full">
-                    <Button
-                      variant={activeTopic === topic.id ? 'secondary' : 'ghost'}
-                      className="flex-1 justify-start text-left"
-                      onClick={() => {
-                        setActiveTopic(topic.id);
-                        setActiveSubtopic(null);
-                      }}
-                    >
-                      {topic.name}
-                    </Button>
-                  </div>
-                )}
-                {activeTopic === topic.id &&
-                  ((topic.subtopics && topic.subtopics.length > 0) ||
-                    (topic.exercises && topic.exercises.length > 0)) &&
-                  sidebarOpen && (
-                    <div className="ml-4 mt-1 space-y-1">
-                      {topic.subtopics?.map((subtopic) => (
-                        <Button
-                          key={subtopic.id}
-                          variant={
-                            activeSubtopic === subtopic.id
-                              ? 'secondary'
-                              : 'ghost'
-                          }
-                          size="sm"
-                          className="w-full justify-start text-muted-foreground hover:text-foreground"
-                          onClick={() => scrollToSubtopic(subtopic.id)}
-                        >
-                          {subtopic.name}
-                        </Button>
-                      ))}
-                      {topic.exercises && topic.exercises?.length > 0 && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="w-full justify-start text-muted-foreground hover:text-foreground"
-                          onClick={scrollToExercises}
-                        >
-                          Exercises ({topic.exercises?.length || 0})
-                        </Button>
-                      )}
-                    </div>
-                  )}
-              </div>
-            ))}
-          </div>
-        </ScrollArea>
-      </div>
+        items={content.topics?.map((topic) => ({
+          id: topic.id,
+          name: topic.name,
+          isActive: activeTopic === topic.id,
+          onClick: () => {
+            setActiveTopic(topic.id);
+            setActiveSubtopic(null);
+          },
+          children: [
+            ...(topic.subtopics?.map((subtopic) => ({
+              id: subtopic.id,
+              name: subtopic.name,
+              isActive: activeSubtopic === subtopic.id,
+              onClick: () => {
+                scrollToSubtopic(subtopic.id);
+                if (isMobile) {
+                  setSidebarOpen(false);
+                }
+              },
+            })) || []),
+            ...(topic.exercises?.length
+              ? [
+                  {
+                    id: `exercises-${topic.id}`,
+                    name: `Exercises (${topic.exercises.length})`,
+                    onClick: () => {
+                      scrollToExercises();
+                      if (isMobile) {
+                        setSidebarOpen(false);
+                      }
+                    },
+                  },
+                ]
+              : []),
+          ],
+        }))}
+        activeItemId={activeTopic}
+        activeChildId={activeSubtopic}
+        collapsible={!isMobile}
+      />
 
       {/* Main content */}
       <div className="flex-1 overflow-y-auto p-4 md:p-8 h-[calc(100vh-64px)]">
@@ -457,7 +373,6 @@ const LearnContentInner: FC<LearnContentInnerProps> = ({
   );
 };
 
-// This is the inner component that doesn't use useSearchParams directly
 export default function LearnContent({
   initialTopicId = null,
   initialSubtopicId = null,
@@ -465,8 +380,6 @@ export default function LearnContent({
   initialTopicId?: string | null;
   initialSubtopicId?: string | null;
 }) {
-  // Rest of the component implementation
-  console.log(initialTopicId, initialSubtopicId);
   return (
     <LearnContentInner
       initialTopicId={initialTopicId}
