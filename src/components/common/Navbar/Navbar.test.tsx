@@ -24,13 +24,17 @@ jest.mock('@/firebase/config', () => ({
   auth: {},
 }));
 
-// ——— Mock next/navigation useRouter ———
 const mockPush = jest.fn();
+const mockUsePathname = jest.fn(() => '/');
+
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
     push: mockPush,
+    back: jest.fn(),
+    forward: jest.fn(),
     replace: jest.fn(),
   }),
+  usePathname: () => mockUsePathname(),
 }));
 
 // ——— Mock UserDropDown inline ———
