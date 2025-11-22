@@ -124,8 +124,12 @@ function CollapsibleSidebar({
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
-                        variant={activeItem === item.id ? 'secondary' : 'ghost'}
-                        className="justify-center px-0 w-10 h-10 rounded-full mx-auto"
+                        variant="ghost"
+                        className={`justify-center px-0 w-10 h-10 rounded-full mx-auto ${
+                          activeItem === item.id
+                            ? 'bg-teal-lighter text-foreground hover:bg-teal-light'
+                            : 'hover:bg-accent/50'
+                        }`}
                         onClick={() => handleItemClick(item)}
                       >
                         {item.icon || (
@@ -143,8 +147,8 @@ function CollapsibleSidebar({
               ) : (
                 <div className="flex items-center gap-2 w-full">
                   <Button
-                    variant={activeItem === item.id ? 'secondary' : 'ghost'}
-                    className="flex-1 justify-start text-left"
+                    variant="ghost"
+                    className={`flex-1 justify-start text-left ${activeItem === item.id ? 'bg-teal-lighter text-foreground hover:bg-teal-light' : 'hover:bg-accent'}`}
                     onClick={() => handleItemClick(item)}
                   >
                     {item.icon && <span className="mr-2">{item.icon}</span>}
@@ -160,11 +164,9 @@ function CollapsibleSidebar({
                     {item.children.map((child) => (
                       <Button
                         key={child.id}
-                        variant={
-                          activeChild === child.id ? 'secondary' : 'ghost'
-                        }
+                        variant="ghost"
                         size="sm"
-                        className="w-full justify-start text-muted-foreground hover:text-foreground"
+                        className={`w-full justify-start ${activeChild === child.id ? 'bg-teal-lighter text-foreground hover:bg-teal-light' : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'}`}
                         onClick={() => handleChildClick(child, item.id)}
                       >
                         {child.icon && (
