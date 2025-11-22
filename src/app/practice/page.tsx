@@ -66,30 +66,27 @@ export default function Practice() {
                 <div className="flex flex-col flex-1">
                   <Navbar />
                   <main className="flex-1">
-                    <div className="container mx-auto py-8 px-4">
-                      <h1 className="text-3xl font-bold mb-6">Practice</h1>
-                      <div className="flex flex-col md:flex-row gap-6">
-                        <div className="w-full md:w-64 flex-shrink-0">
-                          <CollapsibleSidebar
-                            items={sidebarItems}
-                            header="Categories"
-                            defaultOpen={true}
-                            collapsible={true}
-                            activeItemId={activeItemId}
-                            onItemClick={(item) => {
-                              setActiveItemId(item.id);
-                              if (item.onClick) item.onClick();
-                            }}
-                            className="border-r border-border h-[calc(100vh-4rem)] fixed md:sticky top-16 left-0"
-                          />
-                        </div>
-                        <div className="w-full md:pl-4 flex-1">
-                          <PracticeContent
-                            currentTopic={currentTopic}
-                            setCurrentTopic={setCurrentTopic}
-                            category={category}
-                          />
-                        </div>
+                    <div className="flex flex-col md:flex-row gap-6">
+                      <div className="w-full md:w-64 flex-shrink-0">
+                        <CollapsibleSidebar
+                          items={sidebarItems}
+                          header="Choose Category"
+                          defaultOpen={true}
+                          collapsible={true}
+                          activeItemId={activeItemId}
+                          onItemClick={(item) => {
+                            setActiveItemId(item.id);
+                            if (item.onClick) item.onClick();
+                          }}
+                          className="border-r border-border h-[calc(100vh-4rem)] fixed md:sticky top-16 left-0"
+                        />
+                      </div>
+                      <div className="w-full md:pl-4 flex-1">
+                        <PracticeContent
+                          currentTopic={currentTopic}
+                          setCurrentTopic={setCurrentTopic}
+                          category={category}
+                        />
                       </div>
                     </div>
                   </main>
