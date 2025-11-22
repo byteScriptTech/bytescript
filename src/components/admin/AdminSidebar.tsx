@@ -30,6 +30,7 @@ export function AdminSidebar() {
       icon: Code,
     },
     { name: 'Problems', href: '/admin/problems', icon: BookOpen },
+    { name: 'Practice Questions', href: '/admin/practice', icon: BookOpen },
     { name: 'Users', href: '/admin/users', icon: Users },
     { name: 'Settings', href: '/admin/settings', icon: Settings },
   ];
