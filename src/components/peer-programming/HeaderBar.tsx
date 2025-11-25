@@ -24,8 +24,7 @@ export default function HeaderBar({
 }: Props) {
   return (
     <header className="border-b border-border p-4">
-      <div className="container mx-auto flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Peer Programming</h1>
+      <div className="container mx-auto flex justify-end items-center">
         <div className="flex items-center gap-4">
           {!overallConnected ? (
             <div className="flex gap-2">

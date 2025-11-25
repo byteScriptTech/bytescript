@@ -17,11 +17,7 @@ interface NavLinkProps {
   activeClassName?: string;
 }
 
-const NavLink = ({
-  href,
-  children,
-  activeClassName = 'bg-teal-lighter',
-}: NavLinkProps) => {
+const NavLink = ({ href, children }: NavLinkProps) => {
   const pathname = usePathname();
   const isActive = pathname === href;
 
@@ -31,8 +27,8 @@ const NavLink = ({
         variant="ghost"
         className={`px-3 h-8 text-sm font-medium transition-all duration-300 ${
           isActive
-            ? `${activeClassName} hover:bg-teal-light`
-            : 'text-foreground hover:bg-teal-lightest hover:text-accent-foreground'
+            ? 'text-teal-600 hover:bg-transparent hover:text-teal-600'
+            : 'text-foreground hover:bg-accent hover:text-accent-foreground'
         }`}
       >
         {children}
@@ -55,7 +51,7 @@ const MobileNavLink = ({
   children,
   onClick,
   className = '',
-  activeClassName = 'bg-teal-lighter',
+  activeClassName = 'text-teal-600 dark:text-teal-400',
 }: MobileNavLinkProps) => {
   const pathname = usePathname();
   const isActive = pathname === href;
@@ -64,9 +60,7 @@ const MobileNavLink = ({
     <Link
       href={href}
       className={`w-full flex items-center px-4 py-2.5 rounded-lg transition-all duration-300 text-base font-medium ${
-        isActive
-          ? `${activeClassName} text-foreground`
-          : 'text-foreground hover:bg-teal-lightest hover:text-accent-foreground'
+        isActive ? `${activeClassName}` : 'text-foreground hover:bg-accent'
       } ${className}`}
       onClick={onClick}
     >
@@ -234,7 +228,7 @@ const Navbar = () => {
                   href={item.href}
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="w-full flex items-center px-4 py-2.5 rounded-lg transition-colors duration-200"
-                  activeClassName="bg-teal-lighter text-foreground"
+                  activeClassName="bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300"
                 >
                   {item.label}
                 </MobileNavLink>
