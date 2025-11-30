@@ -29,6 +29,11 @@ export function AdminSidebar() {
       href: '/admin/javascript',
       icon: Code,
     },
+    {
+      name: 'Node.js',
+      href: '/admin/nodejs',
+      icon: Code,
+    },
     { name: 'Problems', href: '/admin/problems', icon: BookOpen },
     { name: 'Practice Questions', href: '/admin/practice', icon: BookOpen },
     { name: 'Users', href: '/admin/users', icon: Users },
