@@ -104,7 +104,7 @@ export function PeerProgrammingRoom() {
   const fetchToken = useFetchWsToken();
 
   useEffect(() => {
-    const roomIdFromUrl = searchParams.get('room');
+    const roomIdFromUrl = searchParams?.get('room');
     if (roomIdFromUrl && roomIdFromUrl !== roomId) setRoomId(roomIdFromUrl);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);

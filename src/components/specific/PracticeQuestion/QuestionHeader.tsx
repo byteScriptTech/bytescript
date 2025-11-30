@@ -1,6 +1,5 @@
 import { Timer } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useParams } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 import { Progress } from '@/components/ui/progress';
@@ -24,7 +23,8 @@ export function QuestionHeader({
   timeRemaining,
   progress,
 }: QuestionHeaderProps) {
-  const { id } = useParams<{ id: string }>();
+  const params = useParams<{ id: string }>();
+  const id = params?.id;
   const formatTime = (seconds: number | null) => {
     if (seconds === null) return '--:--';
     const mins = Math.floor(seconds / 60);
@@ -37,6 +37,10 @@ export function QuestionHeader({
   const [topic, setTopic] = useState<any>(null);
   useEffect(() => {
     const loadTopic = async () => {
+      if (!id) {
+        router.push('/practice');
+        return;
+      }
       try {
         const topicData = await getTopic(id);
         if (!topicData) {

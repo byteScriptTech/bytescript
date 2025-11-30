@@ -2,7 +2,15 @@
 
 import dynamic from 'next/dynamic';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import { FC, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import {
+  FC,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 import CollapsibleSidebar from '@/components/common/CollapsibleSidebar';
 import { FloatingMenuButton } from '@/components/common/FloatingMenuButton/FloatingMenuButton';
@@ -10,7 +18,7 @@ import { JavaScriptCodeEditor } from '@/components/common/JavaScriptCodeEditor';
 import { Content } from '@/components/specific/LearnContent/Content';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { cn } from '@/lib/utils';
-import { getJavascriptContent } from '@/services/javascriptService';
+import { getNodejsContent } from '@/services/nodejsService';
 import type { LanguageContent } from '@/types/content';
 
 const DraggableCircle = dynamic(
@@ -44,7 +52,6 @@ const LearnContentInner: FC<LearnContentInnerProps> = ({
   initialTopicId: _initialTopicId = null,
   initialSubtopicId: _initialSubtopicId = null,
 }) => {
-  // Use refs to store the initial values to avoid re-running effects
   const initialTopicId = useRef(_initialTopicId);
   const initialSubtopicId = useRef(_initialSubtopicId);
   const [loading, setLoading] = useState(true);
@@ -56,22 +63,16 @@ const LearnContentInner: FC<LearnContentInnerProps> = ({
   const [showEditor, setShowEditor] = useState(false);
   const isMobile = useIsMobile();
 
-  // Auto-open sidebar on desktop
   useEffect(() => {
-    if (!isMobile) {
-      setSidebarOpen(true);
-    } else {
-      setSidebarOpen(false);
-    }
+    setSidebarOpen(!isMobile);
   }, [isMobile]);
 
-  // Close sidebar when clicking outside on mobile
   useEffect(() => {
     if (!isMobile) return;
 
     const handleClickOutside = (event: MouseEvent) => {
-      const sidebar = document.getElementById('js-sidebar');
-      const menuButton = document.getElementById('js-menu-button');
+      const sidebar = document.getElementById('nodejs-sidebar');
+      const menuButton = document.getElementById('nodejs-menu-button');
       if (
         sidebarOpen &&
         sidebar &&
@@ -98,7 +99,6 @@ const LearnContentInner: FC<LearnContentInnerProps> = ({
       params.set('subtopic', subtopicId);
       router.push(`${pathname}?${params.toString()}`, { scroll: false });
 
-      // Use a small timeout to ensure the DOM is updated
       const timer = setTimeout(() => {
         const element = document.getElementById(`subtopic-${subtopicId}`);
         if (element) {
@@ -109,7 +109,7 @@ const LearnContentInner: FC<LearnContentInnerProps> = ({
 
       return () => clearTimeout(timer);
     },
-    [pathname, router, searchParams, setActiveSubtopic]
+    [pathname, router, searchParams]
   );
 
   const scrollToExercises = useCallback(() => {
@@ -123,7 +123,7 @@ const LearnContentInner: FC<LearnContentInnerProps> = ({
 
   const fetchContent = useCallback(async () => {
     try {
-      const data = await getJavascriptContent();
+      const data = await getNodejsContent();
       setContent(data);
       if (data?.topics?.length) {
         setActiveTopic(data.topics[0].id);
@@ -131,11 +131,9 @@ const LearnContentInner: FC<LearnContentInnerProps> = ({
       return data;
     } catch (err) {
       const errorMessage =
-        err instanceof Error
-          ? err.message
-          : 'Failed to load JavaScript content';
+        err instanceof Error ? err.message : 'Failed to load Node.js content';
       setError(`Error: ${errorMessage}. Please try again later.`);
-      console.error('Error fetching JavaScript content:', err);
+      console.error('Error fetching Node.js content:', err);
       throw err;
     }
   }, []);
@@ -145,7 +143,7 @@ const LearnContentInner: FC<LearnContentInnerProps> = ({
       try {
         await fetchContent();
       } catch (error) {
-        // Error is already handled in fetchContent
+        // handled in fetchContent
       } finally {
         setLoading(false);
       }
@@ -154,33 +152,28 @@ const LearnContentInner: FC<LearnContentInnerProps> = ({
     loadContent();
   }, [fetchContent]);
 
-  // Handle initial content load and set the active topic/subtopic from URL params
   useEffect(() => {
     if (!content?.topics?.length) return;
-    console.log(content, 'content');
-    // If we have an initial topic ID from URL, use it
+
     if (initialTopicId.current) {
       const topicExists = content.topics.some(
         (topic: { id: string }) => topic.id === initialTopicId.current
       );
 
       if (topicExists) {
-        // Only update if the topic is different from current active topic
         if (activeTopic !== initialTopicId.current) {
           setActiveTopic(initialTopicId.current);
         }
 
-        // If we also have a subtopic ID, set it and scroll to it
         if (initialSubtopicId.current) {
           setActiveSubtopic(initialSubtopicId.current);
-          // Small delay to ensure the DOM is updated
           const timer = setTimeout(() => {
             const element = document.getElementById(
               `subtopic-${initialSubtopicId.current}`
             );
             if (element) {
               element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              window.scrollBy(0, -20); // Small offset for header
+              window.scrollBy(0, -20);
             }
           }, 300);
           return () => clearTimeout(timer);
@@ -189,23 +182,57 @@ const LearnContentInner: FC<LearnContentInnerProps> = ({
       }
     }
 
-    // Fallback to first topic if no valid topic ID in URL
     if (!activeTopic && content.topics.length > 0) {
       setActiveTopic(content.topics[0].id);
     }
   }, [content, activeTopic, scrollToSubtopic]);
 
-  const _renderMarkdownContent = (text: string) => (
-    <div
-      className="prose dark:prose-invert max-w-none"
-      dangerouslySetInnerHTML={{ __html: text }}
-    />
-  );
+  const topicSidebarItems = useMemo(() => {
+    return (
+      content?.topics?.map((topic) => ({
+        id: topic.id,
+        name: topic.name,
+        isActive: activeTopic === topic.id,
+        onClick: () => {
+          setActiveTopic(topic.id);
+          setActiveSubtopic(null);
+        },
+        children: [
+          ...(topic.subtopics?.map((subtopic) => ({
+            id: subtopic.id,
+            name: subtopic.name,
+            isActive: activeSubtopic === subtopic.id,
+            onClick: () => {
+              scrollToSubtopic(subtopic.id);
+              if (isMobile) setSidebarOpen(false);
+            },
+          })) || []),
+          ...(topic.exercises?.length
+            ? [
+                {
+                  id: `exercises-${topic.id}`,
+                  name: `Exercises (${topic.exercises.length})`,
+                  onClick: () => {
+                    scrollToExercises();
+                    if (isMobile) setSidebarOpen(false);
+                  },
+                },
+              ]
+            : []),
+        ],
+      })) || []
+    );
+  }, [
+    content?.topics,
+    activeTopic,
+    activeSubtopic,
+    scrollToSubtopic,
+    scrollToExercises,
+    isMobile,
+  ]);
 
   const renderExamples = useCallback((examples: Example[] = []) => {
-    if (!examples || examples.length === 0) {
-      return null;
-    }
+    if (!examples || !examples.length) return null;
 
     return (
       <div className="space-y-6">
@@ -221,8 +248,8 @@ const LearnContentInner: FC<LearnContentInnerProps> = ({
                 initialCode={example.code}
                 readOnly={false}
                 className="w-full"
-                showRunButton={true}
-                showOutput={true}
+                showRunButton
+                showOutput
               />
             </div>
           </div>
@@ -236,7 +263,7 @@ const LearnContentInner: FC<LearnContentInnerProps> = ({
       <div className="flex h-screen items-center justify-center">
         <div className="text-center">
           <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading JavaScript content...</p>
+          <p className="text-muted-foreground">Loading Node.js content...</p>
         </div>
       </div>
     );
@@ -245,7 +272,7 @@ const LearnContentInner: FC<LearnContentInnerProps> = ({
   if (!content) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p>No content available</p>
+        <p>No Node.js content available</p>
       </div>
     );
   }
@@ -254,26 +281,17 @@ const LearnContentInner: FC<LearnContentInnerProps> = ({
     content.topics?.find((topic) => topic.id === activeTopic) ||
     content.topics?.[0];
 
-  if (!content) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
   return (
     <div className="flex h-[calc(100vh-64px)] overflow-hidden relative">
-      {/* Mobile menu button */}
-
-      <FloatingMenuButton
-        isOpen={sidebarOpen}
-        onToggle={() => setSidebarOpen(!sidebarOpen)}
-      />
+      <div id="nodejs-menu-button">
+        <FloatingMenuButton
+          isOpen={sidebarOpen}
+          onToggle={() => setSidebarOpen(!sidebarOpen)}
+        />
+      </div>
 
       <DraggableCircle onClick={() => setShowEditor(true)} />
 
-      {/* Mobile overlay */}
       {isMobile && sidebarOpen && (
         <button
           type="button"
@@ -283,59 +301,24 @@ const LearnContentInner: FC<LearnContentInnerProps> = ({
         />
       )}
 
-      {/* Sidebar */}
-      <CollapsibleSidebar
-        defaultOpen={sidebarOpen}
-        isMobile={isMobile}
-        header="JavaScript Topics"
-        className={cn(
-          isMobile ? 'w-4/5 max-w-xs' : '',
-          isMobile && 'fixed z-50',
-          isMobile && !sidebarOpen && '-translate-x-full',
-          isMobile && 'transition-transform duration-300 ease-in-out'
-        )}
-        items={content.topics?.map((topic) => ({
-          id: topic.id,
-          name: topic.name,
-          isActive: activeTopic === topic.id,
-          onClick: () => {
-            setActiveTopic(topic.id);
-            setActiveSubtopic(null);
-          },
-          children: [
-            ...(topic.subtopics?.map((subtopic) => ({
-              id: subtopic.id,
-              name: subtopic.name,
-              isActive: activeSubtopic === subtopic.id,
-              onClick: () => {
-                scrollToSubtopic(subtopic.id);
-                if (isMobile) {
-                  setSidebarOpen(false);
-                }
-              },
-            })) || []),
-            ...(topic.exercises?.length
-              ? [
-                  {
-                    id: `exercises-${topic.id}`,
-                    name: `Exercises (${topic.exercises.length})`,
-                    onClick: () => {
-                      scrollToExercises();
-                      if (isMobile) {
-                        setSidebarOpen(false);
-                      }
-                    },
-                  },
-                ]
-              : []),
-          ],
-        }))}
-        activeItemId={activeTopic}
-        activeChildId={activeSubtopic}
-        collapsible={!isMobile}
-      />
+      <div id="nodejs-sidebar">
+        <CollapsibleSidebar
+          defaultOpen={sidebarOpen}
+          isMobile={isMobile}
+          header="Node.js Topics"
+          className={cn(
+            isMobile ? 'w-4/5 max-w-xs' : '',
+            isMobile && 'fixed z-50',
+            isMobile && !sidebarOpen && '-translate-x-full',
+            isMobile && 'transition-transform duration-300 ease-in-out'
+          )}
+          items={topicSidebarItems}
+          activeItemId={activeTopic}
+          activeChildId={activeSubtopic}
+          collapsible={!isMobile}
+        />
+      </div>
 
-      {/* Main content */}
       <div className="flex-1 overflow-y-auto p-4 md:p-8 h-[calc(100vh-64px)]">
         <div className="max-w-4xl mx-auto">
           {error ? (
@@ -364,7 +347,7 @@ const LearnContentInner: FC<LearnContentInnerProps> = ({
             defaultSize={{ width: 800, height: 500 }}
             onClose={() => setShowEditor(false)}
             defaultEditorType="javascript"
-            hideTabs={true}
+            hideTabs
             showAlgorithm={false}
           />
         </div>

@@ -117,7 +117,7 @@ function CollapsibleSidebar({
       </div>
       <ScrollArea className="flex-1">
         <div className="p-4 space-y-2">
-          {items.map((item) => (
+          {items?.map((item) => (
             <div key={item.id} className="space-y-1">
               {!isOpen && !isMobile ? (
                 <TooltipProvider>

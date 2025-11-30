@@ -11,7 +11,8 @@ import type { DataStructureFormValues } from '@/lib/validations';
 import { dsaService, type DSATopic } from '@/services/firebase/dsaService';
 
 export default function EditDataStructurePage() {
-  const { id } = useParams();
+  const params = useParams<{ id?: string | string[] }>();
+  const id = params?.id;
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState<DataStructureFormValues | null>(null);
