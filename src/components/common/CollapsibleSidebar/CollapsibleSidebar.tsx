@@ -11,6 +11,10 @@ import {
 } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 
+const MAX_LABEL_LENGTH = 28;
+const truncateLabel = (text: string, maxLength = MAX_LABEL_LENGTH) =>
+  text.length > maxLength ? `${text.slice(0, maxLength - 1)}…` : text;
+
 export type SidebarItem = {
   id: string;
   name: string;
@@ -152,7 +156,7 @@ function CollapsibleSidebar({
                     onClick={() => handleItemClick(item)}
                   >
                     {item.icon && <span className="mr-2">{item.icon}</span>}
-                    {item.name}
+                    {truncateLabel(item.name)}
                   </Button>
                 </div>
               )}
@@ -172,7 +176,7 @@ function CollapsibleSidebar({
                         {child.icon && (
                           <span className="mr-2">{child.icon}</span>
                         )}
-                        {child.name}
+                        {truncateLabel(child.name)}
                       </Button>
                     ))}
                   </div>
