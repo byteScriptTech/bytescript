@@ -121,68 +121,123 @@ function CollapsibleSidebar({
       </div>
       <ScrollArea className="flex-1">
         <div className="p-4 space-y-2">
-          {items?.map((item) => (
-            <div key={item.id} className="space-y-1">
-              {!isOpen && !isMobile ? (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
+          {items?.map((item) => {
+            const isItemTruncated = item.name.length > MAX_LABEL_LENGTH;
+            return (
+              <div key={item.id} className="space-y-1">
+                {!isOpen && !isMobile ? (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          className={`justify-center px-0 w-10 h-10 rounded-full mx-auto ${
+                            activeItem === item.id
+                              ? 'bg-teal-lighter text-foreground hover:bg-teal-light'
+                              : 'hover:bg-accent/50'
+                          }`}
+                          onClick={() => handleItemClick(item)}
+                        >
+                          {item.icon || (
+                            <span className="text-sm font-medium">
+                              {item.name.charAt(0)}
+                            </span>
+                          )}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="right" sideOffset={10}>
+                        <p>{item.name}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                ) : (
+                  <div className="flex items-center gap-2 w-full">
+                    {isItemTruncated ? (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              className={`flex-1 justify-start text-left ${
+                                activeItem === item.id
+                                  ? 'bg-teal-lighter text-foreground hover:bg-teal-light'
+                                  : 'hover:bg-accent'
+                              }`}
+                              onClick={() => handleItemClick(item)}
+                            >
+                              {item.icon && (
+                                <span className="mr-2">{item.icon}</span>
+                              )}
+                              {truncateLabel(item.name)}
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent side="right" sideOffset={10}>
+                            <p>{item.name}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    ) : (
                       <Button
                         variant="ghost"
-                        className={`justify-center px-0 w-10 h-10 rounded-full mx-auto ${
+                        className={`flex-1 justify-start text-left ${
                           activeItem === item.id
                             ? 'bg-teal-lighter text-foreground hover:bg-teal-light'
-                            : 'hover:bg-accent/50'
+                            : 'hover:bg-accent'
                         }`}
                         onClick={() => handleItemClick(item)}
                       >
-                        {item.icon || (
-                          <span className="text-sm font-medium">
-                            {item.name.charAt(0)}
-                          </span>
-                        )}
+                        {item.icon && <span className="mr-2">{item.icon}</span>}
+                        {truncateLabel(item.name)}
                       </Button>
-                    </TooltipTrigger>
-                    <TooltipContent side="right" sideOffset={10}>
-                      <p>{item.name}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              ) : (
-                <div className="flex items-center gap-2 w-full">
-                  <Button
-                    variant="ghost"
-                    className={`flex-1 justify-start text-left ${activeItem === item.id ? 'bg-teal-lighter text-foreground hover:bg-teal-light' : 'hover:bg-accent'}`}
-                    onClick={() => handleItemClick(item)}
-                  >
-                    {item.icon && <span className="mr-2">{item.icon}</span>}
-                    {truncateLabel(item.name)}
-                  </Button>
-                </div>
-              )}
-              {activeItem === item.id &&
-                item.children &&
-                item.children.length > 0 &&
-                (isOpen || isMobile) && (
-                  <div className="ml-4 mt-1 space-y-1">
-                    {item.children.map((child) => (
-                      <Button
-                        key={child.id}
-                        variant="ghost"
-                        size="sm"
-                        className={`w-full justify-start ${activeChild === child.id ? 'bg-teal-lighter text-foreground hover:bg-teal-light' : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'}`}
-                        onClick={() => handleChildClick(child, item.id)}
-                      >
-                        {child.icon && (
-                          <span className="mr-2">{child.icon}</span>
-                        )}
-                        {truncateLabel(child.name)}
-                      </Button>
-                    ))}
+                    )}
                   </div>
                 )}
-            </div>
-          ))}
+                {activeItem === item.id &&
+                  item.children &&
+                  item.children.length > 0 &&
+                  (isOpen || isMobile) && (
+                    <div className="ml-4 mt-1 space-y-1">
+                      {item.children.map((child) => {
+                        const isChildTruncated =
+                          child.name.length > MAX_LABEL_LENGTH;
+                        const childButton = (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className={`w-full justify-start ${
+                              activeChild === child.id
+                                ? 'bg-teal-lighter text-foreground hover:bg-teal-light'
+                                : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
+                            }`}
+                            onClick={() => handleChildClick(child, item.id)}
+                          >
+                            {child.icon && (
+                              <span className="mr-2">{child.icon}</span>
+                            )}
+                            {truncateLabel(child.name)}
+                          </Button>
+                        );
+
+                        return isChildTruncated ? (
+                          <TooltipProvider key={child.id}>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                {childButton}
+                              </TooltipTrigger>
+                              <TooltipContent side="right" sideOffset={10}>
+                                <p>{child.name}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        ) : (
+                          <div key={child.id}>{childButton}</div>
+                        );
+                      })}
+                    </div>
+                  )}
+              </div>
+            );
+          })}
         </div>
       </ScrollArea>
     </div>
