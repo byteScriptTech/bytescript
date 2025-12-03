@@ -13,7 +13,8 @@ import { usePractice } from '@/context/PracticeContext';
 import { PracticeQuestion } from '@/types/practiceQuestion';
 
 export default function PracticeQuestionPage() {
-  const { id: topicId } = useParams<{ id: string }>();
+  const params = useParams<{ id: string }>();
+  const topicId = params?.id;
   const router = useRouter();
   const { getQuestionsByTopicId } = usePractice();
   const [questions, setQuestions] = useState<PracticeQuestion[]>([]);
@@ -53,10 +54,10 @@ export default function PracticeQuestionPage() {
 
   // Fetch questions for the topic
   useEffect(() => {
-    const fetchQuestions = async () => {
+    const fetchQuestions = async (id: string) => {
       try {
         setLoading(true);
-        const topicQuestions = await getQuestionsByTopicId(topicId);
+        const topicQuestions = await getQuestionsByTopicId(id);
         if (topicQuestions.length === 0) {
           setError('No questions found for this topic');
           return;
@@ -77,7 +78,7 @@ export default function PracticeQuestionPage() {
     };
 
     if (topicId) {
-      fetchQuestions();
+      fetchQuestions(topicId);
     }
   }, [topicId, getQuestionsByTopicId]);
 
@@ -140,6 +141,11 @@ export default function PracticeQuestionPage() {
   };
 
   const handleComplete = () => {
+    if (!topicId) {
+      router.push('/practice');
+      return;
+    }
+
     // In a real app, we would submit the entire session to the server
     router.push(`/practice/${topicId}/results`);
   };

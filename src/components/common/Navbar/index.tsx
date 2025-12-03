@@ -1,7 +1,7 @@
 import { signOut } from 'firebase/auth';
 import { ChevronLeft, ChevronRight, Menu, X } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
 
 import Logo from '@/components/common/Logo';
@@ -11,22 +11,31 @@ import { useAuth } from '@/context/AuthContext';
 import { auth } from '@/firebase/config';
 
 // Navigation Link Component
-const NavLink = ({
-  href,
-  children,
-}: {
+interface NavLinkProps {
   href: string;
   children: React.ReactNode;
-}) => (
-  <Link href={href}>
-    <Button
-      variant="ghost"
-      className="px-3 h-8 text-sm font-medium text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
-    >
-      {children}
-    </Button>
-  </Link>
-);
+  activeClassName?: string;
+}
+
+const NavLink = ({ href, children }: NavLinkProps) => {
+  const pathname = usePathname();
+  const isActive = pathname === href;
+
+  return (
+    <Link href={href}>
+      <Button
+        variant="ghost"
+        className={`px-3 h-8 text-sm font-medium transition-all duration-300 ${
+          isActive
+            ? 'text-teal-600 hover:bg-transparent hover:text-teal-600'
+            : 'text-foreground hover:bg-accent hover:text-accent-foreground'
+        }`}
+      >
+        {children}
+      </Button>
+    </Link>
+  );
+};
 
 // Mobile Navigation Link Component
 interface MobileNavLinkProps {
@@ -34,22 +43,31 @@ interface MobileNavLinkProps {
   children: React.ReactNode;
   onClick: () => void;
   className?: string;
+  activeClassName?: string;
 }
 
 const MobileNavLink = ({
   href,
   children,
   onClick,
-  className,
-}: MobileNavLinkProps) => (
-  <Link
-    href={href}
-    className={`block px-3 py-2 rounded-md text-base font-medium text-foreground hover:bg-accent hover:text-accent-foreground transition-colors ${className}`}
-    onClick={onClick}
-  >
-    {children}
-  </Link>
-);
+  className = '',
+  activeClassName = 'text-teal-600 dark:text-teal-400',
+}: MobileNavLinkProps) => {
+  const pathname = usePathname();
+  const isActive = pathname === href;
+
+  return (
+    <Link
+      href={href}
+      className={`w-full flex items-center px-4 py-2.5 rounded-lg transition-all duration-300 text-base font-medium ${
+        isActive ? `${activeClassName}` : 'text-foreground hover:bg-accent'
+      } ${className}`}
+      onClick={onClick}
+    >
+      {children}
+    </Link>
+  );
+};
 
 // Navigation Controls Component
 const NavigationControls = ({
@@ -130,31 +148,7 @@ const Navbar = () => {
           </Link>
           <div className="flex items-center gap-2">
             <NavLink href="/dashboard">Dashboard</NavLink>
-            <div className="relative group">
-              <NavLink href="/learn">Learn</NavLink>
-              <div className="absolute left-0 mt-1 w-48 bg-popover border rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                <div className="py-1">
-                  <Link
-                    href="/learn"
-                    className="block px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
-                  >
-                    All Topics
-                  </Link>
-                  <Link
-                    href="/learn/python"
-                    className="block px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
-                  >
-                    Python
-                  </Link>
-                  <Link
-                    href="/learn/javascript"
-                    className="block px-4 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
-                  >
-                    JavaScript
-                  </Link>
-                </div>
-              </div>
-            </div>
+            <NavLink href="/learn">Learn</NavLink>
             <NavLink href="/practice">Practice</NavLink>
             <NavLink href="/peer-programming">Peer Programming</NavLink>
             <NavigationControls
@@ -217,42 +211,31 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       <div
-        className={`w-full sm:hidden overflow-hidden transition-all duration-200 ${
-          isMobileMenuOpen ? 'max-h-48' : 'max-h-0'
+        className={`w-full sm:hidden overflow-hidden transition-all duration-300 ease-in-out bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 ${
+          isMobileMenuOpen ? 'max-h-96' : 'max-h-0'
         }`}
       >
-        <div className="p-3 space-y-3 border-t">
-          {/* Menu Items */}
-          <div className="space-y-1">
-            <MobileNavLink
-              href="/dashboard"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Dashboard
-            </MobileNavLink>
-            <div className="pl-4">
-              <MobileNavLink
-                href="/learn"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                All Topics
-              </MobileNavLink>
-              <MobileNavLink
-                href="/learn/python"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="pl-6"
-              >
-                Python
-              </MobileNavLink>
-            </div>
-            <MobileNavLink
-              href="/practice"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Practice
-            </MobileNavLink>
-          </div>
-        </div>
+        <nav className="px-4 py-3 border-t border-border/40">
+          <ul className="space-y-2">
+            {[
+              { href: '/dashboard', label: 'Dashboard' },
+              { href: '/learn', label: 'Learn' },
+              { href: '/practice', label: 'Practice' },
+              { href: '/peer-programming', label: 'Peer Programming' },
+            ].map((item) => (
+              <li key={item.href}>
+                <MobileNavLink
+                  href={item.href}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="w-full flex items-center px-4 py-2.5 rounded-lg transition-colors duration-200"
+                  activeClassName="bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300"
+                >
+                  {item.label}
+                </MobileNavLink>
+              </li>
+            ))}
+          </ul>
+        </nav>
       </div>
     </header>
   );

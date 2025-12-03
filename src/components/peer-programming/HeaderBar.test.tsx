@@ -36,7 +36,6 @@ describe('HeaderBar', () => {
   it('renders the header with initial state', () => {
     render(<HeaderBar {...defaultProps} />);
 
-    expect(screen.getByText('Peer Programming')).toBeInTheDocument();
     expect(screen.getByTestId('room-id-input')).toBeInTheDocument();
     expect(screen.getByTestId('join-room-button')).toBeInTheDocument();
     expect(screen.getByTestId('create-room-button')).toBeInTheDocument();

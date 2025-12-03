@@ -17,6 +17,10 @@ export default function EditProblemPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!params || !params.id) {
+      return;
+    }
+
     const fetchProblem = async () => {
       try {
         const id = Array.isArray(params.id) ? params.id[0] : params.id;
@@ -35,7 +39,7 @@ export default function EditProblemPage() {
     };
 
     fetchProblem();
-  }, [params.id, router]);
+  }, [params, router]);
 
   if (loading) {
     return <div>Loading...</div>;

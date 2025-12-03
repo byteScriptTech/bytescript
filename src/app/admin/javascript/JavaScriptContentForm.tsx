@@ -131,19 +131,30 @@ const contentSchema = z.object({
     .default([]),
 });
 
+type TopicService = Pick<
+  typeof javascriptService,
+  'createTopic' | 'updateTopic'
+>;
+
 interface JavaScriptContentFormProps {
   content?: Partial<ContentFormValues> & { id?: string };
   onSuccess?: () => void;
+  service?: TopicService;
+  redirectPath?: string;
 }
 
 export function JavaScriptContentForm({
   content,
   onSuccess,
+  service,
+  redirectPath,
 }: JavaScriptContentFormProps): JSX.Element {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [newObjective, setNewObjective] = useState('');
   const [newMistake, setNewMistake] = useState('');
+  const contentService = service ?? javascriptService;
+  const successRedirect = redirectPath ?? '/admin/javascript';
 
   const form = useForm<ContentFormValues>({
     resolver: zodResolver(contentSchema as any),
@@ -313,17 +324,17 @@ export function JavaScriptContentForm({
       };
 
       if (content?.id) {
-        await javascriptService.updateTopic(content.id, topicData);
+        await contentService.updateTopic(content.id, topicData);
         toast.success('Topic updated successfully');
         if (onSuccess) onSuccess();
       } else {
-        await javascriptService.createTopic(topicData);
+        await contentService.createTopic(topicData);
         toast.success('Topic created successfully');
         form.reset();
         if (onSuccess) onSuccess();
       }
 
-      router.push('/admin/javascript');
+      router.push(successRedirect);
     } catch (error) {
       console.error('Error saving topic:', error);
       toast.error(

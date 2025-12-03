@@ -5,10 +5,12 @@ import { Button } from '@/components/ui/button';
 
 interface LandingPageHeaderProps {
   handleExploreByteScriptClick: () => void;
+  hideGetStarted?: boolean;
 }
 
 const LandingPageHeader = ({
   handleExploreByteScriptClick,
+  hideGetStarted = false,
 }: LandingPageHeaderProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuItems = [
@@ -54,12 +56,14 @@ const LandingPageHeader = ({
                 {item.text}
               </a>
             ))}
-            <Button
-              onClick={handleExploreByteScriptClick}
-              className="min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden h-10 px-4 bg-[#00BFA6] hover:bg-[#00A38C] text-white text-sm font-bold leading-normal tracking-[0.015em]"
-            >
-              <span className="truncate">Get Started</span>
-            </Button>
+            {!hideGetStarted && (
+              <Button
+                onClick={handleExploreByteScriptClick}
+                className="min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden h-10 px-4 bg-[#00BFA6] hover:bg-[#00A38C] text-white text-sm font-bold leading-normal tracking-[0.015em]"
+              >
+                <span className="truncate">Get Started</span>
+              </Button>
+            )}
           </div>
           <button
             data-testid="mobile-menu-toggle"
@@ -131,12 +135,14 @@ const LandingPageHeader = ({
                 {item.text}
               </a>
             ))}
-            <Button
-              onClick={handleExploreByteScriptClick}
-              className="w-full mt-4 min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden h-10 px-4 bg-[#00BFA6] hover:bg-[#00A38C] text-white text-sm font-bold leading-normal tracking-[0.015em]"
-            >
-              <span className="truncate">Get Started</span>
-            </Button>
+            {!hideGetStarted && (
+              <Button
+                onClick={handleExploreByteScriptClick}
+                className="w-full mt-4 min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden h-10 px-4 bg-[#00BFA6] hover:bg-[#00A38C] text-white text-sm font-bold leading-normal tracking-[0.015em]"
+              >
+                <span className="truncate">Get Started</span>
+              </Button>
+            )}
           </div>
         </div>
       </div>

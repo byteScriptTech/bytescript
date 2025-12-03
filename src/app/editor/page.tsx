@@ -56,6 +56,7 @@ export default function EditorPage() {
       <div className="min-h-screen bg-background text-foreground">
         <LandingPageHeader
           handleExploreByteScriptClick={() => router.push('/login')}
+          hideGetStarted={true}
         />
         <div className="container mx-auto p-2 sm:p-4 h-[calc(100vh-64px)] flex flex-col max-w-7xl">
           <div className="mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -85,7 +86,7 @@ export default function EditorPage() {
 
           <div className="flex-1 flex flex-col min-h-0 rounded-lg overflow-hidden border">
             {editorType === 'javascript' ? (
-              <JsEditor />
+              <JsEditor showAlgorithm={true} />
             ) : (
               <PythonEditor
                 initialCode={pythonCode}

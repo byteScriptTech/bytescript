@@ -32,6 +32,7 @@ const PracticeContent: React.FC<PracticeContentProps> = ({
   const router = useRouter();
 
   const { topics, loading, error, fetchTopicsByCategory } = usePractice();
+
   useEffect(() => {
     const filterTopics = async () => {
       setIsLoading(true);

@@ -7,8 +7,8 @@ import LearnContent from './LearnContent';
 
 function LearnContentWithParamsInner() {
   const searchParams = useSearchParams();
-  const initialTopicId = searchParams.get('topic');
-  const initialSubtopicId = searchParams.get('subtopic');
+  const initialTopicId = searchParams?.get('topic') ?? null;
+  const initialSubtopicId = searchParams?.get('subtopic') ?? null;
 
   return (
     <LearnContent

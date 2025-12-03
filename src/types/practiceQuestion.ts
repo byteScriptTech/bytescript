@@ -17,8 +17,11 @@ export interface BaseQuestion {
   type: QuestionType;
   question: string;
   points: number;
+  topicId: string;
   timeLimit?: number; // in seconds
   explanation?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface MCQQuestion extends BaseQuestion {

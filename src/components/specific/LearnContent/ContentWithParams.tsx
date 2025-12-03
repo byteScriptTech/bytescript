@@ -27,8 +27,8 @@ export default function ContentWithParams() {
   const [loading, setLoading] = useState(true);
 
   // Get topic and subtopic from URL params
-  const topicId = searchParams.get('topic') || '';
-  const subtopicId = searchParams.get('subtopic') || '';
+  const topicId = searchParams?.get('topic') || '';
+  const subtopicId = searchParams?.get('subtopic') || '';
 
   // Mock data - replace with actual data fetching
   useEffect(() => {
@@ -86,7 +86,7 @@ export default function ContentWithParams() {
 
   // Handle topic click - update URL with new topic and clear subtopic
   const handleTopicClick = (newTopicId: string) => {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(searchParams?.toString() || '');
     params.set('topic', newTopicId);
     params.delete('subtopic');
     router.push(`?${params.toString()}`);
@@ -94,7 +94,7 @@ export default function ContentWithParams() {
 
   // Handle subtopic click - update URL with new subtopic
   const handleSubtopicClick = (newSubtopicId: string) => {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(searchParams?.toString() || '');
     params.set('subtopic', newSubtopicId);
     router.push(`?${params.toString()}`);
   };

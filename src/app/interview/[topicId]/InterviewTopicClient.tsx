@@ -23,8 +23,8 @@ interface Question {
 }
 
 export default function InterviewTopicClient() {
-  const params = useParams();
-  const topicId = params.topicId as string;
+  const params = useParams<{ topicId?: string }>();
+  const topicId = params?.topicId ?? null;
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -68,10 +68,12 @@ export default function InterviewTopicClient() {
   }, [questionsPerPage]);
 
   useEffect(() => {
-    const fetchQuestions = async () => {
+    const fetchQuestions = async (currentTopicId: string) => {
       try {
         setLoading(true);
-        const questions = await interviewService.getQuestionsByTopic(topicId);
+        setError(null);
+        const questions =
+          await interviewService.getQuestionsByTopic(currentTopicId);
 
         if (!questions) {
           console.error('[ERROR] No questions array returned from service');
@@ -80,8 +82,10 @@ export default function InterviewTopicClient() {
         }
 
         if (questions.length === 0) {
-          console.warn(`[WARN] No questions found for topic: ${topicId}`);
-          setError(`No questions found for topic: ${topicId}`);
+          console.warn(
+            `[WARN] No questions found for topic: ${currentTopicId}`
+          );
+          setError(`No questions found for topic: ${currentTopicId}`);
           return;
         }
 
@@ -95,9 +99,13 @@ export default function InterviewTopicClient() {
       }
     };
 
-    if (topicId) {
-      fetchQuestions();
+    if (!topicId) {
+      setError('Invalid topic. Please go back and pick another topic.');
+      setLoading(false);
+      return;
     }
+
+    fetchQuestions(topicId);
   }, [topicId]);
 
   // Handle search
