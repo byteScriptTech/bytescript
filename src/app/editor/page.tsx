@@ -85,7 +85,7 @@ export default function EditorPage() {
 
           <div className="flex-1 flex flex-col min-h-0 rounded-lg overflow-hidden border">
             {editorType === 'javascript' ? (
-              <JsEditor />
+              <JsEditor showAlgorithm={true} />
             ) : (
               <PythonEditor
                 initialCode={pythonCode}
