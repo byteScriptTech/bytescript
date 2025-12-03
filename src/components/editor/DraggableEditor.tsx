@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import useIsMobile from '@/hooks/useIsMobile';
 
 const JsEditor = dynamic(
   () =>
@@ -91,6 +92,7 @@ export function DraggableEditor({
   const [pythonCode, setPythonCode] = useState(defaultPythonCode);
   const [dimensions, setDimensions] = useState(defaultSize);
   const [position, setPosition] = useState(defaultPosition);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     setPosition(defaultPosition);
@@ -155,6 +157,10 @@ export function DraggableEditor({
   }, [defaultPosition]);
 
   useEffect(() => {
+    if (isMobile) {
+      return;
+    }
+
     const handleMouseMove = (e: MouseEvent) => {
       if (isDragging) {
         setPosition({
@@ -191,20 +197,40 @@ export function DraggableEditor({
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, isResizing, dragStart, startDimensions, resizeStart]);
+  }, [
+    isDragging,
+    isResizing,
+    dragStart,
+    startDimensions,
+    resizeStart,
+    isMobile,
+  ]);
 
-  return (
-    <div
-      ref={editorRef}
-      className="fixed bg-background rounded-lg shadow-2xl border border-border overflow-hidden flex flex-col z-50"
-      style={{
+  const editorStyles: React.CSSProperties = isMobile
+    ? {
+        left: '16px',
+        right: '16px',
+        top: '72px',
+        bottom: '16px',
+        width: 'auto',
+        height: 'auto',
+        minWidth: 'auto',
+        minHeight: 'auto',
+      }
+    : {
         width: `${dimensions.width}px`,
         height: `${dimensions.height}px`,
         left: `${position.x}px`,
         top: `${position.y}px`,
         minWidth: '400px',
         minHeight: '300px',
-      }}
+      };
+
+  return (
+    <div
+      ref={editorRef}
+      className="fixed bg-background rounded-lg shadow-2xl border border-border overflow-hidden flex flex-col z-50"
+      style={editorStyles}
       role="dialog"
       aria-modal="true"
       aria-label="Code editor"
@@ -215,8 +241,11 @@ export function DraggableEditor({
           role="button"
           tabIndex={0}
           aria-label="Move editor"
-          className="flex items-center justify-between px-4 py-2 bg-muted border-b cursor-move focus:outline-none focus:ring-2 focus:ring-primary"
+          className={`flex items-center justify-between px-4 py-2 bg-muted border-b ${
+            isMobile ? 'cursor-default' : 'cursor-move'
+          } focus:outline-none focus:ring-2 focus:ring-primary`}
           onMouseDown={(e) => {
+            if (isMobile) return;
             e.stopPropagation();
             setIsDragging(true);
             _setDragStart({
@@ -225,12 +254,14 @@ export function DraggableEditor({
             });
           }}
           onKeyDown={(e) => {
+            if (isMobile) return;
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
               setIsDragging(true);
             }
           }}
           onBlur={() => {
+            if (isMobile) return;
             setIsDragging(false);
           }}
         >
@@ -257,19 +288,21 @@ export function DraggableEditor({
           </button>
         </div>
         {renderEditor()}
-        <div
-          className="absolute bottom-1 right-1 w-2 h-2 border-r-2 border-b-2 border-muted-foreground"
-          onMouseDown={(e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            _setIsResizing(true);
-            _setResizeStart({ x: e.clientX, y: e.clientY });
-            _setStartDimensions(dimensions);
-          }}
-          role="button"
-          tabIndex={-1}
-          aria-label="Resize editor"
-        />
+        {!isMobile && (
+          <div
+            className="absolute bottom-1 right-1 w-2 h-2 border-r-2 border-b-2 border-muted-foreground"
+            onMouseDown={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              _setIsResizing(true);
+              _setResizeStart({ x: e.clientX, y: e.clientY });
+              _setStartDimensions(dimensions);
+            }}
+            role="button"
+            tabIndex={-1}
+            aria-label="Resize editor"
+          />
+        )}
       </div>
     </div>
   );
