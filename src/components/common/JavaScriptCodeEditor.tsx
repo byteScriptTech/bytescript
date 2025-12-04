@@ -23,7 +23,8 @@ interface JavaScriptCodeEditorProps {
   showOutput?: boolean;
   theme?: Theme;
   onRun?: (code: string) => void | Promise<void>;
-  onCodeChange?: (code: string) => void; // <-- NEW
+  onCodeChange?: (code: string) => void;
+  height?: string;
 }
 
 export const JavaScriptCodeEditor = ({
@@ -34,14 +35,14 @@ export const JavaScriptCodeEditor = ({
   showOutput = true,
   theme = 'dark',
   onRun,
-  onCodeChange, // <-- NEW
+  onCodeChange,
+  height,
 }: JavaScriptCodeEditorProps) => {
   const editorRef = React.useRef<any>(null);
   const [output, setOutput] = React.useState('');
   const [isRunning, setIsRunning] = React.useState(false);
   const [code, setCode] = React.useState(initialCode);
 
-  // EXECUTE EDITOR CODE
   const runCode = useCallback(async () => {
     if (!editorRef.current) return;
 
@@ -49,7 +50,6 @@ export const JavaScriptCodeEditor = ({
     setOutput('');
     setIsRunning(true);
 
-    // Call parent run handler if provided
     await onRun?.(currentCode);
 
     setIsRunning(false);
@@ -105,7 +105,7 @@ export const JavaScriptCodeEditor = ({
       {/* Code Editor */}
       <div className="relative h-full">
         <MonacoEditor
-          height="100%"
+          height={height ?? '100%'}
           language="javascript"
           theme={theme === 'light' ? 'vs-light' : 'vs-dark'}
           value={code}

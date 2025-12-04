@@ -223,6 +223,7 @@ const LearnContentInner: FC<LearnContentInnerProps> = ({
                 className="w-full"
                 showRunButton={true}
                 showOutput={true}
+                height="300px"
               />
             </div>
           </div>
