@@ -140,6 +140,7 @@ export function Exercise({
                       showRunButton={false}
                       showOutput={false}
                       className="rounded-t-none border-0"
+                      height={'300px'}
                     />
                   </div>
                 </div>

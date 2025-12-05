@@ -5,14 +5,6 @@ import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 
 import { JavaScriptCodeEditor } from './common/JavaScriptCodeEditor';
 
-type ExecutionResult = {
-  output: string;
-  result?: any;
-  error?: string;
-  stack?: string;
-  executionTime?: number;
-};
-
 interface CodeEditorProps {
   code?: string;
   onCodeChange?: (code: string) => void;
@@ -35,6 +27,13 @@ export default function CodeEditor({
     }
   }, [externalCode]);
 
+  const [output, setOutput] = useState('');
+  const outputRef = useRef<HTMLDivElement>(null);
+
+  const handleOutput = useCallback((result: string) => {
+    setOutput(result);
+  }, []);
+
   const handleCodeChange = useCallback(
     (newCode: string) => {
       setCurrentCode(newCode);
@@ -43,89 +42,16 @@ export default function CodeEditor({
     [onCodeChange]
   );
 
-  const [isRunning, setIsRunning] = useState(false);
-  const [result, setResult] = useState<ExecutionResult | null>(null);
-  const outputRef = useRef<HTMLDivElement>(null);
-
-  // Utility function to normalize all logged values
-  const normalizeOutput = (value: any): string => {
-    if (value === null) return 'null';
-    if (value === undefined) return 'undefined';
-    if (typeof value === 'object') return JSON.stringify(value, null, 2);
-    return String(value);
-  };
-
-  // Execute code entered in editor
-  const executeCode = useCallback((executionCode: string): ExecutionResult => {
-    let output = '';
-
-    const originalLog = console.log;
-    const originalError = console.error;
-    const originalWarn = console.warn;
-
-    console.log = (...args) => {
-      output += args.map(normalizeOutput).join(' ') + '\n';
-      originalLog(...args);
-    };
-
-    console.error = (...args) => {
-      output += 'Error: ' + args.map(normalizeOutput).join(' ') + '\n';
-      originalError(...args);
-    };
-
-    console.warn = (...args) => {
-      output += 'Warning: ' + args.map(normalizeOutput).join(' ') + '\n';
-      originalWarn(...args);
-    };
-
-    const start = performance.now();
-
-    try {
-      const result = new Function(executionCode)();
-      const end = performance.now();
-
-      return {
-        output,
-        result,
-        executionTime: end - start,
-      };
-    } catch (error: any) {
-      return {
-        output,
-        error: error.message,
-        stack: error.stack,
-      };
-    } finally {
-      // Restore original console
-      console.log = originalLog;
-      console.error = originalError;
-      console.warn = originalWarn;
-    }
-  }, []);
-
-  const handleRunCode = useCallback(() => {
-    if (isRunning) return;
-
-    setIsRunning(true);
-    setResult(null);
-
-    setTimeout(() => {
-      const execResult = executeCode(currentCode);
-      setResult(execResult);
-      setIsRunning(false);
-    }, 50);
-  }, [currentCode, isRunning, executeCode]);
-
   const clearOutput = useCallback(() => {
-    setResult(null);
+    setOutput('');
   }, []);
 
-  // Scroll output automatically
+  // Scroll output automatically when it changes
   useEffect(() => {
     if (outputRef.current) {
       outputRef.current.scrollTop = outputRef.current.scrollHeight;
     }
-  }, [result]);
+  }, [output]);
 
   const [algorithm, setAlgorithm] = useState('// Write your algorithm here\n');
 
@@ -167,15 +93,8 @@ export default function CodeEditor({
                   </div>
                   <div className="flex space-x-2">
                     <button
-                      onClick={handleRunCode}
-                      disabled={isRunning}
-                      className="border bg-background hover:bg-accent h-8 px-3 text-xs rounded-md"
-                    >
-                      {isRunning ? 'Running...' : 'Run (Ctrl+Enter)'}
-                    </button>
-                    <button
                       onClick={clearOutput}
-                      disabled={!result}
+                      disabled={!output}
                       className="border bg-background hover:bg-accent h-8 px-3 text-xs rounded-md"
                     >
                       Clear
@@ -188,9 +107,10 @@ export default function CodeEditor({
                   <JavaScriptCodeEditor
                     initialCode={currentCode}
                     onCodeChange={handleCodeChange}
+                    onOutput={handleOutput}
                     readOnly={false}
                     className="h-full w-full"
-                    showRunButton={false}
+                    showRunButton={true}
                     showOutput={false}
                   />
                 </div>
@@ -209,29 +129,16 @@ export default function CodeEditor({
                   ref={outputRef}
                   className="flex-1 overflow-auto p-4 text-sm font-mono whitespace-pre-wrap bg-background"
                 >
-                  {isRunning ? (
-                    <div className="text-muted-foreground">Running...</div>
-                  ) : result ? (
-                    <>
-                      {result.output}
-                      {result.error && (
-                        <div className="text-red-500 mt-2">
-                          <strong>Error:</strong> {result.error}
-                          {result.stack && (
-                            <pre className="mt-1 text-xs text-red-400 whitespace-pre-wrap">
-                              {result.stack}
-                            </pre>
-                          )}
-                        </div>
-                      )}
-
-                      {result.executionTime && (
-                        <div className="mt-2 text-xs text-muted-foreground">
-                          Execution time: {result.executionTime.toFixed(2)}ms
-                        </div>
-                      )}
-                    </>
-                  ) : null}
+                  {output || (
+                    <div className="text-muted-foreground">
+                      Output will appear here
+                    </div>
+                  )}
+                  {output && (
+                    <pre className="whitespace-pre-wrap break-words">
+                      {output}
+                    </pre>
+                  )}
                 </div>
               </Panel>
             </PanelGroup>
