@@ -44,49 +44,6 @@ export default function CustomTestList({
   >('my-tests');
   const [attempts, setAttempts] = useState<TestAttempt[]>([]);
 
-  // Debug function - add this to your component
-  const debugTests = async () => {
-    console.log('=== DEBUG INFO ===');
-    console.log('Current user:', currentUser?.uid);
-    console.log('Current user email:', currentUser?.email);
-
-    try {
-      // Test 1: Get user's own tests
-      console.log('\n--- Testing getUserTests ---');
-      const userTests = await CustomTestService.getUserTests(
-        currentUser?.uid || ''
-      );
-      console.log('User tests found:', userTests.length);
-      userTests.forEach((test) => {
-        console.log(
-          'User Test:',
-          test.id,
-          test.title,
-          'createdBy:',
-          test.createdBy
-        );
-      });
-
-      // Test 2: Get public tests
-      console.log('\n--- Testing getPublicTests ---');
-      const publicTests = await CustomTestService.getPublicTests();
-      console.log('Public tests found:', publicTests.length);
-      publicTests.forEach((test) => {
-        console.log(
-          'Public Test:',
-          test.id,
-          test.title,
-          'createdBy:',
-          test.createdBy,
-          'isPublic:',
-          test.isPublic
-        );
-      });
-    } catch (error) {
-      console.error('Debug error:', error);
-    }
-  };
-
   const loadTests = useCallback(async () => {
     if (!currentUser) return;
 
@@ -117,8 +74,6 @@ export default function CustomTestList({
   // Add this to your useEffect or call it manually
   useEffect(() => {
     loadTests();
-    // Debug on load
-    debugTests();
   }, [loadTests]);
   const handleDeleteTest = async (testId: string) => {
     if (!confirm('Are you sure you want to delete this test?')) return;
@@ -155,10 +110,6 @@ export default function CustomTestList({
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Custom Tests</h1>
         <div className="flex gap-2">
-          {/* Debug button - remove this in production */}
-          <Button variant="outline" onClick={debugTests}>
-            Debug
-          </Button>
           <Button onClick={onCreateTest}>
             <Plus className="h-4 w-4 mr-2" />
             Create Test

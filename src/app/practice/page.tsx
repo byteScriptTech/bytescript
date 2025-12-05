@@ -21,8 +21,8 @@ export default function Practice() {
     undefined
   );
   const [category, setCategory] = useState<string>('problems');
-  const [activeItemId, setActiveItemId] = useState<string>('problems');
-  const [view, setView] = useState<'practice' | 'custom-tests'>('practice');
+  const [activeItemId, setActiveItemId] = useState<string>('custom-tests');
+  const [view, setView] = useState<'practice' | 'custom-tests'>('custom-tests');
 
   const sidebarItems: SidebarItem[] = useMemo(
     () => [

@@ -26,6 +26,7 @@ export default function PracticeQuestionPage() {
   const [userCode, setUserCode] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showNextButton, setShowNextButton] = useState(false);
 
   // Timer effect
   useEffect(() => {
@@ -45,11 +46,16 @@ export default function PracticeQuestionPage() {
       setCurrentQuestionIndex(nextIndex);
       setSelectedOption(null);
       setShowExplanation(false);
+      setShowNextButton(false);
       if (nextQuestion?.type === 'coding') {
         setUserCode(nextQuestion.initialCode || '');
       }
       setTimeRemaining(nextQuestion?.timeLimit || null);
     }
+  };
+
+  const handleShowNext = () => {
+    setShowNextButton(true);
   };
 
   // Fetch questions for the topic
@@ -128,13 +134,11 @@ export default function PracticeQuestionPage() {
     setIsSubmitting(true);
     setShowExplanation(true);
 
-    // Auto-advance to next question after a short delay
+    // Show the next button after submission
     setTimeout(() => {
-      if (!isLastQuestion) {
-        handleNextQuestion();
-      }
       setIsSubmitting(false);
-    }, 1000);
+      handleShowNext();
+    }, 500);
   };
 
   const handleComplete = () => {
@@ -223,8 +227,10 @@ export default function PracticeQuestionPage() {
         isSubmitting={isSubmitting}
         isMcq={currentQuestion.type === 'mcq'}
         hasSelectedOption={!!selectedOption}
+        showNext={showNextButton}
         onPrevious={handlePreviousQuestion}
         onSubmit={handleSubmit}
+        onNext={handleNextQuestion}
         onComplete={handleComplete}
       />
     </div>

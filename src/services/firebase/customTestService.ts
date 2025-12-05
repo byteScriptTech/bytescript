@@ -207,7 +207,6 @@ export class CustomTestService {
 
       const tests = querySnapshot.docs.map((doc) => {
         const data = doc.data();
-        console.log('Document data:', doc.id, data);
         return {
           id: doc.id,
           ...data,
@@ -216,7 +215,6 @@ export class CustomTestService {
         } as CustomTest;
       });
 
-      console.log('Mapped tests:', tests);
       return tests;
     } catch (error) {
       console.error('Error in getUserTests:', error);
@@ -231,7 +229,6 @@ export class CustomTestService {
   }
 
   static async getPublicTests(limitCount: number = 20): Promise<CustomTest[]> {
-    console.log('Fetching public tests with limit:', limitCount);
     try {
       const q = query(
         collection(db, TESTS_COLLECTION),
@@ -239,18 +236,9 @@ export class CustomTestService {
         orderBy('createdAt', 'desc'),
         limit(limitCount)
       );
-
-      console.log('Public tests query created, executing...');
       const querySnapshot = await getDocs(q);
-      console.log(
-        'Public tests query executed, found',
-        querySnapshot.size,
-        'documents'
-      );
-
       const tests = querySnapshot.docs.map((doc) => {
         const data = doc.data();
-        console.log('Public test document:', doc.id, data);
         return {
           id: doc.id,
           ...data,
@@ -258,8 +246,6 @@ export class CustomTestService {
           updatedAt: data?.updatedAt?.toDate(),
         } as CustomTest;
       });
-
-      console.log('Mapped public tests:', tests);
       return tests;
     } catch (error) {
       console.error('Error in getPublicTests:', error);

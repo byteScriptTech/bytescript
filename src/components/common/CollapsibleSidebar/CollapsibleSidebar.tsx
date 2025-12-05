@@ -81,7 +81,6 @@ function CollapsibleSidebar({
       child.onClick();
     }
   };
-  console.log(isMobile, 'isMobile');
   return (
     <div
       id="collapsible-sidebar"
