@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -14,6 +15,7 @@ import TestTaker from './TestTaker';
 type ViewState = 'list' | 'create' | 'edit' | 'take' | 'results';
 
 export default function CustomTestContent() {
+  const router = useRouter();
   const [viewState, setViewState] = useState<ViewState>('list');
   const [selectedTest, setSelectedTest] = useState<CustomTest | null>(null);
   const [selectedAttempt, setSelectedAttempt] = useState<TestAttempt | null>(
@@ -38,8 +40,8 @@ export default function CustomTestContent() {
     try {
       const test = await CustomTestService.getTest(testId);
       if (test) {
-        setSelectedTest(test);
-        setViewState('take');
+        // Navigate to the separate custom test page
+        router.push(`/customtest/${testId}`);
       }
     } catch (error) {
       console.error('Error loading test:', error);
