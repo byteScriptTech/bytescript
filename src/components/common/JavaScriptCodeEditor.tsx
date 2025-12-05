@@ -198,7 +198,7 @@ export const JavaScriptCodeEditor: React.FC<JavaScriptCodeEditorProps> = ({
       />
 
       {showOutput && (
-        <div className="border-t p-3 text-sm font-mono whitespace-pre-wrap max-h-60 overflow-y-auto">
+        <div className="border-t p-3 text-sm font-mono whitespace-pre-wrap max-h-40 overflow-y-auto">
           {output || (
             <span className="text-muted-foreground italic">
               Run the code to see output here...

@@ -17,7 +17,7 @@ export function CodingQuestion({
 }: CodingQuestionProps) {
   return (
     <div className="space-y-4">
-      <div className="h-[600px] rounded-md overflow-hidden">
+      <div className="h-[500px] rounded-md overflow-hidden">
         <JavaScriptCodeEditor
           initialCode={userCode || initialCode || ''}
           onCodeChange={onCodeChange}
