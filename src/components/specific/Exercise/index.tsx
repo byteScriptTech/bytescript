@@ -108,6 +108,7 @@ export function Exercise({
               showRunButton={true}
               showOutput={true}
               className="rounded-b-none"
+              height="300px"
             />
           </div>
         </div>

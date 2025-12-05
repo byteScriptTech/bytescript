@@ -6,6 +6,7 @@ import * as React from 'react';
 import { useCallback } from 'react';
 
 import { Button } from '@/components/ui/button';
+import { useTheme } from '@/context/theme-provider';
 import { cn } from '@/lib/utils';
 
 // Dynamically import Monaco
@@ -13,15 +14,12 @@ const MonacoEditor = dynamic(() => import('@monaco-editor/react'), {
   ssr: false,
 });
 
-type Theme = 'light' | 'dark' | 'system';
-
 interface JavaScriptCodeEditorProps {
   initialCode: string;
   readOnly?: boolean;
   className?: string;
   showRunButton?: boolean;
   showOutput?: boolean;
-  theme?: Theme;
   onRun?: (code: string) => void | Promise<void>;
   onCodeChange?: (code: string) => void;
   height?: string;
@@ -33,11 +31,11 @@ export const JavaScriptCodeEditor = ({
   className,
   showRunButton = true,
   showOutput = true,
-  theme = 'dark',
   onRun,
   onCodeChange,
   height,
 }: JavaScriptCodeEditorProps) => {
+  const { theme } = useTheme();
   const editorRef = React.useRef<any>(null);
   const [output, setOutput] = React.useState('');
   const [isRunning, setIsRunning] = React.useState(false);
