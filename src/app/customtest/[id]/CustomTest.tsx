@@ -3,12 +3,12 @@
 import { useParams, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 
+import { JavaScriptCodeEditor } from '@/components/common/JavaScriptCodeEditor';
 import Timer from '@/components/TestTimer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/context/AuthContext';
 import { CustomTestService } from '@/services/firebase/customTestService';
 import { CustomTest, TestQuestion, TestAnswer } from '@/types/customTest';
@@ -181,7 +181,7 @@ export default function CustomTestPage() {
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
         <p className="text-red-500">{error ?? 'Test not found'}</p>
         <Button className="mt-4" onClick={() => router.push('/customtest')}>
-          Back to Custom Tests
+          Back to Practice
         </Button>
       </div>
     );
@@ -193,10 +193,10 @@ export default function CustomTestPage() {
       <div className="mb-6">
         <Button
           variant="outline"
-          onClick={() => router.push('/customtest')}
+          onClick={() => router.push('/practice')}
           className="flex items-center gap-2"
         >
-          ← Back to Custom Tests
+          ← Back to Practice
         </Button>
       </div>
 
@@ -270,11 +270,20 @@ export default function CustomTestPage() {
           ) : currentQuestion.type === 'coding' ? (
             <div className="space-y-3">
               <Label>Write your code:</Label>
-              <Textarea
-                value={userCode}
-                onChange={(e) => setUserCode(e.target.value)}
-                className="font-mono min-h-[200px]"
-              />
+              <div className="h-full border rounded-md overflow-hidden">
+                <JavaScriptCodeEditor
+                  initialCode={userCode}
+                  onCodeChange={setUserCode}
+                  readOnly={false}
+                  className="w-full"
+                  showRunButton
+                  showOutput
+                  height="300px"
+                  onOutput={(output) => {
+                    console.log('Code output:', output);
+                  }}
+                />
+              </div>
             </div>
           ) : (
             <p className="text-gray-600">

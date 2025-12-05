@@ -128,9 +128,6 @@ export default function PracticeQuestionPage() {
     setIsSubmitting(true);
     setShowExplanation(true);
 
-    // In a real app, we would submit the answer to the server here
-    // and wait for confirmation before moving to the next question
-
     // Auto-advance to next question after a short delay
     setTimeout(() => {
       if (!isLastQuestion) {
@@ -146,7 +143,6 @@ export default function PracticeQuestionPage() {
       return;
     }
 
-    // In a real app, we would submit the entire session to the server
     router.push(`/practice/${topicId}/results`);
   };
 

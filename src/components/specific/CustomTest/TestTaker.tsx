@@ -4,6 +4,7 @@ import { Clock, ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
 import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 
+import { JavaScriptCodeEditor } from '@/components/common/JavaScriptCodeEditor';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -460,13 +461,16 @@ function CodingQuestion({
         <label htmlFor="solution" className="block text-sm font-medium mb-2">
           Your Solution:
         </label>
-        <textarea
-          id="solution"
-          value={answer}
-          onChange={(e) => onAnswerChange(e.target.value)}
-          placeholder="Write your solution here..."
-          className="w-full h-64 p-3 border rounded-lg font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+        <div className="h-64">
+          <JavaScriptCodeEditor
+            initialCode={answer || ''}
+            onCodeChange={onAnswerChange}
+            readOnly={false}
+            showRunButton={false}
+            showOutput={false}
+            className="h-full w-full border rounded-lg overflow-hidden"
+          />
+        </div>
       </div>
     </div>
   );
