@@ -21,6 +21,9 @@ interface PracticeContextType {
     topicId: string,
     type: 'mcq' | 'coding'
   ) => Promise<PracticeQuestion[]>;
+
+  getTimerEnabled: (topicId: string) => boolean;
+  toggleTimer: (topicId: string) => void;
 }
 
 const PracticeContext = createContext<PracticeContextType | undefined>(
@@ -35,6 +38,39 @@ export const PracticeProvider = ({
   const [topics, setTopics] = useState<PracticeTopic[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [timerSettings, setTimerSettings] = useState<Record<string, boolean>>(
+    () => {
+      // Load timer preferences from localStorage
+      if (typeof window !== 'undefined') {
+        const saved = localStorage.getItem('practice-timer-settings');
+        return saved !== null ? JSON.parse(saved) : {};
+      }
+      return {};
+    }
+  );
+
+  const getTimerEnabled = (topicId: string): boolean => {
+    return timerSettings[topicId] ?? true; // Default to true for new topics
+  };
+
+  const toggleTimer = (topicId: string) => {
+    const currentValue = timerSettings[topicId] ?? true;
+    const newValue = !currentValue;
+
+    const newSettings = {
+      ...timerSettings,
+      [topicId]: newValue,
+    };
+
+    setTimerSettings(newSettings);
+
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(
+        'practice-timer-settings',
+        JSON.stringify(newSettings)
+      );
+    }
+  };
 
   const fetchTopics = async () => {
     try {
@@ -127,6 +163,8 @@ export const PracticeProvider = ({
         getQuestionsByTopicId,
         getQuestionById,
         getQuestionsByType,
+        getTimerEnabled,
+        toggleTimer,
       }}
     >
       {children}

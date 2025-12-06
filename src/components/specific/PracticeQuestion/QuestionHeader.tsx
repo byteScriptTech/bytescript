@@ -25,14 +25,17 @@ export function QuestionHeader({
 }: QuestionHeaderProps) {
   const params = useParams<{ id: string }>();
   const id = params?.id;
+  const { getTopic, getTimerEnabled } = usePractice();
+  const router = useRouter();
+
+  const isTimerEnabled = id ? getTimerEnabled(id) : true;
+
   const formatTime = (seconds: number | null) => {
     if (seconds === null) return '--:--';
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
-  const { getTopic } = usePractice();
-  const router = useRouter();
 
   const [topic, setTopic] = useState<any>(null);
   useEffect(() => {
@@ -73,10 +76,12 @@ export function QuestionHeader({
         <div className="text-sm text-gray-600 dark:text-gray-400">
           Question {currentQuestionIndex + 1} of {totalQuestions}
         </div>
-        <div className="flex items-center gap-2">
-          <Timer className="h-4 w-4" />
-          <span className="font-medium">{formatTime(timeRemaining)}</span>
-        </div>
+        {isTimerEnabled && (
+          <div className="flex items-center gap-2">
+            <Timer className="h-4 w-4" />
+            <span className="font-medium">{formatTime(timeRemaining)}</span>
+          </div>
+        )}
       </div>
       <Progress value={progress} className="mt-2" />
     </div>
