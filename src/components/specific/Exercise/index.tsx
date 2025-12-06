@@ -69,6 +69,7 @@ export function Exercise({
                 showRunButton={false}
                 showOutput={false}
                 className="rounded-t-none border-0"
+                height="300px"
               />
             </div>
           </div>
@@ -107,6 +108,7 @@ export function Exercise({
               showRunButton={true}
               showOutput={true}
               className="rounded-b-none"
+              height="300px"
             />
           </div>
         </div>
@@ -138,6 +140,7 @@ export function Exercise({
                       showRunButton={false}
                       showOutput={false}
                       className="rounded-t-none border-0"
+                      height={'300px'}
                     />
                   </div>
                 </div>
