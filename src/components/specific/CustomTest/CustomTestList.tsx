@@ -420,9 +420,10 @@ function TestListSkeleton() {
         <Skeleton className="h-10 w-32" />
       </div>
 
-      <div className="flex border-b border-border gap-4">
+      <div className="flex border-b border-border gap-4 pb-2">
         <Skeleton className="h-10 w-24" />
         <Skeleton className="h-10 w-24" />
+        <Skeleton className="h-10 w-28" />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
