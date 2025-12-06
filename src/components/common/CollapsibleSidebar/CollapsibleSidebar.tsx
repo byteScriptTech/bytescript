@@ -132,7 +132,7 @@ function CollapsibleSidebar({
                           variant="ghost"
                           className={`justify-center px-0 w-10 h-10 rounded-full mx-auto text-foreground ${
                             activeItem === item.id
-                              ? 'bg-teal-lighter text-secondary hover:bg-teal-light'
+                              ? 'bg-teal-lighter text-black hover:bg-teal-light'
                               : 'hover:bg-accent/50'
                           }`}
                           onClick={() => handleItemClick(item)}
@@ -159,7 +159,7 @@ function CollapsibleSidebar({
                               variant="ghost"
                               className={`flex-1 justify-start text-left ${
                                 activeItem === item.id
-                                  ? 'bg-teal-lighter text-secondary hover:bg-teal-light'
+                                  ? 'bg-teal-lighter text-black hover:bg-teal-light'
                                   : 'hover:bg-accent'
                               }`}
                               onClick={() => handleItemClick(item)}
@@ -180,7 +180,7 @@ function CollapsibleSidebar({
                         variant="ghost"
                         className={`flex-1 justify-start text-left ${
                           activeItem === item.id
-                            ? 'bg-teal-lighter text-secondary hover:bg-teal-light'
+                            ? 'bg-teal-lighter text-black hover:bg-teal-light'
                             : 'hover:bg-accent'
                         }`}
                         onClick={() => handleItemClick(item)}
@@ -205,7 +205,7 @@ function CollapsibleSidebar({
                             size="sm"
                             className={`w-full justify-start ${
                               activeChild === child.id
-                                ? 'bg-teal-lighter text-secondary hover:bg-teal-light'
+                                ? 'bg-teal-lighter text-black hover:bg-teal-light'
                                 : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
                             }`}
                             onClick={() => handleChildClick(child, item.id)}

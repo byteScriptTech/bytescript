@@ -49,9 +49,20 @@ export default function CustomTestContent() {
     }
   };
 
-  const handleEditTest = (testId: string) => {
-    setEditingTestId(testId);
-    setViewState('edit');
+  const handleEditTest = async (testId: string) => {
+    try {
+      const test = await CustomTestService.getTest(testId);
+      if (test) {
+        setSelectedTest(test);
+        setEditingTestId(testId);
+        setViewState('edit');
+      } else {
+        toast.error('Test not found');
+      }
+    } catch (error) {
+      console.error('Error loading test for editing:', error);
+      toast.error('Failed to load test for editing');
+    }
   };
 
   const handleCompleteTest = (attempt: TestAttempt) => {
@@ -104,7 +115,11 @@ export default function CustomTestContent() {
 
       case 'edit':
         return (
-          <TestCreator onCancel={handleBackToTests} onSave={handleSaveTest} />
+          <TestCreator
+            onCancel={handleBackToTests}
+            onSave={handleSaveTest}
+            initialData={selectedTest || undefined}
+          />
         );
 
       case 'take':

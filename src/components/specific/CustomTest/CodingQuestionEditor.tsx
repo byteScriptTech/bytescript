@@ -1,3 +1,5 @@
+import dynamic from 'next/dynamic';
+
 import { Label } from '@/components/ui/label';
 import {
   Select,
@@ -8,6 +10,18 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { TestQuestion } from '@/types/customTest';
+
+// Dynamically import the JavaScriptCodeEditor with SSR disabled
+const JavaScriptCodeEditor = dynamic(
+  () =>
+    import('@/components/common/JavaScriptCodeEditor').then((mod) => {
+      // Return a new component that matches the expected props
+      return function WrappedEditor(props: any) {
+        return <mod.JavaScriptCodeEditor {...props} />;
+      };
+    }),
+  { ssr: false }
+);
 
 interface Props {
   question: TestQuestion;
@@ -37,12 +51,15 @@ export default function CodingQuestionEditor({ question, onUpdate }: Props) {
 
       <div>
         <Label>Starter Code (Optional)</Label>
-        <Textarea
-          rows={5}
-          className="font-mono text-sm"
-          value={question.codeTemplate || ''}
-          onChange={(e) => onUpdate({ codeTemplate: e.target.value })}
-        />
+        <div className="border rounded-md overflow-hidden">
+          <JavaScriptCodeEditor
+            initialCode={question.codeTemplate || ''}
+            onCodeChange={(code: string) => onUpdate({ codeTemplate: code })}
+            showRunButton={false}
+            showOutput={false}
+            height="200px"
+          />
+        </div>
       </div>
 
       <div>

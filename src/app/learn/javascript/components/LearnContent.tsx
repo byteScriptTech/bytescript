@@ -157,7 +157,6 @@ const LearnContentInner: FC<LearnContentInnerProps> = ({
   // Handle initial content load and set the active topic/subtopic from URL params
   useEffect(() => {
     if (!content?.topics?.length) return;
-    console.log(content, 'content');
     // If we have an initial topic ID from URL, use it
     if (initialTopicId.current) {
       const topicExists = content.topics.some(

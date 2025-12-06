@@ -223,20 +223,42 @@ function TestCard({
   getDifficultyColor: (difficulty: string) => string;
 }) {
   return (
-    <Card className="group h-full overflow-hidden transition-all hover:shadow-lg hover:-translate-y-1">
-      <CardHeader className="p-5 pb-4">
+    <Card className="group h-full overflow-hidden transition-all hover:shadow-lg hover:-translate-y-1 flex flex-col">
+      <CardHeader className="p-5 pb-4 flex-shrink-0">
         <div className="flex items-start justify-between mb-3">
           <div className="p-2.5 rounded-lg bg-primary/10 text-primary">
             <FileText className="w-5 h-5" />
           </div>
-          <Badge
-            className={cn(
-              'text-xs font-medium',
-              getDifficultyColor(test.difficulty)
+          <div className="flex items-center gap-2">
+            <Badge
+              className={cn(
+                'text-xs font-medium',
+                getDifficultyColor(test.difficulty)
+              )}
+            >
+              {test.difficulty}
+            </Badge>
+            {isOwner && (
+              <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={onEdit}
+                  className="hover:bg-primary/10"
+                >
+                  <Edit className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={onDelete}
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
             )}
-          >
-            {test.difficulty}
-          </Badge>
+          </div>
         </div>
 
         <CardTitle className="text-lg font-bold mb-2 line-clamp-2 leading-tight">
@@ -248,9 +270,9 @@ function TestCard({
         </p>
       </CardHeader>
 
-      <CardContent className="p-5 pt-0 space-y-4">
+      <CardContent className="p-5 pt-0 flex-1 flex flex-col">
         {/* Metadata */}
-        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+        <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
           <div className="flex items-center gap-1.5">
             <Clock className="h-4 w-4" />
             <span>{test.duration}min</span>
@@ -269,7 +291,7 @@ function TestCard({
 
         {/* Tags */}
         {test.tags && test.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-1.5 mb-auto pb-4">
             {test.tags.slice(0, 3).map((tag) => (
               <Badge key={tag} variant="secondary" className="text-xs">
                 {tag}
@@ -283,33 +305,12 @@ function TestCard({
           </div>
         )}
 
-        {/* Actions */}
-        <div className="flex gap-2 pt-2 border-t border-border/50">
-          <Button onClick={onStart} className="flex-1 group/btn">
+        {/* Actions - Stuck to bottom */}
+        <div className="pt-4 mt-auto border-t border-border/50">
+          <Button onClick={onStart} className="w-full group/btn">
             <Play className="h-4 w-4 mr-2 transition-transform group-hover/btn:translate-x-1" />
             Start Test
           </Button>
-
-          {isOwner && (
-            <div className="flex gap-1">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onEdit}
-                className="hover:bg-primary/10"
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onDelete}
-                className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          )}
         </div>
       </CardContent>
     </Card>

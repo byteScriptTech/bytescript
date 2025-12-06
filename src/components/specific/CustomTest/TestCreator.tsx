@@ -23,7 +23,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/context/AuthContext';
 import { CustomTestService } from '@/services/firebase/customTestService';
 import { practiceQuestionsService } from '@/services/firebase/practiceQuestionsService';
+import { practiceTopicsService } from '@/services/firebase/practiceTopicsService';
 import { CustomTest, TestQuestion } from '@/types/customTest';
+import { PracticeTopic } from '@/types/practice';
 import { PracticeQuestion } from '@/types/practiceQuestion';
 
 import QuestionEditor from './QuestionEditor';
@@ -31,20 +33,29 @@ import QuestionEditor from './QuestionEditor';
 interface TestCreatorProps {
   onCancel: () => void;
   onSave: (testId: string) => void;
+  initialData?: Partial<CustomTest>;
 }
 
-export default function TestCreator({ onCancel, onSave }: TestCreatorProps) {
+export default function TestCreator({
+  onCancel,
+  onSave,
+  initialData,
+}: TestCreatorProps) {
   const { currentUser } = useAuth();
 
   const [isSaving, setIsSaving] = useState(false);
   const [practiceQuestions, setPracticeQuestions] = useState<
     PracticeQuestion[]
   >([]);
+  const [topics, setTopics] = useState<PracticeTopic[]>([]);
   const [selectedQuestions, setSelectedQuestions] = useState<Set<string>>(
     new Set()
   );
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('custom');
+  const [activeTab, setActiveTab] = useState<'custom' | 'library'>('custom');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedTopic, setSelectedTopic] = useState<string>('all');
+  const [newTag, setNewTag] = useState('');
 
   const [testData, setTestData] = useState<Partial<CustomTest>>({
     title: '',
@@ -54,29 +65,41 @@ export default function TestCreator({ onCancel, onSave }: TestCreatorProps) {
     isPublic: false,
     tags: [],
     difficulty: 'Beginner',
+    ...initialData,
   });
 
-  const [newTag, setNewTag] = useState('');
-
   // ----------------------------
-  // Load questions from library
-  // ----------------------------
+  // Load questions and topics from library and initialize form
+  // ---------------------------------------------
   useEffect(() => {
-    const loadQuestions = async () => {
+    const loadData = async () => {
       try {
         setIsLoading(true);
-        const questions = await practiceQuestionsService.getAllQuestions();
-        setPracticeQuestions(questions);
+        const [questionsData, topicsData] = await Promise.all([
+          practiceQuestionsService.getAllQuestions(),
+          practiceTopicsService.getAllTopics(),
+        ]);
+        setPracticeQuestions(questionsData);
+        setTopics(topicsData);
+
+        // If we have initialData, update the testData state
+        if (initialData) {
+          setTestData((prev) => ({
+            ...prev,
+            ...initialData,
+            questions: initialData.questions || [],
+          }));
+        }
       } catch (error) {
         console.error(error);
-        toast.error('Failed to load practice questions');
+        toast.error('Failed to load practice questions and topics');
       } finally {
         setIsLoading(false);
       }
     };
 
-    loadQuestions();
-  }, []);
+    loadData();
+  }, [initialData]);
 
   // ----------------------------
   // Add custom question
@@ -168,12 +191,23 @@ export default function TestCreator({ onCancel, onSave }: TestCreatorProps) {
     try {
       const testPayload = {
         ...testData,
-        createdBy: currentUser.uid,
+        createdBy: testData.createdBy || currentUser.uid,
+        updatedAt: new Date().toISOString(),
       } as Omit<CustomTest, 'id' | 'createdAt' | 'updatedAt'>;
 
-      const testId = await CustomTestService.createTest(testPayload);
+      let testId: string;
 
-      toast.success('Test created successfully!');
+      if (testData.id) {
+        // Update existing test
+        await CustomTestService.updateTest(testData.id, testPayload);
+        testId = testData.id;
+        toast.success('Test updated successfully!');
+      } else {
+        // Create new test
+        testId = await CustomTestService.createTest(testPayload);
+        toast.success('Test created successfully!');
+      }
+
       onSave(testId);
     } catch (error) {
       console.error(error);
@@ -187,7 +221,9 @@ export default function TestCreator({ onCancel, onSave }: TestCreatorProps) {
     <div className="max-w-4xl mx-auto p-6 space-y-6">
       {/* HEADER */}
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Create Custom Test</h1>
+        <h1 className="text-3xl font-bold">
+          {initialData?.id ? 'Edit Custom Test' : 'Create Custom Test'}
+        </h1>
 
         <div className="flex gap-2">
           <Button variant="outline" onClick={onCancel}>
@@ -342,7 +378,10 @@ export default function TestCreator({ onCancel, onSave }: TestCreatorProps) {
           </Button>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs
+          value={activeTab}
+          onValueChange={(value) => setActiveTab(value as 'custom' | 'library')}
+        >
           <TabsList className="grid grid-cols-2 w-full">
             <TabsTrigger value="custom">Custom Questions</TabsTrigger>
             <TabsTrigger value="library">Library</TabsTrigger>
@@ -411,40 +450,121 @@ export default function TestCreator({ onCancel, onSave }: TestCreatorProps) {
               <p className="text-center py-10">Loading...</p>
             ) : (
               <>
-                <div className="max-h-[400px] overflow-y-auto space-y-2">
-                  {practiceQuestions.map((q) => (
-                    <div
-                      key={q.id}
-                      className="flex items-start gap-3 p-4 border rounded-md hover:bg-accent/40"
-                    >
-                      <Checkbox
-                        checked={selectedQuestions.has(q.id)}
-                        onCheckedChange={() => {
-                          setSelectedQuestions((prev) => {
-                            const newSet = new Set(prev);
-                            newSet.has(q.id)
-                              ? newSet.delete(q.id)
-                              : newSet.add(q.id);
-                            return newSet;
-                          });
-                        }}
-                      />
-
+                {/* FILTERS */}
+                <div className="space-y-3 mb-4">
+                  <div className="flex justify-between items-end">
+                    <div className="flex-1 space-y-3">
                       <div>
-                        <p className="font-medium">
-                          {q.question.slice(0, 120)}
-                          {q.question.length > 120 ? '...' : ''}
-                        </p>
-                        <div className="flex gap-2 mt-1">
-                          <Badge>
-                            {q.type === 'mcq' ? 'Multiple Choice' : 'Coding'}
-                          </Badge>
-                          <Badge variant="outline">{q.points} pts</Badge>
-                        </div>
+                        <Label>Search Questions</Label>
+                        <Input
+                          placeholder="Search by question text..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="mt-1"
+                        />
+                      </div>
+                      <div>
+                        <Label>Filter by Topic</Label>
+                        <Select
+                          value={selectedTopic}
+                          onValueChange={setSelectedTopic}
+                        >
+                          <SelectTrigger className="mt-1">
+                            <SelectValue placeholder="Select a topic" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All Topics</SelectItem>
+                            {topics.map((topic) => (
+                              <SelectItem key={topic.id} value={topic.id}>
+                                {topic.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
-                  ))}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setSearchTerm('');
+                        setSelectedTopic('all');
+                      }}
+                      className="ml-3"
+                    >
+                      Clear Filters
+                    </Button>
+                  </div>
                 </div>
+
+                <div className="max-h-[400px] overflow-y-auto space-y-2">
+                  {practiceQuestions
+                    .filter((q) => {
+                      // Filter by search term
+                      const matchesSearch =
+                        searchTerm === '' ||
+                        q.question
+                          .toLowerCase()
+                          .includes(searchTerm.toLowerCase());
+
+                      // Filter by topic
+                      const matchesTopic =
+                        selectedTopic === 'all' || q.topicId === selectedTopic;
+
+                      return matchesSearch && matchesTopic;
+                    })
+                    .map((q) => (
+                      <div
+                        key={q.id}
+                        className="flex items-start gap-3 p-4 border rounded-md hover:bg-accent/40"
+                      >
+                        <Checkbox
+                          checked={selectedQuestions.has(q.id)}
+                          onCheckedChange={() => {
+                            setSelectedQuestions((prev) => {
+                              const newSet = new Set(prev);
+                              newSet.has(q.id)
+                                ? newSet.delete(q.id)
+                                : newSet.add(q.id);
+                              return newSet;
+                            });
+                          }}
+                        />
+
+                        <div className="flex-1">
+                          <p className="font-medium">
+                            {q.question.slice(0, 120)}
+                            {q.question.length > 120 ? '...' : ''}
+                          </p>
+                          <div className="flex gap-2 mt-1">
+                            <Badge>
+                              {q.type === 'mcq' ? 'Multiple Choice' : 'Coding'}
+                            </Badge>
+                            <Badge variant="outline">{q.points} pts</Badge>
+                            {q.topicId && (
+                              <Badge variant="secondary">
+                                {topics.find((t) => t.id === q.topicId)?.name ||
+                                  'Unknown Topic'}
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+
+                {practiceQuestions.filter((q) => {
+                  const matchesSearch =
+                    searchTerm === '' ||
+                    q.question.toLowerCase().includes(searchTerm.toLowerCase());
+                  const matchesTopic =
+                    selectedTopic === 'all' || q.topicId === selectedTopic;
+                  return matchesSearch && matchesTopic;
+                }).length === 0 && (
+                  <div className="text-center py-8 border-2 border-dashed rounded-lg">
+                    No questions found matching your filters.
+                  </div>
+                )}
 
                 <div className="flex justify-end gap-2 mt-3">
                   <Button
