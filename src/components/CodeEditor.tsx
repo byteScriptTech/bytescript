@@ -129,15 +129,14 @@ export default function CodeEditor({
                   ref={outputRef}
                   className="flex-1 overflow-auto p-4 text-sm font-mono whitespace-pre-wrap bg-background"
                 >
-                  {output || (
-                    <div className="text-muted-foreground">
-                      Output will appear here
-                    </div>
-                  )}
-                  {output && (
+                  {output ? (
                     <pre className="whitespace-pre-wrap break-words">
                       {output}
                     </pre>
+                  ) : (
+                    <div className="text-muted-foreground">
+                      Output will appear here
+                    </div>
                   )}
                 </div>
               </Panel>
