@@ -1,14 +1,16 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
 import { updateUserRole } from '@/lib/admin';
 
 export async function PATCH(
-  request: Request,
-  { params }: { params: { userId: string } }
+  request: NextRequest,
+  context: { params: Promise<{ userId: string }> }
 ) {
   try {
+    const { userId } = await context.params;
     const { role } = await request.json();
-    const success = await updateUserRole(params.userId, role);
+
+    const success = await updateUserRole(userId, role);
 
     if (!success) {
       return NextResponse.json(

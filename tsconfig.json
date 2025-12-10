@@ -18,7 +18,7 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "incremental": true,
     "plugins": [
       {
@@ -29,7 +29,8 @@
       "@/*": [
         "./src/*"
       ]
-    }
+    },
+    "target": "ES2017"
   },
   "include": [
     "next-env.d.ts",
@@ -37,7 +38,8 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "src/components/specific/AddLanguageForm",
-    "src/app/learn/data-structures/.test.tsx"
+    "src/app/learn/data-structures/.test.tsx",
+    ".next/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"
