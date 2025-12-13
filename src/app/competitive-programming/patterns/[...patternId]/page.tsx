@@ -33,7 +33,8 @@ export const revalidate = 3600; // Revalidate at most every hour
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
-  const slug = params.patternId?.[0] || '';
+  const resolvedParams = await params;
+  const slug = resolvedParams.patternId?.[0] || '';
   const pattern = await getPatternBySlug(slug);
 
   if (!pattern) {
@@ -52,7 +53,6 @@ async function fetchPatternData(slug: string) {
   try {
     // Get the pattern by slug (uses cached version)
     const pattern = await getPatternBySlug(slug);
-
     if (!pattern) {
       console.log(`Pattern not found with slug: ${slug}`);
       notFound();
@@ -82,7 +82,8 @@ async function fetchPatternData(slug: string) {
 }
 
 export default async function PatternPage({ params }: PageProps) {
-  const patternId = params.patternId?.[0] || '';
+  const resolvedParams = await params;
+  const patternId = resolvedParams.patternId?.[0] || '';
   const { pattern, problems } = await fetchPatternData(patternId);
 
   return (
