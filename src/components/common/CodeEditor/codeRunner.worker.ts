@@ -38,7 +38,12 @@ const startWatchdog = () => {
   watchdog = nativeSetInterval(() => {
     if (stopped) return;
 
-    if (!forceKeepAlive && Date.now() - lastActivity > IDLE_TIMEOUT_MS) {
+    // Do NOT idle-timeout if intervals exist
+    if (
+      !forceKeepAlive &&
+      intervals.size === 0 &&
+      Date.now() - lastActivity > IDLE_TIMEOUT_MS
+    ) {
       cleanupAndExit('idle-timeout');
     }
   }, WATCHDOG_INTERVAL_MS);
@@ -85,6 +90,7 @@ const sandboxConsole = {
 // ---------- Timers ----------
 (self as any).setTimeout = (fn: any, delay?: number, ...args: any[]) => {
   startWatchdog();
+  markAlive(); // scheduling counts as activity
   const id = nativeSetTimeout(() => {
     if (!stopped) {
       markAlive();
@@ -97,6 +103,7 @@ const sandboxConsole = {
 
 (self as any).setInterval = (fn: any, delay?: number, ...args: any[]) => {
   startWatchdog();
+  markAlive(); // scheduling counts as activity
   const id = nativeSetInterval(() => {
     if (!stopped) {
       markAlive();
@@ -167,12 +174,16 @@ self.onmessage = async (e) => {
       `
     );
 
+    // Wait for ALL async/await work
     await fn(sandboxConsole, (self as any).keepAlive, (self as any).fetch);
 
-    // Fast path: pure sync code
-    if (!watchdog && !forceKeepAlive) {
-      cleanupAndExit('done');
+    // If background work exists, stay alive
+    if (intervals.size > 0 || forceKeepAlive) {
+      startWatchdog();
+      return;
     }
+
+    cleanupAndExit('done');
   } catch (err: any) {
     post('error', [err.message]);
     cleanupAndExit('error');
