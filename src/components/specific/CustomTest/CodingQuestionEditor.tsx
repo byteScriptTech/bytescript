@@ -14,7 +14,7 @@ import { TestQuestion } from '@/types/customTest';
 // Dynamically import the JavaScriptCodeEditor with SSR disabled
 const JavaScriptCodeEditor = dynamic(
   () =>
-    import('@/components/common/JavaScriptCodeEditor').then((mod) => {
+    import('@/components/common/CodeEditor').then((mod) => {
       // Return a new component that matches the expected props
       return function WrappedEditor(props: any) {
         return <mod.JavaScriptCodeEditor {...props} />;

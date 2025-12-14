@@ -1,4 +1,4 @@
-import { JavaScriptCodeEditor } from '@/components/common/JavaScriptCodeEditor';
+import { JavaScriptCodeEditor } from '@/components/common/CodeEditor';
 import { TestCase } from '@/types/practiceQuestion';
 
 interface CodingQuestionProps {

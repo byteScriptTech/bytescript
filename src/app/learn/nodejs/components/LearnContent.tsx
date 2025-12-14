@@ -12,9 +12,9 @@ import {
   useState,
 } from 'react';
 
+import { JavaScriptCodeEditor } from '@/components/common/CodeEditor';
 import CollapsibleSidebar from '@/components/common/CollapsibleSidebar';
 import { FloatingMenuButton } from '@/components/common/FloatingMenuButton/FloatingMenuButton';
-import { JavaScriptCodeEditor } from '@/components/common/JavaScriptCodeEditor';
 import { Content } from '@/components/specific/LearnContent/Content';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { cn } from '@/lib/utils';

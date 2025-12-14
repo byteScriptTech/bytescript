@@ -14,6 +14,59 @@ jest.mock('react-resizable-panels', () => ({
   ),
 }));
 
+// Mock Monaco Editor
+jest.mock('@monaco-editor/react', () => {
+  return function MockMonacoEditor({ defaultValue, onChange, onMount }: any) {
+    const [value, setValue] = React.useState(defaultValue);
+
+    React.useEffect(() => {
+      // Simulate editor mounting
+      if (onMount) {
+        const mockEditor = {
+          getValue: () => value,
+          setValue: (newValue: string) => {
+            setValue(newValue);
+            onChange?.(newValue);
+          },
+          onDidChangeModelContent: jest.fn(),
+        };
+        onMount(mockEditor);
+      }
+    }, [defaultValue, onChange, onMount, value]);
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        const textarea = e.target as HTMLTextAreaElement;
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const newValue =
+          value.substring(0, start) + '    ' + value.substring(end);
+        setValue(newValue);
+        onChange?.(newValue);
+
+        // Set cursor position after the inserted tabs
+        setTimeout(() => {
+          textarea.selectionStart = textarea.selectionEnd = start + 4;
+        }, 0);
+      }
+    };
+
+    return (
+      <textarea
+        data-testid="monaco-editor"
+        value={value}
+        onChange={(e) => {
+          setValue(e.target.value);
+          onChange?.(e.target.value);
+        }}
+        onKeyDown={handleKeyDown}
+        className="monaco-editor-textarea"
+      />
+    );
+  };
+});
+
 // Mock Pyodide
 const mockPyodide = {
   runPythonAsync: jest.fn().mockResolvedValue(undefined),
@@ -23,7 +76,7 @@ const mockPyodide = {
 
 window.loadPyodide = jest.fn().mockResolvedValue(mockPyodide);
 
-import { PythonCodeEditor } from './PythonCodeEditor';
+import { PythonCodeEditor } from '.';
 
 describe('PythonCodeEditor', () => {
   const defaultProps = {
@@ -33,16 +86,15 @@ describe('PythonCodeEditor', () => {
 
   let renderResult: ReturnType<typeof render>;
 
-  // Helper function to get the code editor textarea
-  const getCodeTextarea = (
+  // Helper function to get the code editor (Monaco Editor)
+  const getCodeEditor = (
     container: HTMLElement = document.body
   ): HTMLTextAreaElement => {
-    const textareas = Array.from(container.querySelectorAll('textarea'));
-    const textarea = textareas.find(
-      (ta) => !ta.placeholder?.includes('algorithm')
-    );
-    if (!textarea) throw new Error('Code textarea not found');
-    return textarea as HTMLTextAreaElement;
+    const editor = container.querySelector(
+      '[data-testid="monaco-editor"]'
+    ) as HTMLTextAreaElement;
+    if (!editor) throw new Error('Code editor not found');
+    return editor;
   };
 
   // Setup before each test
@@ -64,11 +116,11 @@ describe('PythonCodeEditor', () => {
 
   describe('Initial Rendering', () => {
     it('renders without crashing', () => {
-      expect(getCodeTextarea()).toBeInTheDocument();
+      expect(getCodeEditor()).toBeInTheDocument();
     });
 
     it('displays initial code', () => {
-      expect(getCodeTextarea()).toHaveValue(defaultProps.initialCode);
+      expect(getCodeEditor()).toHaveValue(defaultProps.initialCode);
     });
 
     // Loading state is handled internally by the component
@@ -78,10 +130,10 @@ describe('PythonCodeEditor', () => {
   describe('Code Editing', () => {
     it('calls onCodeChange when code is modified', async () => {
       const newCode = 'print("Updated")';
-      const textarea = getCodeTextarea();
+      const editor = getCodeEditor();
 
       await act(async () => {
-        fireEvent.change(textarea, { target: { value: newCode } });
+        fireEvent.change(editor, { target: { value: newCode } });
       });
 
       expect(defaultProps.onCodeChange).toHaveBeenCalledWith(newCode);
@@ -92,14 +144,14 @@ describe('PythonCodeEditor', () => {
       renderResult = render(
         <PythonCodeEditor {...defaultProps} initialCode={initialCode} />
       );
-      const textarea = getCodeTextarea(renderResult.container);
+      const editor = getCodeEditor(renderResult.container);
 
       // Set cursor position to the start
-      textarea.setSelectionRange(0, 0);
+      editor.setSelectionRange(0, 0);
 
       // Simulate tab key press
       await act(async () => {
-        fireEvent.keyDown(textarea, {
+        fireEvent.keyDown(editor, {
           key: 'Tab',
           keyCode: 9,
           which: 9,
