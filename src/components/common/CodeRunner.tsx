@@ -11,11 +11,7 @@ import { Card } from '../ui/card';
 // Type declarations for Pyodide
 declare global {
   interface Window {
-    loadPyodide: (options: { indexURL: string }) => Promise<{
-      runPythonAsync: (code: string) => Promise<any>;
-      runPython: (code: string) => any;
-      loadPackagesFromImports: (code: string) => Promise<void>;
-    }>;
+    loadPyodide?: (opts: { indexURL: string }) => Promise<any>;
   }
 }
 
@@ -51,7 +47,7 @@ export function CodeRunner({
       });
     }
 
-    return window.loadPyodide({
+    return window.loadPyodide!({
       indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.25.0/full/',
     });
   };

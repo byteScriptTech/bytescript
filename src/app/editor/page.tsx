@@ -19,10 +19,15 @@ const JsEditor = dynamic(() => import('@/components/CodeEditor'), {
 });
 
 const PythonEditor = dynamic<{
-  initialCode?: string;
+  initialCode: string;
   className?: string;
-  onCodeChange?: (code: string) => void;
+  height?: string | number;
   readOnly?: boolean;
+  showRunButton?: boolean;
+  showOutput?: boolean;
+  showAlgorithm?: boolean;
+  onCodeChange?: (code: string) => void;
+  onOutput?: (output: string) => void;
 }>(
   () =>
     import('@/components/common/PythonCodeEditor').then(
@@ -91,6 +96,7 @@ export default function EditorPage() {
               <PythonEditor
                 initialCode={pythonCode}
                 onCodeChange={handlePythonCodeChange}
+                showAlgorithm={true}
               />
             )}
           </div>
