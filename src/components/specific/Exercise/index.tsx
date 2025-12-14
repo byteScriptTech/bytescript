@@ -1,7 +1,7 @@
 import { AlertCircle, Lightbulb, ChevronDown } from 'lucide-react';
 import { useState } from 'react';
 
-import { JavaScriptCodeEditor } from '@/components/common/JavaScriptCodeEditor';
+import { JavaScriptCodeEditor } from '@/components/common/CodeEditor';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';

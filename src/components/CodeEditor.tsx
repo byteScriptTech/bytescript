@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 
-import { JavaScriptCodeEditor } from './common/JavaScriptCodeEditor';
+import { JavaScriptCodeEditor } from './common/CodeEditor';
 
 interface CodeEditorProps {
   code?: string;

@@ -4,7 +4,7 @@ import { Clock, ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
 import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 
-import { JavaScriptCodeEditor } from '@/components/common/JavaScriptCodeEditor';
+import { JavaScriptCodeEditor } from '@/components/common/CodeEditor';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';

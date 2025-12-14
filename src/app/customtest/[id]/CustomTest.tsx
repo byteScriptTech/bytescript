@@ -3,7 +3,7 @@
 import { useParams, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 
-import { JavaScriptCodeEditor } from '@/components/common/JavaScriptCodeEditor';
+import { JavaScriptCodeEditor } from '@/components/common/CodeEditor';
 import Timer from '@/components/TestTimer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -273,15 +273,8 @@ export default function CustomTestPage() {
               <div className="h-full border rounded-md overflow-hidden">
                 <JavaScriptCodeEditor
                   initialCode={userCode}
-                  onCodeChange={setUserCode}
-                  readOnly={false}
                   className="w-full"
-                  showRunButton
-                  showOutput
                   height="300px"
-                  onOutput={(output) => {
-                    console.log('Code output:', output);
-                  }}
                 />
               </div>
             </div>
