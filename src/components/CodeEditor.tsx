@@ -91,15 +91,6 @@ export default function CodeEditor({
                   <div className="text-sm font-medium px-2">
                     JavaScript Editor
                   </div>
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={clearOutput}
-                      disabled={!output}
-                      className="border bg-background hover:bg-accent h-8 px-3 text-xs rounded-md"
-                    >
-                      Clear
-                    </button>
-                  </div>
                 </div>
 
                 {/* Monaco Editor */}
@@ -123,6 +114,15 @@ export default function CodeEditor({
               <Panel defaultSize={30} minSize={20} className="flex flex-col">
                 <div className="flex items-center justify-between p-2 border-b bg-muted/10">
                   <div className="text-sm font-medium px-2">Console Output</div>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={clearOutput}
+                      disabled={!output}
+                      className="border bg-background hover:bg-accent h-8 px-3 text-xs rounded-md"
+                    >
+                      Clear
+                    </button>
+                  </div>
                 </div>
 
                 <div

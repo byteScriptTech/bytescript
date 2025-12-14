@@ -38,9 +38,10 @@ const startWatchdog = () => {
   watchdog = nativeSetInterval(() => {
     if (stopped) return;
 
-    // Do NOT idle-timeout if intervals exist
+    // Idle timeout only if NOTHING pending
     if (
       !forceKeepAlive &&
+      timers.size === 0 &&
       intervals.size === 0 &&
       Date.now() - lastActivity > IDLE_TIMEOUT_MS
     ) {
@@ -91,12 +92,15 @@ const sandboxConsole = {
 (self as any).setTimeout = (fn: any, delay?: number, ...args: any[]) => {
   startWatchdog();
   markAlive(); // scheduling counts as activity
+
   const id = nativeSetTimeout(() => {
+    timers.delete(id);
     if (!stopped) {
       markAlive();
       fn(...args);
     }
   }, delay);
+
   timers.add(id as any);
   return id;
 };
@@ -104,12 +108,14 @@ const sandboxConsole = {
 (self as any).setInterval = (fn: any, delay?: number, ...args: any[]) => {
   startWatchdog();
   markAlive(); // scheduling counts as activity
+
   const id = nativeSetInterval(() => {
     if (!stopped) {
       markAlive();
       fn(...args);
     }
   }, delay);
+
   intervals.add(id as any);
   return id;
 };
@@ -144,9 +150,11 @@ const sandboxConsole = {
 // ---------- Cleanup ----------
 const cleanupAndExit = (reason: string) => {
   stopped = true;
+
   timers.forEach(nativeClearTimeout);
   intervals.forEach(nativeClearInterval);
   if (watchdog) nativeClearInterval(watchdog);
+
   post('status', reason);
   self.close();
 };
@@ -174,11 +182,11 @@ self.onmessage = async (e) => {
       `
     );
 
-    // Wait for ALL async/await work
+    // Wait for async/await code
     await fn(sandboxConsole, (self as any).keepAlive, (self as any).fetch);
 
-    // If background work exists, stay alive
-    if (intervals.size > 0 || forceKeepAlive) {
+    // Stay alive if background work exists
+    if (timers.size > 0 || intervals.size > 0 || forceKeepAlive) {
       startWatchdog();
       return;
     }
