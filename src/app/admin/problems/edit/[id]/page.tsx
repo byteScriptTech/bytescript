@@ -23,7 +23,7 @@ export default function EditProblemPage() {
 
     const fetchProblem = async () => {
       try {
-        const id = Array.isArray(params.id) ? params.id[0] : params.id;
+        const id = Array.isArray(params.id) ? params.id[0]! : params.id!;
         const data = await problemsService.getProblemById(id);
         if (data) {
           setProblem(data);
