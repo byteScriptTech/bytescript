@@ -7,15 +7,16 @@ import { PythonContentForm } from '../../PythonContentForm';
 export default async function EditPythonContentPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const content = await pythonService.getTopicById(params.id);
+  const { id } = await params;
+
+  const content = await pythonService.getTopicById(id);
 
   if (!content) {
     notFound();
   }
 
-  // Transform the content to match the form's expected shape
   const formContent = {
     id: content.id,
     name: content.name,
