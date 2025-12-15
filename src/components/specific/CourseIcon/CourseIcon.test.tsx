@@ -21,7 +21,7 @@ jest.mock('@/assets/CourseIcons/Python', () => {
 });
 
 jest.mock(
-  '@/assets/CourseIcons/TypeScriptIcon',
+  '@/assets/CourseIcons/TypescriptIcon',
   () => {
     const MockedComponent = () => <div data-testid="typescript-icon" />;
     MockedComponent.displayName = 'TypeScriptIcon';
