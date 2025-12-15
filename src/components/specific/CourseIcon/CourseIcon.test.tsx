@@ -20,11 +20,15 @@ jest.mock('@/assets/CourseIcons/Python', () => {
   return MockedComponent;
 });
 
-jest.mock('@/assets/CourseIcons/TypeScriptIcon', () => {
-  const MockedComponent = () => <div data-testid="typescript-icon" />;
-  MockedComponent.displayName = 'TypeScriptIcon';
-  return MockedComponent;
-});
+jest.mock(
+  '@/assets/CourseIcons/TypeScriptIcon',
+  () => {
+    const MockedComponent = () => <div data-testid="typescript-icon" />;
+    MockedComponent.displayName = 'TypeScriptIcon';
+    return MockedComponent;
+  },
+  { virtual: true }
+);
 
 jest.mock('@/assets/CourseIcons/DataStructuresIcon', () => {
   const MockedComponent = () => <div data-testid="data-structures-icon" />;
