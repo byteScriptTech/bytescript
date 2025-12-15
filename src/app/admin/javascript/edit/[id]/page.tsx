@@ -11,18 +11,28 @@ import { JavaScriptContentForm } from '../../JavaScriptContentForm';
 export default function EditJavaScriptContentPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const router = useRouter();
+
+  const [id, setId] = useState<string | null>(null);
   const [content, setContent] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    params.then((resolved) => {
+      setId(resolved.id);
+    });
+  }, [params]);
+
+  useEffect(() => {
+    if (!id) return;
+
     const fetchContent = async () => {
       try {
-        const data = await javascriptService.getTopicById(params.id);
+        const data = await javascriptService.getTopicById(id);
         if (!data) {
-          router.push('/404');
+          setContent(null);
           return;
         }
         setContent(data);
@@ -35,11 +45,13 @@ export default function EditJavaScriptContentPage({
     };
 
     fetchContent();
-  }, [params.id, router]);
+  }, [id, router]);
 
   const handleSuccess = async () => {
+    if (!id) return;
+
     try {
-      const updatedContent = await javascriptService.getTopicById(params.id);
+      const updatedContent = await javascriptService.getTopicById(id);
       setContent(updatedContent);
       toast.success('Content updated successfully!');
     } catch (error) {
@@ -70,7 +82,6 @@ export default function EditJavaScriptContentPage({
     );
   }
 
-  // Transform the content to match the form's expected shape
   const formContent = {
     id: content.id,
     name: content.name,

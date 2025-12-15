@@ -4,11 +4,9 @@ import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
-// Import markdown editor styles
 import '@uiw/react-md-editor/markdown-editor.css';
 import '@uiw/react-markdown-preview/markdown.css';
 
-// Dynamically import the MDEditor to avoid SSR issues
 const MDEditor = dynamic(
   () => import('@uiw/react-md-editor').then((mod) => mod.default),
   { ssr: false }
@@ -22,9 +20,11 @@ import { patternService } from '@/services/patternService';
 export default function EditPatternPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const router = useRouter();
+
+  const [id, setId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
@@ -40,9 +40,17 @@ export default function EditPatternPage({
   });
 
   useEffect(() => {
+    params.then((resolved) => {
+      setId(resolved.id);
+    });
+  }, [params]);
+
+  useEffect(() => {
+    if (!id) return;
+
     const fetchPattern = async () => {
       try {
-        const pattern = await patternService.getPatternById(params.id);
+        const pattern = await patternService.getPatternById(id);
         if (pattern) {
           setFormData({
             title: pattern.title,
@@ -58,14 +66,13 @@ export default function EditPatternPage({
         }
       } catch (error) {
         console.error('Failed to fetch pattern:', error);
-        // Handle error (e.g., show error toast)
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchPattern();
-  }, [params.id]);
+  }, [id]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -79,14 +86,14 @@ export default function EditPatternPage({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
+    if (!id) return;
 
+    setIsSubmitting(true);
     try {
-      await patternService.savePattern(formData, params.id);
+      await patternService.savePattern(formData, id);
       router.push('/admin/patterns');
     } catch (error) {
       console.error('Failed to update pattern:', error);
-      // Handle error (e.g., show error toast)
     } finally {
       setIsSubmitting(false);
     }
@@ -202,9 +209,11 @@ export default function EditPatternPage({
             type="button"
             variant="destructive"
             onClick={async () => {
+              if (!id) return;
+
               if (confirm('Are you sure you want to delete this pattern?')) {
                 try {
-                  await patternService.deletePattern(params.id);
+                  await patternService.deletePattern(id);
                   router.push('/admin/patterns');
                 } catch (error) {
                   console.error('Failed to delete pattern:', error);
@@ -214,6 +223,7 @@ export default function EditPatternPage({
           >
             Delete Pattern
           </Button>
+
           <div className="space-x-4">
             <Button
               type="button"

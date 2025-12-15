@@ -12,16 +12,26 @@ import { NodejsContentForm } from '../../NodejsContentForm';
 export default function EditNodejsContentPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const router = useRouter();
+
+  const [id, setId] = useState<string | null>(null);
   const [content, setContent] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    params.then((resolved) => {
+      setId(resolved.id);
+    });
+  }, [params]);
+
+  useEffect(() => {
+    if (!id) return;
+
     const fetchContent = async () => {
       try {
-        const data = await nodejsService.getTopicById(params.id);
+        const data = await nodejsService.getTopicById(id);
         if (!data) {
           router.push('/404');
           return;
@@ -36,11 +46,13 @@ export default function EditNodejsContentPage({
     };
 
     fetchContent();
-  }, [params.id, router]);
+  }, [id, router]);
 
   const handleSuccess = async () => {
+    if (!id) return;
+
     try {
-      const updatedContent = await nodejsService.getTopicById(params.id);
+      const updatedContent = await nodejsService.getTopicById(id);
       setContent(updatedContent);
       toast.success('Content updated successfully!');
     } catch (error) {
