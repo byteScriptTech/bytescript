@@ -52,6 +52,12 @@ export const dsaService = {
   // Get all DSA topics
   async getAllTopics(): Promise<DSATopic[]> {
     if (!db) {
+      if (typeof window === 'undefined') {
+        console.warn(
+          'Firebase not initialized during build, returning empty topics array'
+        );
+        return [];
+      }
       throw new Error('Firebase is not initialized');
     }
     const querySnapshot = await getDocs(collection(db, DSA_TOPICS_COLLECTION));
@@ -66,6 +72,13 @@ export const dsaService = {
   // Get a single DSA topic by slug
   async getTopicBySlug(slug: string): Promise<DSATopic | null> {
     if (!db) {
+      // During build time, return null to prevent build failure
+      if (typeof window === 'undefined') {
+        console.warn(
+          'Firebase not initialized during build, returning null for topic'
+        );
+        return null;
+      }
       throw new Error('Firebase is not initialized');
     }
     const querySnapshot = await getDocs(collection(db, DSA_TOPICS_COLLECTION));
