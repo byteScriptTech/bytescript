@@ -22,6 +22,11 @@ export function AdminNavbar() {
   };
 
   const handleSignOut = async () => {
+    if (!auth) {
+      console.warn('Firebase auth not initialized');
+      return;
+    }
+
     await signOut(auth);
     router.push('/login');
   };

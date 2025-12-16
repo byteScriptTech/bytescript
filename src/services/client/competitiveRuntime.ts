@@ -34,7 +34,7 @@ type ExecutionResult = {
 const safeStringify = (obj: unknown): string => {
   try {
     return JSON.stringify(obj, null, 2);
-  } catch (error) {
+  } catch {
     return String(obj);
   }
 };
@@ -229,7 +229,7 @@ const competitiveRuntime = {
                 2
               )}`;
             }
-          } catch (e) {
+          } catch {
             // Handle parsing errors
             testResult = {
               output: `Raw output: ${safeStringify(result.output || '')}`,

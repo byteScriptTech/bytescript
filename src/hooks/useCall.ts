@@ -207,7 +207,7 @@ export function useCall({
       pcsRef.current[peerId] = pc;
       return pc;
     },
-    [wsRef, userId]
+    [wsRef, userId, defaultIceServers]
   );
   const toggleMicMute = useCallback((muted: boolean) => {
     isMicMutedRef.current = muted;
@@ -505,7 +505,7 @@ export function useCall({
         console.error('useCall: error processing signal', err);
       }
     },
-    [wsRef, userId]
+    [userId]
   );
 
   useEffect(() => {
@@ -569,7 +569,7 @@ export function useCall({
 
     return () => {
       try {
-        cleanup && cleanup();
+        if (cleanup) cleanup();
       } catch (err) {
         console.error('useCall: cleanup failed', err);
       }
@@ -579,7 +579,7 @@ export function useCall({
         console.error('useCall: testIncoming event dispatch failed', err);
       }
     };
-  }, [wsRef.current, handleSignal]);
+  }, [handleSignal]);
 
   useEffect(() => {
     return () => {

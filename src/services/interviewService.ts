@@ -8,7 +8,7 @@ import {
   getDoc,
 } from 'firebase/firestore';
 
-import { db } from '@/config/firebase';
+import { db } from '@/firebase/config';
 import { InterviewQuestion } from '@/types/interview';
 
 class InterviewService {
@@ -17,9 +17,8 @@ class InterviewService {
    */
   public async getTopics(): Promise<string[]> {
     try {
-      console.log('Fetching topics from Firestore...');
+      if (!db) return [];
       const q = query(collection(db, 'interviewQuestions'));
-      console.log('Executing Firestore query...');
       const querySnapshot = await getDocs(q);
       console.log(
         `Found ${querySnapshot.size} documents in interviewQuestions collection`
@@ -70,6 +69,7 @@ class InterviewService {
     }
 
     try {
+      if (!db) return [];
       const normalizedTopic = topic.trim().toLowerCase();
       const allQuestionsQuery = query(collection(db, 'interviewQuestions'));
       const allQuestionsSnapshot = await getDocs(allQuestionsQuery);
@@ -124,6 +124,9 @@ class InterviewService {
     questionId: string
   ): Promise<InterviewQuestion | null> {
     try {
+      if (!db) {
+        return null;
+      }
       const docRef = doc(db, 'interviewQuestions', questionId);
       const docSnap = await getDoc(docRef);
 
@@ -143,6 +146,9 @@ class InterviewService {
    */
   public async searchQuestions(query: string): Promise<InterviewQuestion[]> {
     const searchTerm = query.toLowerCase();
+    if (!db) {
+      return [];
+    }
     const q = collection(db, 'interviewQuestions');
     const querySnapshot = await getDocs(q);
 
@@ -172,6 +178,9 @@ class InterviewService {
   public async getQuestionsByDifficulty(
     difficulty: 'easy' | 'medium' | 'hard'
   ): Promise<InterviewQuestion[]> {
+    if (!db) {
+      return [];
+    }
     const q = query(
       collection(db, 'interviewQuestions'),
       where('difficulty', '==', difficulty)

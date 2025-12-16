@@ -10,12 +10,15 @@ import {
   getDoc,
 } from 'firebase/firestore';
 
-import { db } from '@/config/firebase';
+import { db } from '@/firebase/config';
 import { PracticeTopic } from '@/types/practice';
 
 export const practiceTopicsService = {
   // Get all practice topics
   async getAllTopics() {
+    if (!db) {
+      throw new Error('Firebase is not initialized');
+    }
     const q = query(collection(db, 'practice_topics'));
     const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map((doc) => ({
@@ -26,6 +29,7 @@ export const practiceTopicsService = {
 
   // Get topics by category
   async getTopicsByCategory(category: string) {
+    if (!db) return;
     const q = query(
       collection(db, 'practice_topics'),
       where('category', '==', category)
@@ -39,6 +43,7 @@ export const practiceTopicsService = {
 
   // Get a single topic by ID
   async getTopicById(id: string) {
+    if (!db) return;
     const topicDoc = await getDoc(doc(db, 'practice_topics', id));
     if (!topicDoc.exists()) {
       throw new Error('Topic not found');
@@ -50,6 +55,7 @@ export const practiceTopicsService = {
   async createTopic(
     topic: Omit<PracticeTopic, 'id' | 'createdAt' | 'updatedAt'>
   ) {
+    if (!db) return;
     const now = new Date();
     const newTopic = {
       ...topic,
@@ -62,6 +68,7 @@ export const practiceTopicsService = {
 
   // Update a practice topic
   async updateTopic(id: string, updates: Partial<PracticeTopic>) {
+    if (!db) return;
     const now = new Date();
     const topicRef = doc(db, 'practice_topics', id);
     await updateDoc(topicRef, {
@@ -73,11 +80,13 @@ export const practiceTopicsService = {
 
   // Delete a practice topic
   async deleteTopic(id: string) {
+    if (!db) return;
     await deleteDoc(doc(db, 'practice_topics', id));
   },
 
   // Get all categories
   async getCategories() {
+    if (!db) return;
     const topics = await this.getAllTopics();
     const categories = new Set(topics.map((topic) => topic.category));
     return Array.from(categories);

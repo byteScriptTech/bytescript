@@ -68,6 +68,10 @@ export const ContentProvider: React.FC<ContentProviderProps> = ({
     }
 
     try {
+      if (!db) {
+        console.warn('Firestore not initialized');
+        return;
+      }
       const coursesContentCollection = collection(db, topicName || 'default');
       const courseContentSnapshot = await getDocs(coursesContentCollection);
       const courseContentList = courseContentSnapshot.docs.map((doc) => ({
@@ -92,6 +96,7 @@ export const ContentProvider: React.FC<ContentProviderProps> = ({
     }
 
     try {
+      if (!db) return;
       const scrollToListCollection = collection(db, 'scroll_to_view');
       const scrollToViewSnapshot = await getDocs(scrollToListCollection);
       const scrollToList = scrollToViewSnapshot.docs.map((doc) => ({

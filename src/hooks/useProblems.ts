@@ -32,8 +32,8 @@ export const useProblems = () => {
         setLoading(true);
         setError(null);
         const fetchedProblems = await problemsService.getAllProblems();
-        setProblems(fetchedProblems);
-      } catch (err) {
+        setProblems(fetchedProblems || []);
+      } catch {
         setError('Failed to load problems');
       } finally {
         setLoading(false);

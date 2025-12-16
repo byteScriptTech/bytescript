@@ -20,6 +20,7 @@ export default function ProblemsPage() {
     const fetchProblems = async () => {
       try {
         const data = await problemsService.getAllProblems();
+        if (!data) return;
         setProblems(data);
       } catch (error) {
         console.error('Error fetching problems:', error);

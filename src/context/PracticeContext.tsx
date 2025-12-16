@@ -94,6 +94,7 @@ export const PracticeProvider = ({
     try {
       const data = await practiceTopicsService.getTopicsByCategory(category);
       // Sort topics by order
+      if (!data) return [];
       return [...data].sort((a, b) => (a.order || 0) - (b.order || 0));
     } catch (err) {
       console.error(`Error fetching ${category} practice topics:`, err);

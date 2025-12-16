@@ -88,6 +88,10 @@ export const LanguagesProvider = ({
     }
 
     try {
+      if (!db) {
+        console.warn('Firestore not initialized');
+        return;
+      }
       const querySnapshot = await getDocs(collection(db, 'languages'));
       const languagesList: Language[] = querySnapshot.docs.map((doc) => ({
         id: doc.id,
@@ -105,6 +109,10 @@ export const LanguagesProvider = ({
 
   const addLanguage = async (name: string) => {
     try {
+      if (!db) {
+        console.warn('Firestore not initialized');
+        return;
+      }
       await addDoc(collection(db, 'languages'), { name });
       await fetchLanguages();
 
@@ -116,6 +124,7 @@ export const LanguagesProvider = ({
 
   const updateLanguage = async (id: string, name: string) => {
     try {
+      if (!db) return;
       const languageRef = doc(db, 'languages', id);
       await updateDoc(languageRef, { name });
       await fetchLanguages();
@@ -128,6 +137,7 @@ export const LanguagesProvider = ({
 
   const deleteLanguage = async (id: string) => {
     try {
+      if (!db) return;
       const languageRef = doc(db, 'languages', id);
       await deleteDoc(languageRef);
       await fetchLanguages();
@@ -148,6 +158,7 @@ export const LanguagesProvider = ({
     };
 
     try {
+      if (!db) return;
       await setDoc(
         doc(db, `user_learnings/${userUUID}/languages`, language),
         learningProgress
@@ -166,6 +177,7 @@ export const LanguagesProvider = ({
       updatedProgress: number,
       updatedTopics: Topic[]
     ) => {
+      if (!db) return;
       const languageRef = doc(
         db,
         `user_learnings/${userUUID}/languages`,
@@ -186,6 +198,7 @@ export const LanguagesProvider = ({
   // Get user's learning progress for a specific language
   const getUserLearningProgress = debounce(
     async (userUUID: string, language: string) => {
+      if (!db) return;
       const languageRef = doc(
         db,
         `user_learnings/${userUUID}/languages`,

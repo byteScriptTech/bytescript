@@ -18,6 +18,9 @@ export interface Note {
 
 export const notesService = {
   async createNote(content: string, uid: string): Promise<Note> {
+    if (!db) {
+      throw new Error('Firebase is not initialized');
+    }
     const docRef = await addDoc(collection(db, `users/${uid}/notes`), {
       content,
       createdAt: new Date(),
@@ -32,6 +35,9 @@ export const notesService = {
   },
 
   async getNotes(uid: string): Promise<Note[]> {
+    if (!db) {
+      throw new Error('Firebase is not initialized');
+    }
     const querySnapshot = await getDocs(collection(db, `users/${uid}/notes`));
     return querySnapshot.docs.map((doc) => ({
       id: doc.id,
@@ -40,6 +46,9 @@ export const notesService = {
   },
 
   async updateNote(uid: string, id: string, content: string): Promise<void> {
+    if (!db) {
+      throw new Error('Firebase is not initialized');
+    }
     await updateDoc(doc(db, `users/${uid}/notes`, id), {
       content,
       updatedAt: new Date(),
@@ -47,6 +56,9 @@ export const notesService = {
   },
 
   async deleteNote(uid: string, id: string): Promise<void> {
+    if (!db) {
+      throw new Error('Firebase is not initialized');
+    }
     await deleteDoc(doc(db, `users/${uid}/notes`, id));
   },
 };

@@ -11,6 +11,9 @@ const JAVASCRIPT_CONTENT_ID = 'javascript';
  */
 export const getJavascriptContent =
   async (): Promise<LanguageContent | null> => {
+    if (!db) {
+      throw new Error('Firebase is not initialized');
+    }
     try {
       const docRef = doc(
         db,
@@ -28,6 +31,9 @@ export const getJavascriptContent =
 export const javascriptService = {
   // Create a new JavaScript topic
   async createTopic(topicData: Omit<Topic, 'id'>) {
+    if (!db) {
+      throw new Error('Firebase is not initialized');
+    }
     try {
       const docRef = doc(
         db,
@@ -63,6 +69,9 @@ export const javascriptService = {
 
   // Update an existing JavaScript topic
   async updateTopic(id: string, topicData: Partial<Omit<Topic, 'id'>>) {
+    if (!db) {
+      throw new Error('Firebase is not initialized');
+    }
     try {
       const docRef = doc(
         db,
@@ -106,6 +115,9 @@ export const javascriptService = {
 
   // Delete a JavaScript topic
   async deleteTopic(id: string) {
+    if (!db) {
+      throw new Error('Firebase is not initialized');
+    }
     try {
       const docRef = doc(
         db,
@@ -140,6 +152,9 @@ export const javascriptService = {
 
   // Get all JavaScript topics
   getTopics: async () => {
+    if (!db) {
+      throw new Error('Firebase is not initialized');
+    }
     try {
       const docRef = doc(
         db,
@@ -160,6 +175,9 @@ export const javascriptService = {
 
   // Get a single JavaScript topic by ID
   getTopicById: async (topicId: string) => {
+    if (!db) {
+      throw new Error('Firebase is not initialized');
+    }
     try {
       const docRef = doc(
         db,
@@ -183,6 +201,9 @@ export const javascriptService = {
   getTopicsByDifficulty: async (
     difficulty: 'beginner' | 'intermediate' | 'advanced'
   ) => {
+    if (!db) {
+      throw new Error('Firebase is not initialized');
+    }
     try {
       const docRef = doc(
         db,
