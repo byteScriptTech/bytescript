@@ -43,11 +43,13 @@ export const submissionsService = {
   async addSubmission(
     submission: Omit<Submission, 'id' | 'submittedAt'>
   ): Promise<Submission> {
+    if (!db) return {} as Submission;
     const now = new Date();
     const newSubmission = {
       ...submission,
       submittedAt: now,
     };
+
     const docRef = await addDoc(collection(db, 'submissions'), newSubmission);
     return {
       id: docRef.id,
@@ -56,6 +58,7 @@ export const submissionsService = {
   },
 
   async getUserSubmissions(userId: string): Promise<Submission[]> {
+    if (!db) return [];
     const q = query(
       collection(db, 'submissions'),
       where('userId', '==', userId)
@@ -71,6 +74,7 @@ export const submissionsService = {
   },
 
   async getProblemSubmissions(problemId: string): Promise<Submission[]> {
+    if (!db) return [];
     const q = query(
       collection(db, 'submissions'),
       where('problemId', '==', problemId)
@@ -86,6 +90,7 @@ export const submissionsService = {
   },
 
   async getSubmissionById(id: string): Promise<Submission | null> {
+    if (!db) return null;
     const docRef = doc(db, 'submissions', id);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {

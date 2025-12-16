@@ -51,6 +51,9 @@ const DSA_TOPICS_COLLECTION = 'dsa-topics';
 export const dsaService = {
   // Get all DSA topics
   async getAllTopics(): Promise<DSATopic[]> {
+    if (!db) {
+      throw new Error('Firebase is not initialized');
+    }
     const querySnapshot = await getDocs(collection(db, DSA_TOPICS_COLLECTION));
     return querySnapshot.docs.map((doc) => ({
       id: doc.id,
@@ -62,6 +65,9 @@ export const dsaService = {
 
   // Get a single DSA topic by slug
   async getTopicBySlug(slug: string): Promise<DSATopic | null> {
+    if (!db) {
+      throw new Error('Firebase is not initialized');
+    }
     const querySnapshot = await getDocs(collection(db, DSA_TOPICS_COLLECTION));
 
     const topic = querySnapshot.docs.find((doc) => doc.data().slug === slug);
@@ -78,6 +84,9 @@ export const dsaService = {
 
   // Get a single DSA topic by ID
   async getTopicById(id: string): Promise<DSATopic | null> {
+    if (!db) {
+      throw new Error('Firebase is not initialized');
+    }
     const docRef = doc(db, DSA_TOPICS_COLLECTION, id);
     const docSnap = await getDoc(docRef);
 
@@ -96,6 +105,9 @@ export const dsaService = {
     topic: Omit<DSATopic, 'id' | 'createdAt' | 'updatedAt'>,
     id?: string
   ) {
+    if (!db) {
+      throw new Error('Firebase is not initialized');
+    }
     const now = new Date();
     const topicRef = id
       ? doc(db, DSA_TOPICS_COLLECTION, id)
@@ -119,6 +131,9 @@ export const dsaService = {
     id: string,
     updates: Partial<Omit<DSATopic, 'id' | 'createdAt'>>
   ): Promise<void> {
+    if (!db) {
+      throw new Error('Firebase is not initialized');
+    }
     const docRef = doc(db, DSA_TOPICS_COLLECTION, id);
     const now = new Date();
 

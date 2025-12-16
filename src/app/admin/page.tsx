@@ -31,7 +31,7 @@ function AdminDashboard() {
           problemsService.getAllProblems(),
         ]);
         setDataStructures(topics);
-        setProblemsCount(problems.length);
+        setProblemsCount(problems?.length || 0);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {

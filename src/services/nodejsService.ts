@@ -8,6 +8,7 @@ const NODEJS_CONTENT_ID = 'nodejs';
 
 export const getNodejsContent = async (): Promise<LanguageContent | null> => {
   try {
+    if (!db) return null;
     const docRef = doc(db, NODEJS_CONTENT_COLLECTION, NODEJS_CONTENT_ID);
     const docSnap = await getDoc(docRef);
     return docSnap.exists() ? (docSnap.data() as LanguageContent) : null;
@@ -21,6 +22,7 @@ export const nodejsService = {
   // Create a new Node.js topic
   async createTopic(topicData: Omit<Topic, 'id'>) {
     try {
+      if (!db) return null;
       const docRef = doc(db, NODEJS_CONTENT_COLLECTION, NODEJS_CONTENT_ID);
       const docSnap = await getDoc(docRef);
 
@@ -52,6 +54,7 @@ export const nodejsService = {
   // Update an existing Node.js topic
   async updateTopic(id: string, topicData: Partial<Omit<Topic, 'id'>>) {
     try {
+      if (!db) return null;
       const docRef = doc(db, NODEJS_CONTENT_COLLECTION, NODEJS_CONTENT_ID);
       const docSnap = await getDoc(docRef);
 
@@ -90,6 +93,7 @@ export const nodejsService = {
   // Delete a Node.js topic
   async deleteTopic(id: string) {
     try {
+      if (!db) return null;
       const docRef = doc(db, NODEJS_CONTENT_COLLECTION, NODEJS_CONTENT_ID);
       const docSnap = await getDoc(docRef);
 

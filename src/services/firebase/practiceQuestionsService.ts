@@ -12,13 +12,16 @@ import {
   serverTimestamp,
 } from 'firebase/firestore';
 
-import { db } from '@/config/firebase';
+import { db } from '@/firebase/config';
 import { toast } from '@/hooks/use-toast';
 import { PracticeQuestion } from '@/types/practiceQuestion';
 
 export const practiceQuestionsService = {
   // Get all practice questions
   async getAllQuestions() {
+    if (!db) {
+      throw new Error('Firebase is not initialized');
+    }
     const q = query(
       collection(db, 'practice_questions'),
       orderBy('createdAt', 'desc')
@@ -32,6 +35,9 @@ export const practiceQuestionsService = {
 
   // Get all practice questions for a topic
   async getQuestionsByTopicId(topicId: string) {
+    if (!db) {
+      throw new Error('Firebase is not initialized');
+    }
     const q = query(
       collection(db, 'practice_questions'),
       where('topicId', '==', topicId),
@@ -46,6 +52,9 @@ export const practiceQuestionsService = {
 
   // Get a single question by ID
   async getQuestionById(id: string) {
+    if (!db) {
+      throw new Error('Firebase is not initialized');
+    }
     const questionDoc = await getDoc(doc(db, 'practice_questions', id));
     if (!questionDoc.exists()) {
       throw new Error('Question not found');
@@ -55,6 +64,9 @@ export const practiceQuestionsService = {
 
   // Get questions by type (mcq or coding)
   async getQuestionsByType(topicId: string, type: 'mcq' | 'coding') {
+    if (!db) {
+      throw new Error('Firebase is not initialized');
+    }
     const q = query(
       collection(db, 'practice_questions'),
       where('topicId', '==', topicId),
@@ -72,6 +84,9 @@ export const practiceQuestionsService = {
   async createQuestion(
     questionData: Omit<PracticeQuestion, 'id' | 'createdAt' | 'updatedAt'>
   ) {
+    if (!db) {
+      throw new Error('Firebase is not initialized');
+    }
     const now = serverTimestamp();
     const docRef = await addDoc(collection(db, 'practice_questions'), {
       ...questionData,
@@ -83,6 +98,9 @@ export const practiceQuestionsService = {
 
   // Update an existing practice question
   async updateQuestion(id: string, updates: Partial<PracticeQuestion>) {
+    if (!db) {
+      throw new Error('Firebase is not initialized');
+    }
     try {
       const now = serverTimestamp();
       const questionRef = doc(db, 'practice_questions', id);
@@ -110,6 +128,9 @@ export const practiceQuestionsService = {
 
   // Delete a practice question
   async deleteQuestion(id: string) {
+    if (!db) {
+      throw new Error('Firebase is not initialized');
+    }
     try {
       await deleteDoc(doc(db, 'practice_questions', id));
       toast({

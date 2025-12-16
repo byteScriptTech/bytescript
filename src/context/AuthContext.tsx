@@ -51,6 +51,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const auth = getAuth();
   const createUserDocument = async (user: User) => {
     if (!user.uid) return user;
+    if (!db) {
+      console.warn('Firestore not initialized');
+      return user;
+    }
 
     const userDocRef = doc(db, 'users', user.uid);
     const userDoc = await getDoc(userDocRef);
@@ -85,6 +89,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signInWithGithub = async () => {
     try {
+      if (!auth || !githubProvider) {
+        toast.error('Authentication is not configured');
+        return;
+      }
       const result = await signInWithPopup(auth, githubProvider);
       const userWithRole = await createUserDocument(result.user);
       setCurrentUser(userWithRole);

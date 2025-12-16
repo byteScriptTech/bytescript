@@ -131,10 +131,13 @@ const contentSchema = z.object({
     .default([]),
 });
 
-type TopicService = Pick<
-  typeof javascriptService,
-  'createTopic' | 'updateTopic'
->;
+type TopicService = {
+  createTopic: (topicData: Omit<Topic, 'id'>) => Promise<Topic | null>;
+  updateTopic: (
+    id: string,
+    topicData: Partial<Omit<Topic, 'id'>>
+  ) => Promise<Topic | null>;
+};
 
 interface JavaScriptContentFormProps {
   content?: Partial<ContentFormValues> & { id?: string };

@@ -25,6 +25,7 @@ export interface Problem {
 export const problemsService = {
   // Get all problems
   async getAllProblems() {
+    if (!db) return;
     const q = query(collection(db, 'problems'));
     const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map(
@@ -38,6 +39,7 @@ export const problemsService = {
 
   // Get a single problem by ID
   async getProblemById(id: string) {
+    if (!db) return;
     const problemRef = doc(db, 'problems', id);
     const docSnap = await getDoc(problemRef);
     if (docSnap.exists()) {
@@ -53,6 +55,7 @@ export const problemsService = {
   async createProblem(
     problem: Omit<Problem, 'id' | 'createdAt' | 'updatedAt'>
   ) {
+    if (!db) return;
     const now = new Date();
     const newProblem = {
       ...problem,
@@ -70,6 +73,7 @@ export const problemsService = {
 
   // Update a problem
   async updateProblem(id: string, updates: Partial<Problem>) {
+    if (!db) return;
     const problemRef = doc(db, 'problems', id);
     await updateDoc(problemRef, {
       ...updates,
@@ -80,6 +84,7 @@ export const problemsService = {
 
   // Delete a problem
   async deleteProblem(id: string) {
+    if (!db) return;
     const problemRef = doc(db, 'problems', id);
     await deleteDoc(problemRef);
   },

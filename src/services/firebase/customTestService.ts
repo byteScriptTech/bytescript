@@ -14,7 +14,7 @@ import {
 } from 'firebase/firestore';
 import { toast } from 'sonner';
 
-import { db } from '@/config/firebase';
+import { db } from '@/firebase/config';
 import {
   CustomTest,
   TestAttempt,
@@ -30,6 +30,9 @@ export class CustomTestService {
   static async createTest(
     testData: Omit<CustomTest, 'id' | 'createdAt' | 'updatedAt'>
   ): Promise<string> {
+    if (!db) {
+      throw new Error('Firebase is not initialized');
+    }
     try {
       console.log('=== CREATE TEST DEBUG ===');
       console.log('Test data received:', testData);
@@ -150,7 +153,6 @@ export class CustomTestService {
 
       console.log('Final test document:', testDoc);
       console.log('Adding document to collection...');
-
       const docRef = await addDoc(collection(db, TESTS_COLLECTION), testDoc);
       console.log('Test created successfully with ID:', docRef.id);
       return docRef.id;
@@ -169,6 +171,9 @@ export class CustomTestService {
     testId: string,
     updates: Partial<CustomTest>
   ): Promise<void> {
+    if (!db) {
+      throw new Error('Firebase is not initialized');
+    }
     const testRef = doc(db, TESTS_COLLECTION, testId);
     await updateDoc(testRef, {
       ...updates,
@@ -177,10 +182,16 @@ export class CustomTestService {
   }
 
   static async deleteTest(testId: string): Promise<void> {
+    if (!db) {
+      throw new Error('Firebase is not initialized');
+    }
     await deleteDoc(doc(db, TESTS_COLLECTION, testId));
   }
 
   static async getTest(testId: string): Promise<CustomTest | null> {
+    if (!db) {
+      throw new Error('Firebase is not initialized');
+    }
     const testDoc = await getDoc(doc(db, TESTS_COLLECTION, testId));
     if (!testDoc.exists()) return null;
 
@@ -194,6 +205,9 @@ export class CustomTestService {
 
   static async getUserTests(userId: string): Promise<CustomTest[]> {
     console.log('Fetching tests for user:', userId);
+    if (!db) {
+      throw new Error('Firebase is not initialized');
+    }
     try {
       const q = query(
         collection(db, TESTS_COLLECTION),
@@ -229,6 +243,9 @@ export class CustomTestService {
   }
 
   static async getPublicTests(limitCount: number = 20): Promise<CustomTest[]> {
+    if (!db) {
+      throw new Error('Firebase is not initialized');
+    }
     try {
       const q = query(
         collection(db, TESTS_COLLECTION),
@@ -264,6 +281,9 @@ export class CustomTestService {
     testId: string,
     userId: string
   ): Promise<string> {
+    if (!db) {
+      throw new Error('Firebase is not initialized');
+    }
     const test = await this.getTest(testId);
     if (!test) throw new Error('Test not found');
 
@@ -294,25 +314,47 @@ export class CustomTestService {
   }
 
   static async updateTestAttempt(
-    _attemptId: string,
-    _answers: TestAnswer[]
+    attemptId: string,
+    answers: TestAnswer[]
   ): Promise<void> {
-    // Since security rules don't allow updates, we need to work around this
-    // For now, we'll skip updating and rely on the completeTestAttempt to finalize
-    console.log(
-      'Skipping update due to security rules - answers will be saved on completion'
+    if (!db) {
+      throw new Error('Firebase is not initialized');
+    }
+    const attemptRef = doc(db, ATTEMPTS_COLLECTION, attemptId);
+
+    const totalPoints = answers.reduce(
+      (sum, answer) => sum + answer.pointsEarned,
+      0
     );
+    const totalTime = answers.reduce(
+      (sum, answer) => sum + answer.timeSpent,
+      0
+    );
+
+    await updateDoc(attemptRef, {
+      answers,
+      score: totalPoints,
+      timeSpent: totalTime,
+      updatedAt: Timestamp.now(),
+    });
   }
 
-  static async completeTestAttempt(_attemptId: string): Promise<void> {
-    // Since security rules don't allow updates, we can't complete the attempt
-    // We'll need to modify the security rules or use a different approach
-    console.log('Cannot complete attempt due to security rules restrictions');
-    throw new Error('Cannot complete attempt: security rules prevent updates');
+  static async completeTestAttempt(attemptId: string): Promise<void> {
+    if (!db) {
+      throw new Error('Firebase is not initialized');
+    }
+    const attemptRef = doc(db, ATTEMPTS_COLLECTION, attemptId);
+
+    await updateDoc(attemptRef, {
+      status: 'completed',
+      completedAt: Timestamp.now(),
+    });
   }
 
-  // ... (rest of the code remains the same)
   static async getTestAttempt(attemptId: string): Promise<TestAttempt | null> {
+    if (!db) {
+      throw new Error('Firebase is not initialized');
+    }
     const attemptDoc = await getDoc(doc(db, ATTEMPTS_COLLECTION, attemptId));
     if (!attemptDoc.exists()) return null;
 
@@ -328,6 +370,9 @@ export class CustomTestService {
     userId: string,
     testId?: string
   ): Promise<TestAttempt[]> {
+    if (!db) {
+      throw new Error('Firebase is not initialized');
+    }
     const whereConstraints = [where('userId', '==', userId)];
     if (testId) {
       whereConstraints.push(where('testId', '==', testId));
@@ -350,6 +395,9 @@ export class CustomTestService {
 }
 
 export const getPracticeQuestions = async (): Promise<TestQuestion[]> => {
+  if (!db) {
+    throw new Error('Firebase is not initialized');
+  }
   try {
     const questionsRef = collection(db, 'practice_questions');
     const snapshot = await getDocs(questionsRef);

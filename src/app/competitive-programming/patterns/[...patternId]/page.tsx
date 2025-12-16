@@ -61,7 +61,7 @@ async function fetchPatternData(slug: string) {
     // Get all problems and filter by the pattern's slug
     const allProblems = await problemsService.getAllProblems();
     const patternSlugLower = pattern.slug.toLowerCase();
-
+    if (!allProblems) return { pattern, problems: [] };
     const problems = allProblems.filter((problem) => {
       return (
         problem.tags?.some(
