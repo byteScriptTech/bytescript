@@ -55,15 +55,23 @@ export function DSATopicClient({
 
     // Exact matches first
     if (normalizedSlug === 'linked-lists') return 'linked-lists';
-    if (normalizedSlug === 'doubly-linked-list') return 'doubly-linked-list';
+    if (normalizedSlug === 'doubly-linked-list') return 'linked-lists';
     if (normalizedSlug === 'stack') return 'stack';
     if (normalizedSlug === 'queue') return 'queue';
     if (normalizedSlug === 'searching') return 'searching';
-    if (normalizedSlug === 'binary-search') return 'binary-search';
+    if (normalizedSlug === 'binary-search') return 'searching';
     if (normalizedSlug === 'sorting') return 'sorting';
+    if (normalizedSlug === 'bubble-sort') return 'sorting';
+    if (normalizedSlug === 'selection-sort') return 'sorting';
+    if (normalizedSlug === 'insertion-sort') return 'sorting';
+    if (normalizedSlug === 'merge-sort') return 'sorting';
     if (normalizedSlug === 'recursion') return 'recursion';
     if (normalizedSlug === 'trees') return 'trees';
     if (normalizedSlug === 'graph') return 'graph';
+    if (normalizedSlug === 'bfs') return 'graph';
+    if (normalizedSlug === 'dfs') return 'graph';
+    if (normalizedSlug === 'breadth-first-search') return 'graph';
+    if (normalizedSlug === 'depth-first-search') return 'graph';
 
     // Fuzzy matching for common variations
     if (normalizedSlug.includes('linked-list')) return 'linked-lists';

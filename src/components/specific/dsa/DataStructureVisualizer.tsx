@@ -2,14 +2,12 @@
 
 import React from 'react';
 
-import { GraphVisualizer } from './graph/GraphVisualizer';
-import { DoublyLinkedList } from './linked-list/DoublyLinkedList';
-import { SinglyLinkedList } from './linked-list/SinglyLinkedList';
+import { Graph } from './graph/Graph';
+import { LinkedList } from './linked-list/LinkedList';
 import { QueueVisualizer } from './queue/QueueVisualizer';
 import { RecursionTree } from './recursion/RecursionTree';
-import { BinarySearch } from './searching/BinarySearch';
-import { LinearSearch } from './searching/LinearSearch';
-import { BubbleSort } from './sorting/BubbleSort';
+import { Searching } from './searching/Searching';
+import { Sorting } from './sorting/Sorting';
 import { StackVisualizer } from './stack/StackVisualizer';
 import { BinaryTree } from './trees/BinaryTree';
 import type { DSATopic } from './types';
@@ -22,10 +20,7 @@ export function DataStructureVisualizer({ topic }: Props) {
   const renderTopic = () => {
     switch (topic) {
       case 'linked-lists':
-        return <SinglyLinkedList />;
-
-      case 'doubly-linked-list':
-        return <DoublyLinkedList />;
+        return <LinkedList />;
 
       case 'stack':
         return <StackVisualizer />;
@@ -34,13 +29,10 @@ export function DataStructureVisualizer({ topic }: Props) {
         return <QueueVisualizer />;
 
       case 'searching':
-        return <LinearSearch />;
-
-      case 'binary-search':
-        return <BinarySearch />;
+        return <Searching />;
 
       case 'sorting':
-        return <BubbleSort />;
+        return <Sorting />;
 
       case 'recursion':
         return <RecursionTree />;
@@ -49,7 +41,7 @@ export function DataStructureVisualizer({ topic }: Props) {
         return <BinaryTree />;
 
       case 'graph':
-        return <GraphVisualizer />;
+        return <Graph />;
 
       default:
         return (

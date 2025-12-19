@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react';
 
+import { Button } from '@/components/ui/button';
+
 type Graph = Record<string, string[]>;
 
 const graphData: Graph = {
@@ -12,28 +14,6 @@ const graphData: Graph = {
   E: ['B', 'F'],
   F: ['C', 'E'],
 };
-
-function bfs(graph: Graph, start: string): string[] {
-  const visited = new Set<string>();
-  const queue: string[] = [start];
-  const order: string[] = [];
-
-  visited.add(start);
-
-  while (queue.length > 0) {
-    const node = queue.shift()!;
-    order.push(node);
-
-    for (const neighbor of graph[node]) {
-      if (!visited.has(neighbor)) {
-        visited.add(neighbor);
-        queue.push(neighbor);
-      }
-    }
-  }
-
-  return order;
-}
 
 function dfs(
   graph: Graph,
@@ -53,21 +33,13 @@ function dfs(
   return order;
 }
 
-export function GraphVisualizer() {
+export function DFS() {
   const [traversal, setTraversal] = useState<string[]>([]);
   const [step, setStep] = useState<number>(-1);
-  const [mode, setMode] = useState<'bfs' | 'dfs' | null>(null);
-
-  const startBFS = () => {
-    setTraversal(bfs(graphData, 'A'));
-    setStep(0);
-    setMode('bfs');
-  };
 
   const startDFS = () => {
     setTraversal(dfs(graphData, 'A'));
     setStep(0);
-    setMode('dfs');
   };
 
   const nextStep = () => {
@@ -77,14 +49,11 @@ export function GraphVisualizer() {
   const reset = () => {
     setTraversal([]);
     setStep(-1);
-    setMode(null);
   };
 
   return (
     <div className="space-y-6">
-      <h3 className="text-lg font-semibold">
-        Graph Traversal ({mode?.toUpperCase() ?? '—'})
-      </h3>
+      <h4 className="text-lg font-semibold">Depth-First Search (DFS)</h4>
 
       <div className="flex flex-wrap justify-center gap-6">
         {Object.keys(graphData).map((node) => {
@@ -96,7 +65,7 @@ export function GraphVisualizer() {
               className={`w-14 h-14 flex items-center justify-center rounded-full border text-lg font-semibold
                 ${
                   visited
-                    ? 'bg-green-500 text-white border-green-600'
+                    ? 'bg-purple-500 text-white border-purple-600'
                     : 'bg-gray-100 dark:bg-gray-800'
                 }`}
             >
@@ -113,39 +82,27 @@ export function GraphVisualizer() {
       )}
 
       <div className="flex flex-wrap justify-center gap-3">
-        <button
-          onClick={startBFS}
-          className="px-4 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
-        >
-          Start BFS
-        </button>
-
-        <button
-          onClick={startDFS}
-          className="px-4 py-1 bg-purple-500 text-white rounded hover:bg-purple-600"
-        >
+        <Button onClick={startDFS} variant="secondary" size="sm">
           Start DFS
-        </button>
+        </Button>
 
-        <button
+        <Button
           onClick={nextStep}
           disabled={step === -1 || step >= traversal.length - 1}
-          className="px-4 py-1 bg-gray-500 text-white rounded disabled:bg-gray-400"
+          variant="secondary"
+          size="sm"
         >
           Next
-        </button>
+        </Button>
 
-        <button
-          onClick={reset}
-          className="px-4 py-1 bg-gray-600 text-white rounded hover:bg-gray-700"
-        >
+        <Button onClick={reset} variant="outline" size="sm">
           Reset
-        </button>
+        </Button>
       </div>
 
       <p className="text-sm text-center text-gray-600 dark:text-gray-400">
-        BFS explores level by level using a queue. DFS explores depth first
-        using recursion or a stack. Both have time complexity O(V + E).
+        DFS explores the graph depth first using recursion or a stack. It goes
+        as deep as possible along each branch before backtracking.
       </p>
     </div>
   );
