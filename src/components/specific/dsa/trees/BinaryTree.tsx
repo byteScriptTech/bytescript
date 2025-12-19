@@ -2,6 +2,9 @@
 
 import React, { useState } from 'react';
 
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+
 type TreeNode = {
   value: number;
   left: TreeNode | null;
@@ -125,50 +128,47 @@ export function BinaryTree() {
       </div>
 
       <div className="flex justify-center gap-3">
-        <input
+        <Input
           type="number"
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          className="w-24 px-2 py-1 border rounded"
+          className="w-24"
           placeholder="Value"
         />
-        <button
-          onClick={insertNode}
-          className="px-4 py-1 bg-green-500 text-white rounded hover:bg-green-600"
-        >
+        <Button onClick={insertNode} size="sm">
           Insert
-        </button>
+        </Button>
       </div>
 
       <div className="flex flex-wrap justify-center gap-3">
-        <button
-          onClick={() => startTraversal('inorder')}
-          className="px-3 py-1 bg-blue-500 text-white rounded"
-        >
+        <Button onClick={() => startTraversal('inorder')} size="sm">
           Inorder
-        </button>
+        </Button>
 
-        <button
+        <Button
           onClick={() => startTraversal('preorder')}
-          className="px-3 py-1 bg-purple-500 text-white rounded"
+          variant="secondary"
+          size="sm"
         >
           Preorder
-        </button>
+        </Button>
 
-        <button
+        <Button
           onClick={() => startTraversal('postorder')}
-          className="px-3 py-1 bg-orange-500 text-white rounded"
+          variant="outline"
+          size="sm"
         >
           Postorder
-        </button>
+        </Button>
 
-        <button
+        <Button
           onClick={nextStep}
           disabled={step === -1 || step >= traversal.length - 1}
-          className="px-3 py-1 bg-gray-500 text-white rounded disabled:bg-gray-400"
+          variant="secondary"
+          size="sm"
         >
           Next
-        </button>
+        </Button>
       </div>
 
       {step !== -1 && (

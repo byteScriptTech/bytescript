@@ -2,6 +2,9 @@
 
 import React, { useState } from 'react';
 
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+
 type CallNode = {
   n: number;
   depth: number;
@@ -88,35 +91,25 @@ export function RecursionTree() {
       )}
 
       <div className="flex flex-wrap justify-center gap-3">
-        <input
+        <Input
           type="number"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          className="w-24 px-2 py-1 border rounded"
+          className="w-24"
           placeholder="n"
         />
 
-        <button
-          onClick={startRecursion}
-          className="px-4 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
-        >
+        <Button onClick={startRecursion} size="sm">
           Start
-        </button>
+        </Button>
 
-        <button
-          onClick={nextStep}
-          disabled={step === -1}
-          className="px-4 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400"
-        >
+        <Button onClick={nextStep} disabled={step === -1} size="sm">
           Next
-        </button>
+        </Button>
 
-        <button
-          onClick={reset}
-          className="px-4 py-1 bg-gray-500 text-white rounded hover:bg-gray-600"
-        >
+        <Button onClick={reset} variant="outline" size="sm">
           Reset
-        </button>
+        </Button>
       </div>
 
       <p className="text-sm text-center text-gray-600 dark:text-gray-400">

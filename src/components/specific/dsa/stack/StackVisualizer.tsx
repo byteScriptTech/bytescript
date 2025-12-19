@@ -2,6 +2,9 @@
 
 import React, { useState } from 'react';
 
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+
 export function StackVisualizer() {
   const [stack, setStack] = useState<number[]>([1, 2, 3]);
   const [value, setValue] = useState('4');
@@ -56,28 +59,26 @@ export function StackVisualizer() {
       </div>
 
       <div className="flex flex-wrap justify-center gap-3">
-        <input
+        <Input
           type="number"
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          className="w-24 px-2 py-1 border rounded"
+          className="w-24"
           placeholder="Value"
         />
 
-        <button
-          onClick={push}
-          className="px-4 py-1 bg-green-500 text-white rounded hover:bg-green-600"
-        >
+        <Button onClick={push} size="sm">
           Push
-        </button>
+        </Button>
 
-        <button
+        <Button
           onClick={pop}
           disabled={stack.length === 0}
-          className="px-4 py-1 bg-red-500 text-white rounded hover:bg-red-600 disabled:bg-gray-400"
+          variant="destructive"
+          size="sm"
         >
           Pop
-        </button>
+        </Button>
       </div>
 
       <p className="text-sm text-gray-600 dark:text-gray-400 text-center">

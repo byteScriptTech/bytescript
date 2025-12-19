@@ -2,6 +2,9 @@
 
 import React, { useState } from 'react';
 
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+
 type Node = {
   value: number;
 };
@@ -102,61 +105,43 @@ export function SinglyLinkedList() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <input
+        <Input
           type="number"
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          className="px-2 py-1 border rounded"
           placeholder="Value"
         />
 
-        <input
+        <Input
           type="number"
           value={index}
           onChange={(e) => setIndex(e.target.value)}
-          className="px-2 py-1 border rounded"
           placeholder="Index"
         />
       </div>
 
       <div className="flex flex-wrap gap-3">
-        <button
-          onClick={insertAtHead}
-          className="px-4 py-1 bg-green-500 text-white rounded hover:bg-green-600"
-        >
+        <Button onClick={insertAtHead} size="sm">
           Insert at Head
-        </button>
+        </Button>
 
-        <button
-          onClick={insertAtIndex}
-          className="px-4 py-1 bg-green-500 text-white rounded hover:bg-green-600"
-        >
+        <Button onClick={insertAtIndex} size="sm">
           Insert at Index
-        </button>
+        </Button>
       </div>
 
       <div className="flex flex-wrap gap-3 pt-2">
-        <button
-          onClick={startTraversal}
-          className="px-4 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
-        >
+        <Button onClick={startTraversal} size="sm">
           Start Traversal
-        </button>
+        </Button>
 
-        <button
-          onClick={nextStep}
-          disabled={currentIndex === null}
-          className="px-4 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400"
-        >
+        <Button onClick={nextStep} disabled={currentIndex === null} size="sm">
           Next
-        </button>
+        </Button>
 
-        <button
-          onClick={resetTraversal}
-          className="px-4 py-1 bg-gray-500 text-white rounded hover:bg-gray-600"
-        >
+        <Button onClick={resetTraversal} variant="outline" size="sm">
           Reset
-        </button>
+        </Button>
       </div>
 
       <p className="text-sm text-gray-600 dark:text-gray-400">

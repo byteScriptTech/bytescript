@@ -2,6 +2,9 @@
 
 import React, { useState } from 'react';
 
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+
 export function BinarySearch() {
   const [array] = useState<number[]>([1, 3, 5, 7, 9, 11, 13]);
   const [target, setTarget] = useState('7');
@@ -98,35 +101,29 @@ export function BinarySearch() {
       </div>
 
       <div className="flex flex-wrap justify-center gap-3">
-        <input
+        <Input
           type="number"
           value={target}
           onChange={(e) => setTarget(e.target.value)}
-          className="w-24 px-2 py-1 border rounded"
+          className="w-24"
           placeholder="Target"
         />
 
-        <button
-          onClick={startSearch}
-          className="px-4 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
-        >
+        <Button onClick={startSearch} size="sm">
           Start
-        </button>
+        </Button>
 
-        <button
+        <Button
           onClick={nextStep}
           disabled={low === null || isFinished}
-          className="px-4 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400"
+          size="sm"
         >
           Next
-        </button>
+        </Button>
 
-        <button
-          onClick={reset}
-          className="px-4 py-1 bg-gray-500 text-white rounded hover:bg-gray-600"
-        >
+        <Button onClick={reset} variant="secondary" size="sm">
           Reset
-        </button>
+        </Button>
       </div>
 
       <p className="text-sm text-gray-600 dark:text-gray-400 text-center">

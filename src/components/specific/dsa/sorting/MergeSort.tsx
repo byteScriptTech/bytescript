@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react';
 
+import { Button } from '@/components/ui/button';
+
 type MergeStep = {
   left: number[];
   right: number[];
@@ -115,20 +117,17 @@ export function MergeSort() {
       </div>
 
       <div className="flex justify-center gap-3">
-        <button
+        <Button
           onClick={nextStep}
           disabled={stepIndex >= steps.length - 1}
-          className="px-4 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400"
+          size="sm"
         >
           Next Step
-        </button>
+        </Button>
 
-        <button
-          onClick={reset}
-          className="px-4 py-1 bg-gray-500 text-white rounded hover:bg-gray-600"
-        >
+        <Button onClick={reset} variant="secondary" size="sm">
           Reset
-        </button>
+        </Button>
       </div>
 
       <p className="text-sm text-center text-gray-600 dark:text-gray-400">

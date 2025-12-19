@@ -2,6 +2,9 @@
 
 import React, { useState } from 'react';
 
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+
 export function QueueVisualizer() {
   const [queue, setQueue] = useState<number[]>([1, 2, 3]);
   const [value, setValue] = useState('4');
@@ -59,28 +62,26 @@ export function QueueVisualizer() {
       </div>
 
       <div className="flex flex-wrap justify-center gap-3">
-        <input
+        <Input
           type="number"
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          className="w-24 px-2 py-1 border rounded"
+          className="w-24"
           placeholder="Value"
         />
 
-        <button
-          onClick={enqueue}
-          className="px-4 py-1 bg-green-500 text-white rounded hover:bg-green-600"
-        >
+        <Button onClick={enqueue} size="sm">
           Enqueue
-        </button>
+        </Button>
 
-        <button
+        <Button
           onClick={dequeue}
           disabled={queue.length === 0}
-          className="px-4 py-1 bg-red-500 text-white rounded hover:bg-red-600 disabled:bg-gray-400"
+          variant="destructive"
+          size="sm"
         >
           Dequeue
-        </button>
+        </Button>
       </div>
 
       <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
