@@ -12,7 +12,7 @@ interface DSATopicPageProps {
 }
 
 export default async function DSATopicPage({ params }: DSATopicPageProps) {
-  const { slug } = params;
+  const { slug } = await params;
   try {
     const topic = await dsaService.getTopicBySlug(slug);
 

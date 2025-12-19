@@ -170,7 +170,7 @@ export default function DataStructuresPage() {
         <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="container mx-auto px-4 py-4">
             <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-              <h1 className="text-2xl font-semibold">DSA Topics</h1>
+              <h1 className="text-2xl font-semibold">DSA</h1>
               <div className="relative w-full sm:w-80">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
