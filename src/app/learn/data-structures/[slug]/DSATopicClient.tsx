@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 
 import Navbar from '@/components/common/Navbar';
 import { DataStructureVisualizer } from '@/components/specific/dsa/DataStructureVisualizer';
+import { Problems } from '@/components/specific/dsa/Problems';
 import { Tabs } from '@/components/specific/dsa/Tabs';
 import type { DSATopic as DSATopicType } from '@/components/specific/dsa/types';
 import { AuthProvider } from '@/context/AuthContext';
@@ -100,6 +101,15 @@ export function DSATopicClient({
       content: (
         <div className="mt-6">
           <DataStructureVisualizer topic={getDSATopicFromSlug(_topic.slug)} />
+        </div>
+      ),
+    },
+    {
+      id: 'problems',
+      label: 'Problems',
+      content: (
+        <div className="mt-6">
+          <Problems topic={getDSATopicFromSlug(_topic.slug)} />
         </div>
       ),
     },
