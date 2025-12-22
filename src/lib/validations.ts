@@ -8,6 +8,7 @@ const resourceSchema = z.object({
 });
 
 const exampleSchema = z.object({
+  id: z.string().optional(),
   input: z.string().min(1, 'Input is required'),
   output: z.string().min(1, 'Output is required'),
   explanation: z.string().optional(),

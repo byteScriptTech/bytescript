@@ -6,6 +6,7 @@ import {
   Code,
   Lightbulb,
   CheckCircle,
+  Copy,
 } from 'lucide-react';
 import React, { useState } from 'react';
 
@@ -78,6 +79,14 @@ export function Problems({ problems }: ProblemsProps) {
       }
       return newSet;
     });
+  };
+
+  const copySolution = async (solution: string) => {
+    try {
+      await navigator.clipboard.writeText(solution);
+    } catch (err) {
+      console.error('Failed to copy solution:', err);
+    }
   };
 
   const getDifficultyColor = (difficulty: string) => {
@@ -207,6 +216,21 @@ export function Problems({ problems }: ProblemsProps) {
                     </Button>
                     {solutionRevealed && (
                       <div className="bg-green-50 border border-green-200 p-3 rounded-md">
+                        <div className="flex justify-between items-start mb-2">
+                          <div className="text-sm font-medium text-green-700">
+                            Solution
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() =>
+                              problem.solution && copySolution(problem.solution)
+                            }
+                            className="text-green-600 hover:text-green-700 hover:bg-green-100"
+                          >
+                            <Copy className="h-4 w-4" />
+                          </Button>
+                        </div>
                         <div className="text-sm text-green-800 whitespace-pre-wrap">
                           {problem.solution}
                         </div>
