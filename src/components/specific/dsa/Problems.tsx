@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import React, { useState } from 'react';
 
+import { JavaScriptCodeEditor } from '@/components/common/CodeEditor';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -163,11 +164,14 @@ export function Problems({ problems }: ProblemsProps) {
                       <Code className="h-4 w-4" />
                       <h4 className="font-medium text-sm">Initial Code</h4>
                     </div>
-                    <div className="bg-muted p-3 rounded-md">
-                      <pre className="text-sm overflow-x-auto">
-                        <code>{problem.initialCode}</code>
-                      </pre>
-                    </div>
+                    <JavaScriptCodeEditor
+                      initialCode={problem.initialCode}
+                      height="200px"
+                      readOnly={false}
+                      showRunButton={true}
+                      showOutput={true}
+                      className="border rounded-lg"
+                    />
                   </div>
                 )}
 
