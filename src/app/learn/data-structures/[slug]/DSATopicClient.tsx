@@ -109,7 +109,7 @@ export function DSATopicClient({
       label: 'Problems',
       content: (
         <div className="mt-6">
-          <Problems topic={getDSATopicFromSlug(_topic.slug)} />
+          <Problems problems={_topic.problems || []} />
         </div>
       ),
     },
