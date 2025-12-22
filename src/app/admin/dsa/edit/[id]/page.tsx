@@ -21,7 +21,7 @@ export default function EditDataStructurePage() {
     const fetchData = async () => {
       if (!id || Array.isArray(id)) {
         toast.error('Invalid data structure ID');
-        router.push('/admin/data-structures');
+        router.push('/admin/dsa');
         return;
       }
 
@@ -51,6 +51,7 @@ export default function EditDataStructurePage() {
             useCases: topic.useCases || [],
             resources: topic.resources || [],
             examples: topic.examples || [],
+            problems: topic.problems || [],
             // Convert Date/Timestamp to ISO string for the form
             lastUpdated: topic.lastUpdated
               ? topic.lastUpdated instanceof Date
@@ -64,12 +65,12 @@ export default function EditDataStructurePage() {
           setData(formValues);
         } else {
           toast.error('Data structure not found');
-          router.push('/admin/data-structures');
+          router.push('/admin/dsa');
         }
       } catch (error) {
         console.error('Error fetching data structure:', error);
         toast.error('Failed to load data structure');
-        router.push('/admin/data-structures');
+        router.push('/admin/dsa');
       } finally {
         setIsLoading(false);
       }
@@ -118,6 +119,7 @@ export default function EditDataStructurePage() {
         useCases: formData.useCases,
         resources: formData.resources,
         examples: formData.examples,
+        problems: formData.problems,
         lastUpdated: now,
         // Preserve existing status if not in form
         status: currentTopic.status || 'active',
@@ -129,7 +131,7 @@ export default function EditDataStructurePage() {
         // Update the topic in Firestore
         await dsaService.updateTopic(id, updatedTopic);
         toast.success('Data structure updated successfully');
-        router.push('/admin/data-structures');
+        router.push('/admin/dsa');
       } catch (error) {
         console.error('Error updating data structure:', error);
         toast.error('Failed to update data structure');

@@ -39,6 +39,16 @@ export interface DSATopic {
     output: string;
     explanation?: string;
   }>;
+  problems?: Array<{
+    id?: string;
+    title: string;
+    difficulty: 'easy' | 'medium' | 'hard';
+    description: string;
+    tags?: string[];
+    initialCode?: string;
+    hint?: string;
+    solution?: string;
+  }>;
   status?: 'active' | 'deleted' | 'draft';
   createdAt: Date | Timestamp;
   updatedAt: Date | Timestamp;
@@ -111,6 +121,25 @@ export const dsaService = {
       createdAt: docSnap.data().createdAt?.toDate(),
       updatedAt: docSnap.data().updatedAt?.toDate(),
     } as DSATopic;
+  },
+
+  // Create a new DSA topic
+  async createTopic(
+    topic: Omit<DSATopic, 'id' | 'createdAt' | 'updatedAt'>
+  ): Promise<string> {
+    if (!db) {
+      throw new Error('Firebase is not initialized');
+    }
+    const now = new Date();
+    const topicRef = doc(collection(db, DSA_TOPICS_COLLECTION));
+
+    await setDoc(topicRef, {
+      ...topic,
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    return topicRef.id;
   },
 
   // Create or update a DSA topic
