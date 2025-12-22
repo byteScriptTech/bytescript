@@ -86,6 +86,41 @@ const components: Components = {
       {...props}
     />
   ),
+  ul: ({ children, ...props }) => (
+    <ul className="list-disc pl-6 mb-4 space-y-2" {...props}>
+      {children}
+    </ul>
+  ),
+  ol: ({ children, ...props }) => (
+    <ol className="list-decimal pl-6 mb-4 space-y-2" {...props}>
+      {children}
+    </ol>
+  ),
+  li: ({ children, ...props }) => (
+    <li className="leading-relaxed" {...props}>
+      {children}
+    </li>
+  ),
+  strong: ({ children, ...props }) => (
+    <strong className="font-bold text-primary" {...props}>
+      {children}
+    </strong>
+  ),
+  b: ({ children, ...props }) => (
+    <b className="font-bold text-primary" {...props}>
+      {children}
+    </b>
+  ),
+  em: ({ children, ...props }) => (
+    <em className="italic" {...props}>
+      {children}
+    </em>
+  ),
+  i: ({ children, ...props }) => (
+    <i className="italic" {...props}>
+      {children}
+    </i>
+  ),
 } as const;
 
 export function MarkdownRenderer({

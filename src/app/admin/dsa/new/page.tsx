@@ -4,20 +4,50 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
 import { DataStructureForm } from '@/components/admin/DataStructureForm';
+import type { DataStructureFormValues } from '@/lib/validations';
+import { dsaService } from '@/services/firebase/dsaService';
 
 export default function NewDataStructurePage() {
   const router = useRouter();
 
-  const handleSubmit = async (data: any) => {
+  const handleSubmit = async (data: DataStructureFormValues) => {
     try {
-      // TODO: Replace with actual API call
-      console.log('Submitting data:', data);
+      // Create the topic object with all fields from the form
+      const now = new Date();
+      const newTopic = {
+        title: data.name,
+        slug: data.slug,
+        description: data.description,
+        category: data.category,
+        subcategory: data.subcategory,
+        difficulty: data.difficulty,
+        content: data.content,
+        timeComplexity: data.timeComplexity,
+        spaceComplexity: data.spaceComplexity,
+        tags: data.tags,
+        prerequisites: data.prerequisites,
+        operations:
+          data.operations?.map((op) => ({
+            name: op,
+            description: '',
+            timeComplexity: '',
+            spaceComplexity: '',
+          })) || [],
+        useCases: data.useCases,
+        resources: data.resources,
+        examples: data.examples,
+        problems: data.problems,
+        status: 'active' as const,
+        createdAt: now,
+        updatedAt: now,
+        lastUpdated: now,
+      };
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Save the topic to Firestore
+      await dsaService.createTopic(newTopic);
 
       toast.success('Data structure created successfully!');
-      router.push('/admin/data-structures');
+      router.push('/admin/dsa');
     } catch (error) {
       console.error('Error creating data structure:', error);
       toast.error('Failed to create data structure. Please try again.');
