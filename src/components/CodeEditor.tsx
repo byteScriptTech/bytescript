@@ -1,5 +1,6 @@
 'use client';
 
+import { Maximize2, Minimize2 } from 'lucide-react';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 
@@ -54,10 +55,35 @@ export default function CodeEditor({
   }, [output]);
 
   const [algorithm, setAlgorithm] = useState('// Write your algorithm here\n');
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const editorContainerRef = useRef<HTMLDivElement>(null);
+
+  const toggleFullscreen = useCallback(() => {
+    if (!document.fullscreenElement) {
+      editorContainerRef.current?.requestFullscreen();
+      setIsFullscreen(true);
+    } else {
+      document.exitFullscreen();
+      setIsFullscreen(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
 
   return (
-    <div className="h-full w-full flex flex-col">
-      <div className="flex flex-col h-full bg-background rounded-lg overflow-hidden border">
+    <div ref={editorContainerRef} className="h-full w-full flex flex-col">
+      <div
+        className={`flex flex-col h-full bg-background rounded-lg overflow-hidden border ${isFullscreen ? 'fixed inset-0 z-50 rounded-none' : ''}`}
+      >
         <PanelGroup direction="horizontal" className="flex-1">
           {/* Algorithm Panel */}
           {showAlgorithm && (
@@ -88,9 +114,21 @@ export default function CodeEditor({
               {/* JavaScript Editor Panel */}
               <Panel defaultSize={70} minSize={30} className="flex flex-col">
                 <div className="flex items-center justify-between p-2 border-b bg-muted/10">
-                  <div className="text-sm font-medium px-2">
-                    JavaScript Editor
-                  </div>
+                  <div className="text-sm font-medium px-2">Editor</div>
+                  <button
+                    onClick={toggleFullscreen}
+                    className="border bg-background hover:bg-accent h-8 px-3 text-xs rounded-md flex items-center gap-1"
+                    title={
+                      isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'
+                    }
+                  >
+                    {isFullscreen ? (
+                      <Minimize2 size={14} />
+                    ) : (
+                      <Maximize2 size={14} />
+                    )}
+                    {isFullscreen ? 'Exit' : 'Fullscreen'}
+                  </button>
                 </div>
 
                 {/* Monaco Editor */}
@@ -101,6 +139,7 @@ export default function CodeEditor({
                     onOutput={handleOutput}
                     readOnly={false}
                     className="h-full w-full"
+                    height={'100%'}
                     showRunButton={true}
                     showOutput={false}
                   />
