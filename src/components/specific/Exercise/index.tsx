@@ -59,25 +59,9 @@ export function Exercise({
           <p className="text-sm text-muted-foreground">{prompt}</p>
         </div>
 
-        {code && (
-          <div className="mt-4">
-            <Label>Initial Code:</Label>
-            <div className="mt-1 rounded-md overflow-hidden border [&_.cm-editor]:bg-muted/50 [&_.cm-editor]:p-2 [&_.cm-editor]:rounded-md [&_.cm-gutters]:bg-muted/30 [&_.cm-gutters]:border-r [&_.cm-gutters]:border-border/50 [&_.cm-scroller]:min-h-[100px]">
-              <JavaScriptCodeEditor
-                initialCode={code}
-                readOnly={true}
-                showRunButton={false}
-                showOutput={false}
-                className="rounded-t-none border-0"
-                height="300px"
-              />
-            </div>
-          </div>
-        )}
-
         <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <Label htmlFor="code-editor">Your Solution</Label>
+            <Label htmlFor="code-editor">Code Editor</Label>
             <Button
               variant="ghost"
               size="sm"
@@ -103,7 +87,7 @@ export function Exercise({
 
           <div className="rounded-md overflow-hidden border">
             <JavaScriptCodeEditor
-              initialCode={initialCode}
+              initialCode={code || initialCode}
               readOnly={false}
               showRunButton={true}
               showOutput={true}
@@ -148,14 +132,6 @@ export function Exercise({
             </div>
           </div>
         )}
-
-        <div className="text-sm text-muted-foreground">
-          Press{' '}
-          <kbd className="px-1.5 py-0.5 text-xs border rounded bg-muted">
-            ⌘ + Enter
-          </kbd>{' '}
-          to run
-        </div>
       </div>
     </div>
   );
