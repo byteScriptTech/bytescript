@@ -1,6 +1,14 @@
 'use client';
 
-import { Copy, Loader2, Play, Square, Trash2 } from 'lucide-react';
+import {
+  Copy,
+  Loader2,
+  Maximize2,
+  Minimize2,
+  Play,
+  Square,
+  Trash2,
+} from 'lucide-react';
 import dynamic from 'next/dynamic';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
@@ -61,6 +69,8 @@ export const PythonCodeEditor = ({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [algorithm, setAlgorithm] = useState('');
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const editorContainerRef = useRef<HTMLDivElement>(null);
 
   // ---------- Output helpers ----------
   const flushOutput = useCallback(() => {
@@ -174,10 +184,36 @@ sys.stdout = io.StringIO()
     await navigator.clipboard.writeText(editorRef.current.getValue());
   }, []);
 
+  const toggleFullscreen = useCallback(() => {
+    if (!document.fullscreenElement) {
+      editorContainerRef.current?.requestFullscreen();
+      setIsFullscreen(true);
+    } else {
+      document.exitFullscreen();
+      setIsFullscreen(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
+
   // ---------- Render ----------
   return (
-    <div className={cn('h-full w-full flex flex-col', className)}>
-      <div className="flex flex-col h-full bg-background rounded-lg overflow-hidden border">
+    <div
+      ref={editorContainerRef}
+      className={cn('h-full w-full flex flex-col', className)}
+    >
+      <div
+        className={`flex flex-col h-full bg-background rounded-lg overflow-hidden border ${isFullscreen ? 'fixed inset-0 z-50 rounded-none' : ''}`}
+      >
         <PanelGroup direction="horizontal" className="flex-1">
           {/* Algorithm Panel */}
           {showAlgorithm && (
@@ -223,6 +259,22 @@ sys.stdout = io.StringIO()
                   <div className="flex gap-2">
                     <Button size="sm" variant="ghost" onClick={copyCode}>
                       <Copy className="w-4 h-4 mr-1" /> Copy
+                    </Button>
+
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={toggleFullscreen}
+                      title={
+                        isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'
+                      }
+                    >
+                      {isFullscreen ? (
+                        <Minimize2 className="w-4 h-4 mr-1" />
+                      ) : (
+                        <Maximize2 className="w-4 h-4 mr-1" />
+                      )}
+                      {isFullscreen ? 'Exit' : 'Fullscreen'}
                     </Button>
 
                     {showRunButton && (
