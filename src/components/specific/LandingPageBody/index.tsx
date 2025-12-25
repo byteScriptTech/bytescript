@@ -58,7 +58,7 @@ const LandingPageBody: React.FC<LandingPageBodyProps> = ({
               <Link href="/competitive-programming">
                 <div
                   data-testid="feature-card-competitive"
-                  className="group flex w-full gap-3 rounded-xl border border-border/50 bg-gradient-to-br from-card to-card/80 p-6 flex-col hover:shadow-2xl hover:scale-102 hover:border-primary/50 transition-all duration-300 cursor-pointer relative overflow-hidden"
+                  className="group flex w-full gap-3 rounded-xl border border-border/50 bg-gradient-to-br from-card to-card/80 p-6 flex-col hover:shadow-2xl hover:scale-102 hover:border-primary/50 transition-all duration-300 cursor-pointer relative overflow-hidden h-full"
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   <div
@@ -109,7 +109,7 @@ const LandingPageBody: React.FC<LandingPageBodyProps> = ({
               <Link href="/practice">
                 <div
                   data-testid="feature-card-problems"
-                  className="group flex w-full gap-3 rounded-xl border border-border/50 bg-gradient-to-br from-card to-card/80 p-6 flex-col hover:shadow-2xl hover:scale-102 hover:border-primary/50 transition-all duration-300 cursor-pointer relative overflow-hidden"
+                  className="group flex w-full gap-3 rounded-xl border border-border/50 bg-gradient-to-br from-card to-card/80 p-6 flex-col hover:shadow-2xl hover:scale-102 hover:border-primary/50 transition-all duration-300 cursor-pointer relative overflow-hidden h-full"
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   <div
@@ -160,7 +160,7 @@ const LandingPageBody: React.FC<LandingPageBodyProps> = ({
               <Link href="/learn/data-structures">
                 <div
                   data-testid="feature-card-dsa"
-                  className="group flex w-full gap-3 rounded-xl border border-border/50 bg-gradient-to-br from-card to-card/80 p-6 flex-col hover:shadow-2xl hover:scale-102 hover:border-primary/50 transition-all duration-300 cursor-pointer relative overflow-hidden"
+                  className="group flex w-full gap-3 rounded-xl border border-border/50 bg-gradient-to-br from-card to-card/80 p-6 flex-col hover:shadow-2xl hover:scale-102 hover:border-primary/50 transition-all duration-300 cursor-pointer relative overflow-hidden h-full"
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   <div
