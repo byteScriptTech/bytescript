@@ -1,6 +1,6 @@
+import Link from 'next/link';
 import React from 'react';
 
-import { VideoPlayer } from '@/components/common/VideoPlayer/VideoPlayer';
 import { Button } from '@/components/ui/button';
 
 interface LandingPageBodyProps {
@@ -18,23 +18,27 @@ const LandingPageBody: React.FC<LandingPageBodyProps> = ({
           <div className="text-center space-y-8">
             <div className="space-y-4">
               <h1 className="text-5xl md:text-7xl font-bold leading-tight tracking-tight text-foreground">
-                Code Together,
-                <span className="text-[#00BFA6]"> Grow Together</span>
+                Master Programming
+                <span className="text-[#00BFA6]">
+                  {' '}
+                  with Interactive Learning
+                </span>
               </h1>
             </div>
             <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-              Master programming through collaborative coding with peers. Get
-              real-time feedback, solve problems together, and build projects
-              that matter.
+              Learn competitive programming, data structures, and multiple
+              languages with interactive visualizations, peer collaboration, and
+              AI assistance.
             </p>
             <div className="pt-4 flex justify-center">
-              <Button
-                onClick={handleExploreByteScriptClick}
-                className="px-10 py-7 text-lg font-semibold bg-primary hover:bg-primary/90 transition-all transform hover:scale-105"
-                size="lg"
-              >
-                Start Pair Programming Now
-              </Button>
+              <Link href="/learn">
+                <Button
+                  className="px-10 py-7 text-lg font-semibold bg-primary hover:bg-primary/90 transition-all transform hover:scale-105"
+                  size="lg"
+                >
+                  Start Learning Now
+                </Button>
+              </Link>
             </div>
           </div>
           <div className="flex flex-col gap-10 px-4 py-10 @container">
@@ -51,99 +55,167 @@ const LandingPageBody: React.FC<LandingPageBodyProps> = ({
               </h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full p-0">
-              <div
-                data-testid="feature-card-interactive"
-                className="flex w-full gap-3 rounded-lg border border-border bg-card p-4 flex-col hover:shadow-md transition-shadow"
-              >
+              <Link href="/competitive-programming">
                 <div
-                  className="text-foreground"
-                  data-icon="Code"
-                  data-size="24px"
-                  data-weight="regular"
+                  data-testid="feature-card-competitive"
+                  className="group flex w-full gap-3 rounded-xl border border-border/50 bg-gradient-to-br from-card to-card/80 p-6 flex-col hover:shadow-2xl hover:scale-102 hover:border-primary/50 transition-all duration-300 cursor-pointer relative overflow-hidden h-full"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24px"
-                    height="24px"
-                    fill="currentColor"
-                    viewBox="0 0 256 256"
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div
+                    className="text-foreground relative z-10"
+                    data-icon="Trophy"
+                    data-size="24px"
+                    data-weight="regular"
                   >
-                    <path d="M69.12,94.15,28.5,128l40.62,33.85a8,8,0,1,1-10.24,12.29l-48-40a8,8,0,0,1,0-12.29l48-40a8,8,0,0,1,10.24,12.3Zm176,27.7-48-40a8,8,0,1,0-10.24,12.3L227.5,128l-40.62,33.85a8,8,0,1,0,10.24,12.29l48-40a8,8,0,0,0,0-12.29ZM162.73,32.48a8,8,0,0,0-10.25,4.79l-64,176a8,8,0,0,0,4.79,10.26A8.14,8.14,0,0,0,96,224a8,8,0,0,0,7.52-5.27l64-176A8,8,0,0,0,162.73,32.48Z"></path>
-                  </svg>
+                    <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-colors duration-300">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24px"
+                        height="24px"
+                        fill="currentColor"
+                        viewBox="0 0 256 256"
+                      >
+                        <path d="M200,32H56A24,24,0,0,0,32,56V200a24,24,0,0,0,24,24H200a24,24,0,0,0,24-24V56A24,24,0,0,0,200,32Zm8,168a8,8,0,0,1-8,8H56a8,8,0,0,1-8-8V56a8,8,0,0,1,8-8H200a8,8,0,0,1,8,8ZM40,16V216a8,8,0,0,1-16,0V16a8,8,0,0,1,16,0ZM232,16V216a8,8,0,0,1-16,0V16a8,8,0,0,1,16,0Z"></path>
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-2 relative z-10">
+                    <h2 className="text-foreground text-lg font-bold leading-tight group-hover:text-primary transition-colors duration-300">
+                      Competitive Programming
+                    </h2>
+                    <p className="text-muted-foreground text-sm font-normal leading-normal">
+                      Practice curated patterns and templates for contest
+                      problems with explanations and variations.
+                    </p>
+                    <div className="flex items-center text-primary text-sm font-medium mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <span>Explore Now</span>
+                      <svg
+                        className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform duration-300"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex flex-col gap-1">
-                  <h2 className="text-foreground text-base font-bold leading-tight">
-                    Interactive Coding Challenges
-                  </h2>
-                  <p className="text-muted-foreground text-sm font-normal leading-normal">
-                    Dive into byte‑sized exercises tailored to your level. Share
-                    your solutions, get community driven feedback, and learn
-                    together one challenge at a time.
-                  </p>
-                </div>
-              </div>
-              <div
-                data-testid="feature-card-problem-solving"
-                className="flex w-full gap-3 rounded-lg border border-border bg-card p-4 flex-col hover:shadow-md transition-shadow"
-              >
+              </Link>
+              <Link href="/practice">
                 <div
-                  className="text-foreground"
-                  data-icon="PuzzlePiece"
-                  data-size="24px"
-                  data-weight="regular"
+                  data-testid="feature-card-problems"
+                  className="group flex w-full gap-3 rounded-xl border border-border/50 bg-gradient-to-br from-card to-card/80 p-6 flex-col hover:shadow-2xl hover:scale-102 hover:border-primary/50 transition-all duration-300 cursor-pointer relative overflow-hidden h-full"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24px"
-                    height="24px"
-                    fill="currentColor"
-                    viewBox="0 0 256 256"
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div
+                    className="text-foreground relative z-10"
+                    data-icon="Puzzle"
+                    data-size="24px"
+                    data-weight="regular"
                   >
-                    <path d="M220.27,158.54a8,8,0,0,0-7.7-.46,20,20,0,1,1,0-36.16A8,8,0,0,0,224,114.69V72a16,16,0,0,0-16-16H171.78a35.36,35.36,0,0,0,.22-4,36.11,36.11,0,0,0-11.36-26.24,36,36,0,0,0-60.55,23.62,36.56,36.56,0,0,0,.14,6.62H64A16,16,0,0,0,48,72v32.22a35.36,35.36,0,0,0-4-.22,36.12,36.12,0,0,0-26.24,11.36,35.7,35.7,0,0,0-9.69,27,36.08,36.08,0,0,0,33.31,33.6,35.68,35.68,0,0,0,6.62-.14V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V165.31A8,8,0,0,0,220.27,158.54ZM208,208H64V165.31a8,8,0,0,0-11.43-7.23,20,20,0,1,1,0-36.16A8,8,0,0,0,64,114.69V72h46.69a8,8,0,0,0,7.23-11.43,20,20,0,1,1,36.16,0A8,8,0,0,0,161.31,72H208v32.23a35.68,35.68,0,0,0-6.62-.14A36,36,0,0,0,204,176a35.36,35.36,0,0,0,4-.22Z"></path>
-                  </svg>
+                    <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-colors duration-300">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24px"
+                        height="24px"
+                        fill="currentColor"
+                        viewBox="0 0 256 256"
+                      >
+                        <path d="M224,96a32,32,0,0,0-32-32,32,32,0,0,0-32-32H96A32,32,0,0,0,64,64,32,32,0,0,0,32,96v64a32,32,0,0,0,32,32,32,32,0,0,0,32,32h64a32,32,0,0,0,32-32,32,32,0,0,0,32-32ZM160,64h16V80H160ZM96,64h48V80H96ZM64,96H80V80h16V64a16,16,0,0,1,16-16h48a16,16,0,0,1,16,16V80h16V96h16v16H208v48H192v16H176v16H128a16,16,0,0,1-16-16H96V160H80V144H64Zm16,64h16v16H80Zm16,32h48v16H96Z"></path>
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-2 relative z-10">
+                    <h2 className="text-foreground text-lg font-bold leading-tight group-hover:text-primary transition-colors duration-300">
+                      Problem Solving
+                    </h2>
+                    <p className="text-muted-foreground text-sm font-normal leading-normal">
+                      Large catalog of practice problems with difficulty tags,
+                      solutions, and testcases.
+                    </p>
+                    <div className="flex items-center text-primary text-sm font-medium mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <span>Start Practicing</span>
+                      <svg
+                        className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform duration-300"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex flex-col gap-1">
-                  <h2 className="text-foreground text-base font-bold leading-tight">
-                    Adaptive Problem-Solving
-                  </h2>
-                  <p className="text-muted-foreground text-sm font-normal leading-normal">
-                    Tackle complex problems with adaptive learning paths,
-                    designed to challenge and improve your analytical abilities.
-                  </p>
-                </div>
-              </div>
-              <div
-                data-testid="feature-card-community-collaboration"
-                className="flex w-full gap-3 rounded-lg border border-border bg-card p-4 flex-col hover:shadow-md transition-shadow"
-              >
+              </Link>
+              <Link href="/learn/data-structures">
                 <div
-                  className="text-foreground"
-                  data-icon="UsersThree"
-                  data-size="24px"
-                  data-weight="regular"
+                  data-testid="feature-card-dsa"
+                  className="group flex w-full gap-3 rounded-xl border border-border/50 bg-gradient-to-br from-card to-card/80 p-6 flex-col hover:shadow-2xl hover:scale-102 hover:border-primary/50 transition-all duration-300 cursor-pointer relative overflow-hidden h-full"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24px"
-                    height="24px"
-                    fill="currentColor"
-                    viewBox="0 0 256 256"
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div
+                    className="text-foreground relative z-10"
+                    data-icon="TreeStructure"
+                    data-size="24px"
+                    data-weight="regular"
                   >
-                    <path d="M244.8,150.4a8,8,0,0,1-11.2-1.6A51.6,51.6,0,0,0,192,128a8,8,0,0,1-7.37-4.89,8,8,0,0,1,0-6.22A8,8,0,0,1,192,112a24,24,0,1,0-23.24-30,8,8,0,1,1-15.5-4A40,40,0,1,1,219,117.51a67.94,67.94,0,0,1,27.43,21.68A8,8,0,0,1,244.8,150.4ZM190.92,212a8,8,0,1,1-13.84,8,57,57,0,0,0-98.16,0,8,8,0,1,1-13.84-8,72.06,72.06,0,0,1,33.74-29.92,48,48,0,1,1,58.36,0A72.06,72.06,0,0,1,190.92,212ZM128,176a32,32,0,1,0-32-32A32,32,0,0,0,128,176ZM72,120a8,8,0,0,0-8-8A24,24,0,1,1,87.24,82a8,8,0,1,0,15.5-4A40,40,0,1,0,37,117.51,67.94,67.94,0,0,0,9.6,139.19a8,8,0,1,0,12.8,9.61A51.6,51.6,0,0,1,64,128,8,8,0,0,0,72,120Z"></path>
-                  </svg>
+                    <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary/20 transition-colors duration-300">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24px"
+                        height="24px"
+                        fill="currentColor"
+                        viewBox="0 0 256 256"
+                      >
+                        <path d="M232,120h-8V88a24,24,0,0,0-24-24H136V56a24,24,0,0,0-24-24H56A24,24,0,0,0,32,56v72a24,24,0,0,0,24,24h8v32a24,24,0,0,0,24,24h64v8a24,24,0,0,0,24,24h56a24,24,0,0,0,24-24V144A24,24,0,0,0,232,120ZM56,48h56a8,8,0,0,1,8,8v8H48V56A8,8,0,0,1,56,48Zm8,96a8,8,0,0,1-8-8V80H120v56H64Zm96,56H88V184h64v8a8,8,0,0,1-8,8Zm64-16H168V144a8,8,0,0,0-8-8H136V88h64a8,8,0,0,1,8,8v32h8a8,8,0,0,1,8,8v48Z"></path>
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-2 relative z-10">
+                    <h2 className="text-foreground text-lg font-bold leading-tight group-hover:text-primary transition-colors duration-300">
+                      Data Structures
+                    </h2>
+                    <p className="text-muted-foreground text-sm font-normal leading-normal">
+                      Learn core data structures with interactive visualizations
+                      and step-through animations.
+                    </p>
+                    <div className="flex items-center text-primary text-sm font-medium mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <span>Learn Now</span>
+                      <svg
+                        className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform duration-300"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex flex-col gap-1">
-                  <h2 className="text-foreground text-base font-bold leading-tight">
-                    Community Collaboration
-                  </h2>
-                  <p className="text-muted-foreground text-sm font-normal leading-normal">
-                    Join a vibrant community of learners and experts,
-                    collaborate on projects, and share your knowledge.
-                  </p>
-                </div>
-              </div>
+              </Link>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* How It Works Section */}
+      <section className="py-24 bg-background">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="@container py-16 @[480px]:py-24 text-center">
             <div className="flex flex-col gap-8 @[480px]:gap-12 max-w-[720px] mx-auto">
               <div className="flex flex-col gap-4">
@@ -170,154 +242,29 @@ const LandingPageBody: React.FC<LandingPageBodyProps> = ({
         </div>
       </section>
 
-      {/* Video Demo Section */}
-      <section className="py-16 md:py-24 bg-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground mb-4">
-              See ByteScript in Action
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Watch how ByteScript makes collaborative coding and learning more
-              effective
-            </p>
-          </div>
-          <div className="px-4">
-            <VideoPlayer
-              videoUrl="/videos/demo.mp4"
-              thumbnailUrl="/images/video-thumbnail.jpg"
-              title="ByteScript Demo: Real-time Collaborative Coding"
-            />
-            <div className="mt-6 text-center">
-              <p className="text-muted-foreground text-sm">
-                This demo showcases the core features of ByteScript&apos;s pair
-                programming environment
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Features Section */}
       <section className="py-24 bg-card/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center space-y-4 max-w-4xl mx-auto">
-            <h2 className="text-4xl font-bold tracking-tight text-foreground">
-              Why Developers Love ByteScript
-            </h2>
-            <p className="text-xl text-muted-foreground">
-              Everything you need to become a better developer, together
-            </p>
-          </div>
-
-          <div className="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Feature 1 */}
-            <div className="group bg-background p-8 rounded-2xl border border-border/50 hover:border-primary/30 transition-all duration-300 hover:-translate-y-1">
-              <div className="w-16 h-16 bg-[#d9f7f0] dark:bg-primary/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-[#c2f0e6] dark:group-hover:bg-primary/20 transition-colors">
-                <svg
-                  className="w-8 h-8 text-primary"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  strokeWidth="1.75"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                  />
-                </svg>
-              </div>
-              <h3 className="text-2xl font-bold mb-4 text-foreground">
-                Pair Programming
-              </h3>
-              <p className="text-muted-foreground leading-relaxed">
-                Team up with peers in real-time coding sessions with built-in
-                voice chat. Collaborate on code together and communicate
-                seamlessly without leaving the platform.
-              </p>
-            </div>
-
-            {/* Feature 2 */}
-            <div className="group bg-background p-8 rounded-2xl border border-border/50 hover:border-primary/30 transition-all duration-300 hover:-translate-y-1">
-              <div className="w-16 h-16 bg-[#d9f7f0] dark:bg-primary/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-[#c2f0e6] dark:group-hover:bg-primary/20 transition-colors">
-                <svg
-                  className="w-8 h-8 text-primary"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  strokeWidth="1.75"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-                  />
-                </svg>
-              </div>
-              <h3 className="text-2xl font-bold mb-4 text-foreground">
-                Real-world Challenges
-              </h3>
-              <p className="text-muted-foreground leading-relaxed">
-                Solve practical coding challenges with instant feedback. Improve
-                your skills through hands-on practice and structured learning
-                paths.
-              </p>
-            </div>
-
-            {/* Feature 3 */}
-            <div className="group bg-background p-8 rounded-2xl border border-border/50 hover:border-primary/30 transition-all duration-300 hover:-translate-y-1">
-              <div className="w-16 h-16 bg-[#d9f7f0] dark:bg-primary/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-[#c2f0e6] dark:group-hover:bg-primary/20 transition-colors">
-                <svg
-                  className="w-8 h-8 text-primary"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-                  ></path>
-                </svg>
-              </div>
-              <h3 className="text-2xl font-bold mb-4 text-foreground">
-                Comprehensive Learning Resources
-              </h3>
-              <ul className="text-muted-foreground leading-relaxed space-y-2 list-disc pl-5">
-                <li>Interactive coding challenges with instant feedback</li>
-                <li>Data structures & algorithms explained simply</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works */}
-      <section className="py-24 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center space-y-4 max-w-4xl mx-auto">
             <h2 className="text-4xl font-bold tracking-tight text-foreground">
               How It Works
             </h2>
             <p className="text-xl text-muted-foreground">
-              Get started with ByteScript in just a few simple steps
+              Start your learning journey in three simple steps
             </p>
           </div>
 
-          <div className="mt-16 grid md:grid-cols-3 gap-8">
+          <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="group text-center p-8 rounded-2xl bg-card/50 border border-border/50 hover:border-primary/30 transition-all duration-300">
               <div className="w-20 h-20 bg-[#d9f7f0] dark:bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-[#c2f0e6] dark:group-hover:bg-primary/20 transition-colors">
                 <span className="text-3xl font-bold text-primary">1</span>
               </div>
               <h3 className="text-2xl font-bold mb-4 text-foreground">
-                Create Your Profile
+                Sign Up for Free
               </h3>
               <p className="text-muted-foreground leading-relaxed">
-                Sign up and set up your developer profile in seconds. Connect
-                with other developers at your skill level.
+                Create your account and get instant access to our comprehensive
+                learning platform. No setup required.
               </p>
             </div>
             <div className="group text-center p-8 rounded-2xl bg-card/50 border border-border/50 hover:border-primary/30 transition-all duration-300">
@@ -325,11 +272,11 @@ const LandingPageBody: React.FC<LandingPageBodyProps> = ({
                 <span className="text-3xl font-bold text-primary">2</span>
               </div>
               <h3 className="text-2xl font-bold mb-4 text-foreground">
-                Join or Start a Session
+                Choose Your Path
               </h3>
               <p className="text-muted-foreground leading-relaxed">
-                Find a coding partner or join an existing session. Work on
-                challenges or real projects together.
+                Select from competitive programming, data structures, JavaScript
+                learning, or peer programming sessions.
               </p>
             </div>
             <div className="group text-center p-8 rounded-2xl bg-card/50 border border-border/50 hover:border-primary/30 transition-all duration-300">
@@ -337,11 +284,11 @@ const LandingPageBody: React.FC<LandingPageBodyProps> = ({
                 <span className="text-3xl font-bold text-primary">3</span>
               </div>
               <h3 className="text-2xl font-bold mb-4 text-foreground">
-                Grow Together
+                Learn and Progress
               </h3>
               <p className="text-muted-foreground leading-relaxed">
-                Learn, build, and get better together. Track your progress and
-                celebrate your achievements.
+                Master programming through hands-on practice. Track your
+                progress and build real projects as you learn.
               </p>
             </div>
           </div>
@@ -352,20 +299,19 @@ const LandingPageBody: React.FC<LandingPageBodyProps> = ({
       <section className="bg-[#f0fdf9] dark:bg-primary/5 py-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
-            Ready to transform how you learn to code?
+            Ready to Master Programming?
           </h2>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Join our growing community of developers improving their skills
-            through collaborative coding. Be among the first to experience the
-            future of learning.
+            Join our comprehensive learning platform and master competitive
+            programming, data structures, JavaScript, and more with interactive
+            visualizations and AI assistance.
           </p>
           <div className="flex justify-center">
-            <Button
-              onClick={handleExploreByteScriptClick}
-              className="px-8 py-6 text-lg font-semibold bg-primary hover:bg-primary/90 text-white dark:text-black"
-            >
-              Start Coding for Free
-            </Button>
+            <Link href="/learn">
+              <Button className="px-8 py-6 text-lg font-semibold bg-primary hover:bg-primary/90 text-white dark:text-black">
+                Start Learning for Free
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
