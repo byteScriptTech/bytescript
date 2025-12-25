@@ -19,7 +19,7 @@ describe('LandingPageHeader', () => {
     expect(menuContainer).toBeInTheDocument();
 
     const menuItems = menuContainer.querySelectorAll('a');
-    expect(menuItems.length).toBe(5);
+    expect(menuItems.length).toBe(4);
 
     const learnLink = menuItems[0];
     expect(learnLink).toBeInTheDocument();
@@ -31,18 +31,15 @@ describe('LandingPageHeader', () => {
     expect(practiceLink).toHaveAttribute('href', '/practice');
     expect(practiceLink).toHaveTextContent(/practice/i);
 
-    const communityLink = menuItems[2];
-    expect(communityLink).toBeInTheDocument();
-    expect(communityLink).toHaveAttribute('href', '/community');
-    expect(communityLink).toHaveTextContent(/community/i);
-    const peerProgrammingLink = menuItems[3];
-    expect(peerProgrammingLink).toBeInTheDocument();
-    expect(peerProgrammingLink).toHaveAttribute('href', '/peer-programming');
-    expect(peerProgrammingLink).toHaveTextContent(/peer programming/i);
-    const editorLink = menuItems[4];
-    expect(editorLink).toBeInTheDocument();
-    expect(editorLink).toHaveAttribute('href', '/editor');
-    expect(editorLink).toHaveTextContent(/editor/i);
+    const competitiveLink = menuItems[2];
+    expect(competitiveLink).toBeInTheDocument();
+    expect(competitiveLink).toHaveAttribute('href', '/competitive-programming');
+    expect(competitiveLink).toHaveTextContent(/competitive/i);
+
+    const playgroundLink = menuItems[3];
+    expect(playgroundLink).toBeInTheDocument();
+    expect(playgroundLink).toHaveAttribute('href', '/editor');
+    expect(playgroundLink).toHaveTextContent(/playground/i);
   });
 
   it('renders get started button with correct styling', () => {
