@@ -1,7 +1,5 @@
 'use client';
 
-import React from 'react';
-
 import AuthGuard from '@/components/misc/authGuard';
 
 import CustomTest from './CustomTest';
