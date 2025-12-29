@@ -41,11 +41,6 @@ jest.mock('@/components/specific/LearnContent', () => {
   return LearnContent;
 });
 
-<<<<<<< HEAD
-=======
-import { useLanguagesRedux } from '@/hooks/useLanguagesRedux';
-
->>>>>>> a246de4 (refactor: add redux for better global state handling)
 import LanguageBody from '../LanguageBody';
 
 // Mock Firebase auth
@@ -82,6 +77,11 @@ jest.mock('next/navigation', () => ({
     get: jest.fn(),
   }),
   notFound: jest.fn(),
+}));
+
+// Mock the useLanguages hook
+jest.mock('@/context/LanguagesContext', () => ({
+  useLanguages: jest.fn(),
 }));
 
 describe('LanguageBody', () => {
