@@ -11,8 +11,8 @@ import React, { ReactElement } from 'react';
 import '@testing-library/jest-dom';
 
 // Mock the useAuth hook
-jest.mock('@/context/AuthContext', () => ({
-  useAuth: () => ({
+jest.mock('@/hooks/useAuthRedux', () => ({
+  useAuthRedux: () => ({
     currentUser: null,
     loading: false,
     signIn: jest.fn(),

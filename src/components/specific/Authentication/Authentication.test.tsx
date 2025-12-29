@@ -5,8 +5,8 @@ import { useAuthRedux } from '@/hooks/useAuthRedux';
 
 import Authentication from '.';
 
-jest.mock('@/context/AuthContext', () => ({
-  useAuth: jest.fn(() => ({
+jest.mock('@/hooks/useAuthRedux', () => ({
+  useAuthRedux: jest.fn(() => ({
     signInWithGithub: jest.fn(),
   })),
 }));

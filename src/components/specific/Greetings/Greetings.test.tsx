@@ -4,8 +4,8 @@ import { useAuthRedux } from '@/hooks/useAuthRedux';
 
 import Greetings from '.';
 
-jest.mock('@/context/AuthContext', () => ({
-  useAuth: jest.fn(),
+jest.mock('@/hooks/useAuthRedux', () => ({
+  useAuthRedux: jest.fn(),
 }));
 
 describe('Greetings Component', () => {

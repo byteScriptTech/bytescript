@@ -48,8 +48,8 @@ jest.mock('next/navigation', () => ({
 }));
 
 // Mock auth context
-jest.mock('@/context/AuthContext', () => ({
-  useAuth: () => mockUseAuth(),
+jest.mock('@/hooks/useAuthRedux', () => ({
+  useAuthRedux: () => mockUseAuth(),
 }));
 
 import ProblemPageContent from '.';

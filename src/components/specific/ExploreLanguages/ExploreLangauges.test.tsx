@@ -22,8 +22,8 @@ jest.mock('../LanguagesList', () => {
 });
 
 // Mock the ContentContext
-jest.mock('@/context/ContentContext', () => ({
-  useContentContext: () => ({
+jest.mock('@/hooks/useContentRedux', () => ({
+  useContentRedux: () => ({
     content: [
       { name: 'JavaScript', slug: 'javascript' },
       { name: 'Python', slug: 'python' },

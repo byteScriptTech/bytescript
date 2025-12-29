@@ -10,16 +10,16 @@ jest.mock('@/hooks/useTopics', () => ({
   useTopics: jest.fn(),
 }));
 
-jest.mock('@/context/ContentContext', () => ({
-  useContentContext: jest.fn(),
+jest.mock('@/hooks/useContentRedux', () => ({
+  useContentRedux: jest.fn(),
 }));
 
 jest.mock('@/context/LocalhostContext', () => ({
   useLocalStorage: jest.fn(),
 }));
 
-import { useContentRedux } from '@/hooks/useContentRedux';
 import { useLocalStorage } from '@/context/LocalhostContext';
+import { useContentRedux } from '@/hooks/useContentRedux';
 import { useTopics } from '@/hooks/useTopics';
 
 import { LanguagesList } from './index';

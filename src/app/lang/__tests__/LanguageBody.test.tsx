@@ -85,8 +85,8 @@ jest.mock('next/navigation', () => ({
 }));
 
 // Mock the useLanguages hook
-jest.mock('@/context/LanguagesContext', () => ({
-  useLanguages: jest.fn(),
+jest.mock('@/hooks/useLanguagesRedux', () => ({
+  useLanguagesRedux: jest.fn(),
 }));
 
 describe('LanguageBody', () => {
