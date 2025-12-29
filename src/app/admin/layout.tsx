@@ -13,20 +13,18 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    
-      <AuthGuard>
-        <ThemeProvider>
-          <div className="flex h-screen bg-background">
-            <AdminSidebar />
-            <div className="flex-1 flex flex-col overflow-hidden">
-              <AdminNavbar />
-              <main className="flex-1 overflow-y-auto p-6 bg-background">
-                {children}
-              </main>
-            </div>
+    <AuthGuard>
+      <ThemeProvider>
+        <div className="flex h-screen bg-background">
+          <AdminSidebar />
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <AdminNavbar />
+            <main className="flex-1 overflow-y-auto p-6 bg-background">
+              {children}
+            </main>
           </div>
-        </ThemeProvider>
-      </AuthGuard>
-    
+        </div>
+      </ThemeProvider>
+    </AuthGuard>
   );
 }

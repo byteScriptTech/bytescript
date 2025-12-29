@@ -2,11 +2,7 @@
 import Authentication from '@/components/specific/Authentication';
 
 const Login = () => {
-  return (
-    
-      <Authentication />
-    
-  );
+  return <Authentication />;
 };
 
 export default Login;

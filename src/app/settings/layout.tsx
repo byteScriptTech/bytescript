@@ -11,13 +11,11 @@ export default function SettingsLayout({
   children: React.ReactNode;
 }) {
   return (
-    
-      <AuthGuard>
-        <div className="flex flex-col min-h-screen">
-          <Navbar />
-          <main className="flex-1">{children}</main>
-        </div>
-      </AuthGuard>
-    
+    <AuthGuard>
+      <div className="flex flex-col min-h-screen">
+        <Navbar />
+        <main className="flex-1">{children}</main>
+      </div>
+    </AuthGuard>
   );
 }

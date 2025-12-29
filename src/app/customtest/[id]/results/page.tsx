@@ -10,10 +10,8 @@ export const dynamic = 'force-dynamic';
 
 export default function CustomTestResultsPage() {
   return (
-    
-      <AuthGuard>
-        <CustomTestResults />
-      </AuthGuard>
-    
+    <AuthGuard>
+      <CustomTestResults />
+    </AuthGuard>
   );
 }

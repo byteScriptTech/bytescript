@@ -163,131 +163,124 @@ export default function DataStructuresPage() {
   }
 
   return (
-    
-      <div className="min-h-[calc(100vh-4rem)] bg-background">
-        <Navbar />
-        <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-          <div className="container mx-auto px-4 py-4">
-            <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-              <h1 className="text-2xl font-semibold">DSA Topics</h1>
-              <div className="relative w-full sm:w-80">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder="Search topics..."
-                  className="pl-9 h-9 w-full"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
+    <div className="min-h-[calc(100vh-4rem)] bg-background">
+      <Navbar />
+      <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+            <h1 className="text-2xl font-semibold">DSA Topics</h1>
+            <div className="relative w-full sm:w-80">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search topics..."
+                className="pl-9 h-9 w-full"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
             </div>
           </div>
         </div>
-
-        <div className="container mx-auto px-4 py-6">
-          <Tabs
-            defaultValue="all"
-            className="space-y-8"
-            onValueChange={setActiveTab}
-          >
-            <TabsList className="grid w-full grid-cols-3 max-w-md mx-auto">
-              <TabsTrigger value="all" className="flex items-center gap-2">
-                <Code className="h-4 w-4" />
-                All Topics
-              </TabsTrigger>
-              <TabsTrigger
-                value="data-structures"
-                className="flex items-center gap-2"
-              >
-                <Database className="h-4 w-4" />
-                Data Structures
-              </TabsTrigger>
-              <TabsTrigger
-                value="algorithms"
-                className="flex items-center gap-2"
-              >
-                <Cpu className="h-4 w-4" />
-                Algorithms
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="all" className="space-y-8">
-              <div className="space-y-4">
-                <h2 className="text-2xl font-bold">All Topics</h2>
-                {loading ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {[...Array(6)].map((_, i) => (
-                      <TopicSkeleton key={i} />
-                    ))}
-                  </div>
-                ) : filteredTopics.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredTopics.map((topic) => (
-                      <TopicCard key={topic.id} topic={topic} />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12 border rounded-lg">
-                    <p className="text-muted-foreground">
-                      No topics found matching your search.
-                    </p>
-                  </div>
-                )}
-              </div>
-            </TabsContent>
-
-            <TabsContent value="data-structures" className="space-y-8">
-              <div className="space-y-4">
-                <h2 className="text-2xl font-bold">Data Structures</h2>
-                {loading ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {[...Array(3)].map((_, i) => (
-                      <TopicSkeleton key={i} />
-                    ))}
-                  </div>
-                ) : dataStructures.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {dataStructures.map((topic) => (
-                      <TopicCard key={topic.id} topic={topic} />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12 border rounded-lg">
-                    <p className="text-muted-foreground">
-                      No data structures found.
-                    </p>
-                  </div>
-                )}
-              </div>
-            </TabsContent>
-
-            <TabsContent value="algorithms" className="space-y-8">
-              <div className="space-y-4">
-                <h2 className="text-2xl font-bold">Algorithms</h2>
-                {loading ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {[...Array(3)].map((_, i) => (
-                      <TopicSkeleton key={i} />
-                    ))}
-                  </div>
-                ) : algorithms.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {algorithms.map((topic) => (
-                      <TopicCard key={topic.id} topic={topic} />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12 border rounded-lg">
-                    <p className="text-muted-foreground">
-                      No algorithms found.
-                    </p>
-                  </div>
-                )}
-              </div>
-            </TabsContent>
-          </Tabs>
-        </div>
       </div>
-    
+
+      <div className="container mx-auto px-4 py-6">
+        <Tabs
+          defaultValue="all"
+          className="space-y-8"
+          onValueChange={setActiveTab}
+        >
+          <TabsList className="grid w-full grid-cols-3 max-w-md mx-auto">
+            <TabsTrigger value="all" className="flex items-center gap-2">
+              <Code className="h-4 w-4" />
+              All Topics
+            </TabsTrigger>
+            <TabsTrigger
+              value="data-structures"
+              className="flex items-center gap-2"
+            >
+              <Database className="h-4 w-4" />
+              Data Structures
+            </TabsTrigger>
+            <TabsTrigger value="algorithms" className="flex items-center gap-2">
+              <Cpu className="h-4 w-4" />
+              Algorithms
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="all" className="space-y-8">
+            <div className="space-y-4">
+              <h2 className="text-2xl font-bold">All Topics</h2>
+              {loading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {[...Array(6)].map((_, i) => (
+                    <TopicSkeleton key={i} />
+                  ))}
+                </div>
+              ) : filteredTopics.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredTopics.map((topic) => (
+                    <TopicCard key={topic.id} topic={topic} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12 border rounded-lg">
+                  <p className="text-muted-foreground">
+                    No topics found matching your search.
+                  </p>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="data-structures" className="space-y-8">
+            <div className="space-y-4">
+              <h2 className="text-2xl font-bold">Data Structures</h2>
+              {loading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {[...Array(3)].map((_, i) => (
+                    <TopicSkeleton key={i} />
+                  ))}
+                </div>
+              ) : dataStructures.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {dataStructures.map((topic) => (
+                    <TopicCard key={topic.id} topic={topic} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12 border rounded-lg">
+                  <p className="text-muted-foreground">
+                    No data structures found.
+                  </p>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="algorithms" className="space-y-8">
+            <div className="space-y-4">
+              <h2 className="text-2xl font-bold">Algorithms</h2>
+              {loading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {[...Array(3)].map((_, i) => (
+                    <TopicSkeleton key={i} />
+                  ))}
+                </div>
+              ) : algorithms.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {algorithms.map((topic) => (
+                    <TopicCard key={topic.id} topic={topic} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12 border rounded-lg">
+                  <p className="text-muted-foreground">No algorithms found.</p>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
   );
 }

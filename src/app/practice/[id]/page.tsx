@@ -11,12 +11,10 @@ export const dynamic = 'force-dynamic';
 
 export default function PracticeQuestion() {
   return (
-    
-      <AuthGuard>
-        <PracticeProvider>
-          <Practice />
-        </PracticeProvider>
-      </AuthGuard>
-    
+    <AuthGuard>
+      <PracticeProvider>
+        <Practice />
+      </PracticeProvider>
+    </AuthGuard>
   );
 }

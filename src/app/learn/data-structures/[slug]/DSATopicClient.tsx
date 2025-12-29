@@ -46,25 +46,20 @@ export function DSATopicClient({
   const circleSize = 50;
 
   return (
-    
-      <div className="relative w-full min-h-screen">
-        <Navbar />
-        <DraggableCircle
-          size={circleSize}
-          onClick={() => setShowEditor(true)}
+    <div className="relative w-full min-h-screen">
+      <Navbar />
+      <DraggableCircle size={circleSize} onClick={() => setShowEditor(true)} />
+      {showEditor && (
+        <DraggableEditor
+          defaultPosition={{ x: 0, y: 0 }}
+          defaultSize={{ width: 800, height: 500 }}
+          onClose={() => setShowEditor(false)}
+          defaultPythonCode="# Start coding here..."
+          showAlgorithm={true}
+          hideTabs={false}
         />
-        {showEditor && (
-          <DraggableEditor
-            defaultPosition={{ x: 0, y: 0 }}
-            defaultSize={{ width: 800, height: 500 }}
-            onClose={() => setShowEditor(false)}
-            defaultPythonCode="# Start coding here..."
-            showAlgorithm={true}
-            hideTabs={false}
-          />
-        )}
-        {children}
-      </div>
-    
+      )}
+      {children}
+    </div>
   );
 }

@@ -152,23 +152,21 @@ export default function EditDataStructurePage() {
   }
 
   return (
-    
-      <AuthGuard>
-        <div className="space-y-6">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">
-              Edit Data Structure
-            </h1>
-            <p className="text-muted-foreground">
-              Update the details of this data structure
-            </p>
-          </div>
-
-          <div className="bg-white p-6 rounded-lg border">
-            <DataStructureForm initialData={data} onSubmit={handleSubmit} />
-          </div>
+    <AuthGuard>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">
+            Edit Data Structure
+          </h1>
+          <p className="text-muted-foreground">
+            Update the details of this data structure
+          </p>
         </div>
-      </AuthGuard>
-    
+
+        <div className="bg-white p-6 rounded-lg border">
+          <DataStructureForm initialData={data} onSubmit={handleSubmit} />
+        </div>
+      </div>
+    </AuthGuard>
   );
 }

@@ -83,49 +83,45 @@ export default function Practice() {
   );
 
   return (
-    
-      <LocalStorageProvider>
-        
-          <PracticeProvider>
-            <AuthGuard>
-              <div className="flex min-h-screen w-full flex-col bg-background">
-                <div className="flex flex-col flex-1">
-                  <Navbar />
-                  <main className="flex-1">
-                    <div className="flex flex-col md:flex-row gap-6">
-                      <div className="w-full md:w-64 flex-shrink-0">
-                        <CollapsibleSidebar
-                          items={sidebarItems}
-                          header="Choose Category"
-                          defaultOpen={true}
-                          collapsible={true}
-                          activeItemId={activeItemId}
-                          onItemClick={(item) => {
-                            setActiveItemId(item.id);
-                            if (item.onClick) item.onClick();
-                          }}
-                          className="border-r border-border h-[calc(100vh-4rem)] fixed md:sticky top-16 left-0"
-                        />
-                      </div>
-                      <div className="w-full md:pl-4 flex-1">
-                        {view === 'custom-tests' ? (
-                          <CustomTestContent />
-                        ) : (
-                          <PracticeContent
-                            currentTopic={currentTopic}
-                            setCurrentTopic={setCurrentTopic}
-                            category={category}
-                          />
-                        )}
-                      </div>
-                    </div>
-                  </main>
+    <LocalStorageProvider>
+      <PracticeProvider>
+        <AuthGuard>
+          <div className="flex min-h-screen w-full flex-col bg-background">
+            <div className="flex flex-col flex-1">
+              <Navbar />
+              <main className="flex-1">
+                <div className="flex flex-col md:flex-row gap-6">
+                  <div className="w-full md:w-64 flex-shrink-0">
+                    <CollapsibleSidebar
+                      items={sidebarItems}
+                      header="Choose Category"
+                      defaultOpen={true}
+                      collapsible={true}
+                      activeItemId={activeItemId}
+                      onItemClick={(item) => {
+                        setActiveItemId(item.id);
+                        if (item.onClick) item.onClick();
+                      }}
+                      className="border-r border-border h-[calc(100vh-4rem)] fixed md:sticky top-16 left-0"
+                    />
+                  </div>
+                  <div className="w-full md:pl-4 flex-1">
+                    {view === 'custom-tests' ? (
+                      <CustomTestContent />
+                    ) : (
+                      <PracticeContent
+                        currentTopic={currentTopic}
+                        setCurrentTopic={setCurrentTopic}
+                        category={category}
+                      />
+                    )}
+                  </div>
                 </div>
-              </div>
-            </AuthGuard>
-          </PracticeProvider>
-        
-      </LocalStorageProvider>
-    
+              </main>
+            </div>
+          </div>
+        </AuthGuard>
+      </PracticeProvider>
+    </LocalStorageProvider>
   );
 }

@@ -103,7 +103,9 @@ describe('Notes Component', () => {
       updatedAt: new Date(),
     };
 
-    (useNotesRedux as jest.Mock).mockReturnValue(getBaseProps({ notes: [note] }));
+    (useNotesRedux as jest.Mock).mockReturnValue(
+      getBaseProps({ notes: [note] })
+    );
     renderComponent();
 
     // Test note content is displayed
@@ -136,7 +138,9 @@ describe('Notes Component', () => {
       updatedAt: new Date(),
     };
 
-    (useNotesRedux as jest.Mock).mockReturnValue(getBaseProps({ notes: [note] }));
+    (useNotesRedux as jest.Mock).mockReturnValue(
+      getBaseProps({ notes: [note] })
+    );
     renderComponent();
 
     // Click delete but cancel the confirmation
