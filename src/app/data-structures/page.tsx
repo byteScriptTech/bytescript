@@ -10,7 +10,6 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AuthProvider } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
 import { dsaService } from '@/services/firebase/dsaService';
 
@@ -164,7 +163,7 @@ export default function DataStructuresPage() {
   }
 
   return (
-    <AuthProvider>
+    
       <div className="min-h-[calc(100vh-4rem)] bg-background">
         <Navbar />
         <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -289,6 +288,6 @@ export default function DataStructuresPage() {
           </Tabs>
         </div>
       </div>
-    </AuthProvider>
+    
   );
 }

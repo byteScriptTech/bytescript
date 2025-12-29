@@ -4,7 +4,6 @@ import dynamic from 'next/dynamic';
 import React, { useState } from 'react';
 
 import Navbar from '@/components/common/Navbar';
-import { AuthProvider } from '@/context/AuthContext';
 import { DSATopic } from '@/types/dsa';
 
 const DraggableCircle = dynamic(
@@ -47,7 +46,7 @@ export function DSATopicClient({
   const circleSize = 50;
 
   return (
-    <AuthProvider>
+    
       <div className="relative w-full min-h-screen">
         <Navbar />
         <DraggableCircle
@@ -66,6 +65,6 @@ export function DSATopicClient({
         )}
         {children}
       </div>
-    </AuthProvider>
+    
   );
 }

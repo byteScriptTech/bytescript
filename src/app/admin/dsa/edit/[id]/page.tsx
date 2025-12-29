@@ -6,7 +6,6 @@ import { toast } from 'sonner';
 
 import { DataStructureForm } from '@/components/admin/DataStructureForm';
 import AuthGuard from '@/components/misc/authGuard';
-import { AuthProvider } from '@/context/AuthContext';
 import type { DataStructureFormValues } from '@/lib/validations';
 import { dsaService, type DSATopic } from '@/services/firebase/dsaService';
 
@@ -153,7 +152,7 @@ export default function EditDataStructurePage() {
   }
 
   return (
-    <AuthProvider>
+    
       <AuthGuard>
         <div className="space-y-6">
           <div>
@@ -170,6 +169,6 @@ export default function EditDataStructurePage() {
           </div>
         </div>
       </AuthGuard>
-    </AuthProvider>
+    
   );
 }

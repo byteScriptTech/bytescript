@@ -2,8 +2,8 @@ import React, { useEffect, useState, useMemo } from 'react';
 
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useContentContext } from '@/context/ContentContext';
-import { useLanguages } from '@/context/LanguagesContext';
+import { useContentRedux } from '@/hooks/useContentRedux';
+import { useLanguagesRedux } from '@/hooks/useLanguagesRedux';
 import { useLocalStorage } from '@/context/LocalhostContext';
 
 import ContentWithSuspense from './ContentWithSuspense';
@@ -24,8 +24,8 @@ const LearnContent: React.FC<LearnContentProps> = ({
   const currentUser = useMemo(() => getItem('user'), [getItem]);
   const currentLang = useMemo(() => getItem('lvl_name'), [getItem]);
 
-  const { content, loading } = useContentContext();
-  const { getUserLearningProgress } = useLanguages();
+  const { content, loading } = useContentRedux();
+  const { getUserLearningProgress } = useLanguagesRedux();
 
   const courseContent = useMemo(() => content?.[0], [content]);
 

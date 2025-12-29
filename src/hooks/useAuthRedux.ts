@@ -1,55 +1,30 @@
+'use client';
+
 import {
   signInWithPopup,
   onAuthStateChanged,
   getAuth,
-  User,
   signOut as firebaseSignOut,
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
-import {
-  createContext,
-  ReactNode,
-  useContext,
-  useEffect,
-  useState,
-} from 'react';
+import { useEffect } from 'react';
 import { toast } from 'sonner';
 
 import { db, githubProvider } from '@/firebase/config';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { setUser, setLoading, clearUser } from '@/store/slices/authSlice';
+import { AppUser } from '@/store/slices/authSlice';
 
-export type UserRole = 'admin' | 'user';
-
-export interface AppUser extends User {
-  role?: UserRole;
-}
-
-export interface AuthContextType {
-  currentUser: AppUser | null;
-  loading: boolean;
-  isAdmin: boolean;
-  signInWithGithub: () => Promise<void>;
-  signOut: () => Promise<void>;
-}
-
-export const AuthContext = createContext<AuthContextType | undefined>(
-  undefined
-);
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
-
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [currentUser, setCurrentUser] = useState<AppUser | null>(null);
-  const [loading, setLoading] = useState(true);
+export const useAuthRedux = () => {
+  const dispatch = useAppDispatch();
+  const { currentUser, loading, isAdmin } = useAppSelector(
+    (state) => state.auth
+  );
   const router = useRouter();
   const auth = getAuth();
-  const createUserDocument = async (user: User) => {
+
+  const createUserDocument = async (user: AppUser): Promise<AppUser> => {
     if (!user.uid) return user;
 
     const userDocRef = doc(db, 'users', user.uid);
@@ -86,8 +61,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signInWithGithub = async () => {
     try {
       const result = await signInWithPopup(auth, githubProvider);
-      const userWithRole = await createUserDocument(result.user);
-      setCurrentUser(userWithRole);
+      const userWithRole = await createUserDocument(result.user as AppUser);
+      dispatch(setUser(userWithRole));
       toast.success('Signed in successfully!');
       router.push('/dashboard');
     } catch (error) {
@@ -99,7 +74,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signOut = async () => {
     try {
       await firebaseSignOut(auth);
-      setCurrentUser(null);
+      dispatch(clearUser());
       toast.success('Signed out successfully!');
       router.push('/login');
     } catch (error) {
@@ -114,33 +89,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (!isMounted) return;
 
+      dispatch(setLoading(true));
+
       if (user) {
-        const userWithRole = await createUserDocument(user);
-        setCurrentUser(userWithRole);
+        const userWithRole = await createUserDocument(user as AppUser);
+        dispatch(setUser(userWithRole));
         if (window.location.pathname === '/login') {
           router.push('/dashboard');
         }
       } else {
-        setCurrentUser(null);
+        dispatch(clearUser());
       }
-      setLoading(false);
+
+      dispatch(setLoading(false));
     });
 
     return () => {
       isMounted = false;
       unsubscribe();
     };
-  }, [auth, router]);
+  }, [auth, router, dispatch]);
 
-  const authValue = {
+  return {
     currentUser,
     loading,
-    isAdmin: currentUser?.role === 'admin',
+    isAdmin,
     signInWithGithub,
     signOut,
   };
-
-  return (
-    <AuthContext.Provider value={authValue}>{children}</AuthContext.Provider>
-  );
 };

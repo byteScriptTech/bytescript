@@ -8,8 +8,6 @@ import Navbar from '@/components/common/Navbar';
 import AuthGuard from '@/components/misc/authGuard';
 import CustomTestContent from '@/components/specific/CustomTest/CustomTestContent';
 import PracticeContent from '@/components/specific/PracticeContent';
-import { AuthProvider } from '@/context/AuthContext';
-import { LanguagesProvider } from '@/context/LanguagesContext';
 import { LocalStorageProvider } from '@/context/LocalhostContext';
 import { PracticeProvider } from '@/context/PracticeContext';
 import { PracticeTopic, SidebarItem } from '@/types/practice';
@@ -85,9 +83,9 @@ export default function Practice() {
   );
 
   return (
-    <AuthProvider>
+    
       <LocalStorageProvider>
-        <LanguagesProvider>
+        
           <PracticeProvider>
             <AuthGuard>
               <div className="flex min-h-screen w-full flex-col bg-background">
@@ -126,8 +124,8 @@ export default function Practice() {
               </div>
             </AuthGuard>
           </PracticeProvider>
-        </LanguagesProvider>
+        
       </LocalStorageProvider>
-    </AuthProvider>
+    
   );
 }

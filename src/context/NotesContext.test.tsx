@@ -9,10 +9,10 @@ import '@testing-library/jest-dom';
 import React from 'react';
 import { toast } from 'sonner';
 
-import { useAuth } from '@/context/AuthContext';
+import { useAuthRedux } from '@/hooks/useAuthRedux';
 import { notesService } from '@/services/firebase/notesService';
 
-import { NotesProvider, useNotes } from './NotesContext';
+import { useNotesRedux } from '@/hooks/useNotesRedux';
 
 // Mock the toast module
 jest.mock('sonner', () => ({
@@ -47,11 +47,11 @@ describe('NotesContext', () => {
   ];
   beforeEach(() => {
     jest.clearAllMocks();
-    (useAuth as jest.Mock).mockReturnValue({ currentUser: { uid: 'uid1' } });
+    (useAuthRedux as jest.Mock).mockReturnValue({ currentUser: { uid: 'uid1' } });
   });
 
   const TestLoader = () => {
-    const { notes } = useNotes();
+    const { notes } = useNotesRedux();
     return <div data-testid="count">{notes.length}</div>;
   };
 
@@ -59,9 +59,9 @@ describe('NotesContext', () => {
     (notesService.getNotes as jest.Mock).mockResolvedValue(mockNotes);
 
     render(
-      <NotesProvider>
+      <>
         <TestLoader />
-      </NotesProvider>
+      </>
     );
 
     await waitFor(() => {
@@ -81,7 +81,7 @@ describe('NotesContext', () => {
 
     // Expose create and setter
     const TestCreator = () => {
-      const { setNewNoteContent, handleCreateNote, notes } = useNotes();
+      const { setNewNoteContent, handleCreateNote, notes } = useNotesRedux();
       return (
         <>
           <button
@@ -99,9 +99,9 @@ describe('NotesContext', () => {
     };
 
     render(
-      <NotesProvider>
+      <>
         <TestCreator />
-      </NotesProvider>
+      </>
     );
 
     // set content then create
@@ -127,7 +127,7 @@ describe('NotesContext', () => {
     (notesService.updateNote as jest.Mock).mockResolvedValue(undefined);
 
     const TestUpdater = () => {
-      const { handleUpdateNote } = useNotes();
+      const { handleUpdateNote } = useNotesRedux();
       return (
         <button
           onClick={() => handleUpdateNote(mockNotes[0])}
@@ -139,9 +139,9 @@ describe('NotesContext', () => {
     };
 
     render(
-      <NotesProvider>
+      <>
         <TestUpdater />
-      </NotesProvider>
+      </>
     );
 
     fireEvent.click(screen.getByTestId('update'));
@@ -158,7 +158,7 @@ describe('NotesContext', () => {
     (notesService.deleteNote as jest.Mock).mockResolvedValue(undefined);
 
     const TestDeleter = () => {
-      const { handleDeleteNote } = useNotes();
+      const { handleDeleteNote } = useNotesRedux();
       return (
         <button onClick={() => handleDeleteNote('1')} data-testid="del">
           Delete
@@ -167,9 +167,9 @@ describe('NotesContext', () => {
     };
 
     render(
-      <NotesProvider>
+      <>
         <TestDeleter />
-      </NotesProvider>
+      </>
     );
 
     fireEvent.click(screen.getByTestId('del'));

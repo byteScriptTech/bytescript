@@ -8,7 +8,7 @@ import { JavaScriptCodeEditor } from '@/components/common/CodeEditor';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { useAuth } from '@/context/AuthContext';
+import { useAuthRedux } from '@/hooks/useAuthRedux';
 import { CustomTestService } from '@/services/firebase/customTestService';
 import {
   CustomTest,
@@ -28,7 +28,7 @@ export default function TestTaker({
   onComplete,
   onCancel,
 }: TestTakerProps) {
-  const { currentUser } = useAuth();
+  const { currentUser } = useAuthRedux();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<TestAnswer[]>([]);
   const [timeRemaining, setTimeRemaining] = useState(test.duration * 60); // Convert to seconds

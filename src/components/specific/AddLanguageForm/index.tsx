@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 
-import { useLanguages } from '@/context/LanguagesContext';
+import { useLanguagesRedux } from '@/hooks/useLanguagesRedux';
 
 const AddLanguageForm = () => {
-  const { addLanguage, updateLanguage } = useLanguages();
+  const { addLanguage, updateLanguage } = useLanguagesRedux();
   const [name, setName] = useState('');
   const [editId, setEditId] = useState<string | null>(null);
 

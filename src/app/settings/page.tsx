@@ -18,7 +18,7 @@ import { ThemeToggle } from '@/components/settings/theme-toggle';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
-import { useAuth } from '@/context/AuthContext';
+import { useAuthRedux } from '@/hooks/useAuthRedux';
 import { cn } from '@/lib/utils';
 import userService from '@/services/userService';
 
@@ -33,7 +33,7 @@ const settingsNav = [
 function SettingsPage() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const pathname = usePathname();
-  const { currentUser } = useAuth();
+  const { currentUser } = useAuthRedux();
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(true);

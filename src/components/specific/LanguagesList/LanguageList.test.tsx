@@ -18,7 +18,7 @@ jest.mock('@/context/LocalhostContext', () => ({
   useLocalStorage: jest.fn(),
 }));
 
-import { useContentContext } from '@/context/ContentContext';
+import { useContentRedux } from '@/hooks/useContentRedux';
 import { useLocalStorage } from '@/context/LocalhostContext';
 import { useTopics } from '@/hooks/useTopics';
 
@@ -47,7 +47,7 @@ describe('LanguagesList Component', () => {
 
   it('shows loading spinner when loading is true', () => {
     (useTopics as jest.Mock).mockReturnValue({ topics: [], loading: true });
-    (useContentContext as jest.Mock).mockReturnValue({
+    (useContentRedux as jest.Mock).mockReturnValue({
       content: null,
       fetchContent: jest.fn(),
     });
@@ -59,7 +59,7 @@ describe('LanguagesList Component', () => {
 
   it('shows "No topics found" when topics is empty', () => {
     (useTopics as jest.Mock).mockReturnValue({ topics: [], loading: false });
-    (useContentContext as jest.Mock).mockReturnValue({
+    (useContentRedux as jest.Mock).mockReturnValue({
       content: null,
       fetchContent: jest.fn(),
     });
@@ -74,7 +74,7 @@ describe('LanguagesList Component', () => {
       topics: sampleTopics,
       loading: false,
     });
-    (useContentContext as jest.Mock).mockReturnValue({
+    (useContentRedux as jest.Mock).mockReturnValue({
       content: null,
       fetchContent: jest.fn(),
     });
@@ -95,7 +95,7 @@ describe('LanguagesList Component', () => {
       topics: [{ id: '99', name: 'Competitive-Programming' }],
       loading: false,
     });
-    (useContentContext as jest.Mock).mockReturnValue({
+    (useContentRedux as jest.Mock).mockReturnValue({
       content: null,
       fetchContent: jest.fn(),
     });
@@ -112,7 +112,7 @@ describe('LanguagesList Component', () => {
       topics: sampleTopics,
       loading: false,
     });
-    (useContentContext as jest.Mock).mockReturnValue({
+    (useContentRedux as jest.Mock).mockReturnValue({
       content: sampleContent,
       fetchContent: jest.fn(),
     });
@@ -133,7 +133,7 @@ describe('LanguagesList Component', () => {
       topics: sampleTopics,
       loading: false,
     });
-    (useContentContext as jest.Mock).mockReturnValue({
+    (useContentRedux as jest.Mock).mockReturnValue({
       content: sampleContent,
       fetchContent: jest.fn(),
     });

@@ -2,20 +2,16 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 
 import '@testing-library/jest-dom';
-import { AuthProvider } from '@/context/AuthContext';
-import { useNotes } from '@/context/NotesContext';
-import { NotesProvider } from '@/context/NotesContext';
+import { useNotesRedux } from '@/hooks/useNotesRedux';
 
 import { Notes } from './index';
 
-jest.mock('@/context/NotesContext', () => ({
-  useNotes: jest.fn(),
-  NotesProvider: ({ children }: any) => <>{children}</>,
+jest.mock('@/hooks/useNotesRedux', () => ({
+  useNotesRedux: jest.fn(),
 }));
 
-jest.mock('@/context/AuthContext', () => ({
-  useAuth: jest.fn(() => ({ currentUser: { uid: 'user1' } })),
-  AuthProvider: ({ children }: any) => <>{children}</>,
+jest.mock('@/hooks/useAuthRedux', () => ({
+  useAuthRedux: jest.fn(() => ({ currentUser: { uid: 'user1' } })),
 }));
 
 describe('Notes Component', () => {
@@ -48,15 +44,13 @@ describe('Notes Component', () => {
 
   const renderComponent = () =>
     render(
-      <AuthProvider>
-        <NotesProvider>
-          <Notes />
-        </NotesProvider>
-      </AuthProvider>
+      <>
+        <Notes />
+      </>
     );
 
   it('renders textarea and create button', () => {
-    (useNotes as jest.Mock).mockReturnValue(getBaseProps());
+    (useNotesRedux as jest.Mock).mockReturnValue(getBaseProps());
     renderComponent();
 
     expect(screen.getByTestId('new-note-textarea')).toBeInTheDocument();
@@ -64,14 +58,14 @@ describe('Notes Component', () => {
   });
 
   it('shows empty state when no notes exist', () => {
-    (useNotes as jest.Mock).mockReturnValue(getBaseProps());
+    (useNotesRedux as jest.Mock).mockReturnValue(getBaseProps());
     renderComponent();
 
     expect(screen.getByTestId('empty-state')).toBeInTheDocument();
   });
 
   it('calls setNewNoteContent on typing', () => {
-    (useNotes as jest.Mock).mockReturnValue(getBaseProps());
+    (useNotesRedux as jest.Mock).mockReturnValue(getBaseProps());
     renderComponent();
 
     fireEvent.change(screen.getByTestId('new-note-textarea'), {
@@ -84,7 +78,7 @@ describe('Notes Component', () => {
   it('creates a new note and resets input', async () => {
     mockHandleCreateNote.mockResolvedValue(undefined);
 
-    (useNotes as jest.Mock).mockReturnValue(
+    (useNotesRedux as jest.Mock).mockReturnValue(
       getBaseProps({ newNoteContent: 'abc' })
     );
 
@@ -109,7 +103,7 @@ describe('Notes Component', () => {
       updatedAt: new Date(),
     };
 
-    (useNotes as jest.Mock).mockReturnValue(getBaseProps({ notes: [note] }));
+    (useNotesRedux as jest.Mock).mockReturnValue(getBaseProps({ notes: [note] }));
     renderComponent();
 
     // Test note content is displayed
@@ -142,7 +136,7 @@ describe('Notes Component', () => {
       updatedAt: new Date(),
     };
 
-    (useNotes as jest.Mock).mockReturnValue(getBaseProps({ notes: [note] }));
+    (useNotesRedux as jest.Mock).mockReturnValue(getBaseProps({ notes: [note] }));
     renderComponent();
 
     // Click delete but cancel the confirmation

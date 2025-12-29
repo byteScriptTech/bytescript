@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { useAuth } from '@/context/AuthContext';
+import { useAuthRedux } from '@/hooks/useAuthRedux';
 import { CustomTestService } from '@/services/firebase/customTestService';
 import { CustomTest, TestQuestion, TestAnswer } from '@/types/customTest';
 
@@ -18,7 +18,7 @@ export default function CustomTestPage() {
   const router = useRouter();
   const testId = params?.id;
 
-  const { currentUser } = useAuth();
+  const { currentUser } = useAuthRedux();
 
   const [test, setTest] = useState<CustomTest | null>(null);
   const [questions, setQuestions] = useState<TestQuestion[]>([]);

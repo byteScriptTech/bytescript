@@ -3,7 +3,7 @@
 import { useSearchParams, useRouter } from 'next/navigation';
 import React, { useEffect, useMemo, useState } from 'react';
 
-import { useLanguages } from '@/context/LanguagesContext';
+import { useLanguagesRedux } from '@/hooks/useLanguagesRedux';
 
 import Content from './Content';
 
@@ -22,7 +22,7 @@ interface Topic {
 export default function ContentWithParams() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { getUserLearningProgress } = useLanguages();
+  const { getUserLearningProgress } = useLanguagesRedux();
   const [topics, setTopics] = useState<Topic[]>([]);
   const [loading, setLoading] = useState(true);
 

@@ -4,10 +4,7 @@ import React from 'react';
 import { useState } from 'react';
 
 import AuthGuard from '@/components/misc/authGuard';
-import { AuthProvider } from '@/context/AuthContext';
 import { BreadcrumbProvider } from '@/context/BreadCrumbContext';
-import { ContentProvider } from '@/context/ContentContext';
-import { LanguagesProvider } from '@/context/LanguagesContext';
 import { LocalStorageProvider } from '@/context/LocalhostContext';
 
 import LanguageBody from './LanguageBody';
@@ -31,23 +28,17 @@ const Course: React.FC<CourseProps> = ({ searchParams }) => {
   });
 
   return (
-    <AuthProvider>
-      <AuthGuard requireAuth={false}>
-        <ContentProvider>
-          <LocalStorageProvider>
-            <BreadcrumbProvider>
-              <LanguagesProvider>
-                <LanguageBody
-                  currentTopic={currentTopic}
-                  setCurrentTopic={setCurrentTopic}
-                  searchParams={searchParams}
-                />
-              </LanguagesProvider>
-            </BreadcrumbProvider>
-          </LocalStorageProvider>
-        </ContentProvider>
-      </AuthGuard>
-    </AuthProvider>
+    <AuthGuard requireAuth={false}>
+      <BreadcrumbProvider>
+        <LocalStorageProvider>
+          <LanguageBody
+            currentTopic={currentTopic}
+            setCurrentTopic={setCurrentTopic}
+            searchParams={searchParams}
+          />
+        </LocalStorageProvider>
+      </BreadcrumbProvider>
+    </AuthGuard>
   );
 };
 

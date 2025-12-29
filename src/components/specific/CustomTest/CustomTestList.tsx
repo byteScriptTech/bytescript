@@ -18,7 +18,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useAuth } from '@/context/AuthContext';
+import { useAuthRedux } from '@/hooks/useAuthRedux';
 import { cn } from '@/lib/utils';
 import { CustomTestService } from '@/services/firebase/customTestService';
 import { CustomTest, TestAttempt } from '@/types/customTest';
@@ -36,7 +36,7 @@ export default function CustomTestList({
   onEditTest,
   onViewAttemptResults,
 }: CustomTestListProps) {
-  const { currentUser } = useAuth();
+  const { currentUser } = useAuthRedux();
   const [tests, setTests] = useState<CustomTest[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<

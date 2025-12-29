@@ -5,7 +5,6 @@ import React from 'react';
 import { AdminNavbar } from '@/components/admin/AdminNavbar';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import AuthGuard from '@/components/misc/authGuard';
-import { AuthProvider } from '@/context/AuthContext';
 import { ThemeProvider } from '@/context/theme-provider';
 
 export default function AdminLayout({
@@ -14,7 +13,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <AuthProvider>
+    
       <AuthGuard>
         <ThemeProvider>
           <div className="flex h-screen bg-background">
@@ -28,6 +27,6 @@ export default function AdminLayout({
           </div>
         </ThemeProvider>
       </AuthGuard>
-    </AuthProvider>
+    
   );
 }

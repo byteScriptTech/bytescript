@@ -20,7 +20,7 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
-import { useAuth } from '@/context/AuthContext';
+import { useAuthRedux } from '@/hooks/useAuthRedux';
 import { CustomTestService } from '@/services/firebase/customTestService';
 import { practiceQuestionsService } from '@/services/firebase/practiceQuestionsService';
 import { practiceTopicsService } from '@/services/firebase/practiceTopicsService';
@@ -41,7 +41,7 @@ export default function TestCreator({
   onSave,
   initialData,
 }: TestCreatorProps) {
-  const { currentUser } = useAuth();
+  const { currentUser } = useAuthRedux();
 
   const [isSaving, setIsSaving] = useState(false);
   const [practiceQuestions, setPracticeQuestions] = useState<

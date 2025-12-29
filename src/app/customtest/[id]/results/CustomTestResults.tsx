@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useAuth } from '@/context/AuthContext';
+import { useAuthRedux } from '@/hooks/useAuthRedux';
 import { CustomTestService } from '@/services/firebase/customTestService';
 import { type CustomTest, TestAttempt } from '@/types/customTest';
 
@@ -13,7 +13,7 @@ export default function CustomTestResults() {
   const params = useParams<{ id: string }>();
   const testId = params?.id;
   const router = useRouter();
-  const { currentUser } = useAuth();
+  const { currentUser } = useAuthRedux();
 
   const [test, setTest] = useState<CustomTest | null>(null);
   const [attempts, setAttempts] = useState<TestAttempt[]>([]);

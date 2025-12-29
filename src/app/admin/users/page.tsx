@@ -18,7 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useAuth } from '@/context/AuthContext';
+import { useAuthRedux } from '@/hooks/useAuthRedux';
 import { useToast } from '@/hooks/use-toast';
 import type { UserData } from '@/lib/admin';
 
@@ -27,7 +27,7 @@ export default function AdminUsersPage() {
   const [loading, setLoading] = useState(true);
   const [updatingUser, setUpdatingUser] = useState<string | null>(null);
   const { toast } = useToast();
-  const { currentUser } = useAuth();
+  const { currentUser } = useAuthRedux();
 
   const loadUsers = useCallback(async () => {
     try {

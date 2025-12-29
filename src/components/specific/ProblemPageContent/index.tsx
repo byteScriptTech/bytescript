@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 
 import ProblemDetail from '@/components/specific/ProblemDetail';
 import ProblemEditor from '@/components/specific/ProblemEditor';
-import { useAuth } from '@/context/AuthContext';
+import { useAuthRedux } from '@/hooks/useAuthRedux';
 import { problemsService } from '@/services/firebase/problemsService';
 import { testCasesService } from '@/services/firebase/testCasesService';
 import type { Problem, TestCase } from '@/types/problem';
@@ -46,7 +46,7 @@ const ProblemPageContent = () => {
   const [executionResult, setExecutionResult] =
     useState<CodeExecutionResult | null>(null);
 
-  const { currentUser } = useAuth();
+  const { currentUser } = useAuthRedux();
 
   useEffect(() => {
     const fetchProblemAndTestCases = async () => {

@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import React, { useEffect } from 'react';
 
-import { useAuth } from '@/context/AuthContext';
+import { useAuthRedux } from '@/hooks/useAuthRedux';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -14,7 +14,7 @@ export const ProtectedRoute = ({
   children,
   requireAdmin = false,
 }: ProtectedRouteProps) => {
-  const { currentUser, loading, isAdmin } = useAuth();
+  const { currentUser, loading, isAdmin } = useAuthRedux();
   const router = useRouter();
 
   useEffect(() => {

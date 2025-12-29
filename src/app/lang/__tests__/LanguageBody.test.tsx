@@ -41,7 +41,7 @@ jest.mock('@/components/specific/LearnContent', () => {
   return LearnContent;
 });
 
-import { useLanguages } from '@/context/LanguagesContext';
+import { useLanguagesRedux } from '@/hooks/useLanguagesRedux';
 
 import LanguageBody from '../LanguageBody';
 
@@ -102,7 +102,7 @@ describe('LanguageBody', () => {
   });
 
   it('renders correctly with valid language', () => {
-    (useLanguages as jest.Mock).mockReturnValue({
+    (useLanguagesRedux as jest.Mock).mockReturnValue({
       loading: false,
       languages: mockLanguages,
     });
@@ -123,7 +123,7 @@ describe('LanguageBody', () => {
   });
 
   it('calls notFound when language is invalid', () => {
-    (useLanguages as jest.Mock).mockReturnValue({
+    (useLanguagesRedux as jest.Mock).mockReturnValue({
       loading: false,
       languages: mockLanguages,
     });
@@ -141,7 +141,7 @@ describe('LanguageBody', () => {
   });
 
   it('calls notFound when search parameters are missing', () => {
-    (useLanguages as jest.Mock).mockReturnValue({
+    (useLanguagesRedux as jest.Mock).mockReturnValue({
       loading: false,
       languages: mockLanguages,
     });
@@ -162,7 +162,7 @@ describe('LanguageBody', () => {
   });
 
   it('handles array values for name parameter', () => {
-    (useLanguages as jest.Mock).mockReturnValue({
+    (useLanguagesRedux as jest.Mock).mockReturnValue({
       loading: false,
       languages: mockLanguages,
     });
@@ -182,7 +182,7 @@ describe('LanguageBody', () => {
   });
 
   it('calls notFound when loading is true', () => {
-    (useLanguages as jest.Mock).mockReturnValue({
+    (useLanguagesRedux as jest.Mock).mockReturnValue({
       loading: true,
       languages: mockLanguages,
     });
