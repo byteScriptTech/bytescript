@@ -9,24 +9,27 @@ import { QuestionHeader } from '@/components/specific/PracticeQuestion/QuestionH
 import { QuestionNavigation } from '@/components/specific/PracticeQuestion/QuestionNavigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { usePractice } from '@/context/PracticeContext';
-import { PracticeQuestion } from '@/types/practiceQuestion';
+import { useGetQuestionsByTopicQuery } from '@/store/slices/practiceQuestionsSlice';
 
 export default function PracticeQuestionPage() {
   const params = useParams<{ id: string }>();
   const topicId = params?.id;
   const router = useRouter();
-  const { getQuestionsByTopicId } = usePractice();
-  const [questions, setQuestions] = useState<PracticeQuestion[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showExplanation, setShowExplanation] = useState(false);
   const [userCode, setUserCode] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [showNextButton, setShowNextButton] = useState(false);
+
+  const {
+    data: questions = [],
+    isLoading: loading,
+    error,
+  } = useGetQuestionsByTopicQuery(topicId!, {
+    skip: !topicId,
+  });
 
   // Timer effect
   useEffect(() => {
@@ -58,35 +61,12 @@ export default function PracticeQuestionPage() {
     setShowNextButton(true);
   };
 
-  // Fetch questions for the topic
+  // Set initial user code when questions are loaded
   useEffect(() => {
-    const fetchQuestions = async (id: string) => {
-      try {
-        setLoading(true);
-        const topicQuestions = await getQuestionsByTopicId(id);
-        if (topicQuestions.length === 0) {
-          setError('No questions found for this topic');
-          return;
-        }
-        setQuestions(topicQuestions);
-        // Set initial code for coding questions
-        setUserCode(
-          topicQuestions[0].type === 'coding'
-            ? (topicQuestions[0] as any).initialCode || ''
-            : ''
-        );
-      } catch (err) {
-        console.error('Error fetching questions:', err);
-        setError('Failed to load questions');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (topicId) {
-      fetchQuestions(topicId);
+    if (questions.length > 0 && questions[0].type === 'coding') {
+      setUserCode((questions[0] as any).initialCode || '');
     }
-  }, [topicId, getQuestionsByTopicId]);
+  }, [questions]);
 
   const currentQuestion = questions[currentQuestionIndex];
   const isLastQuestion = currentQuestionIndex === questions.length - 1;
@@ -108,7 +88,9 @@ export default function PracticeQuestionPage() {
   if (error || !currentQuestion) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
-        <p className="text-red-500">{error || 'No question found'}</p>
+        <p className="text-red-500">
+          {typeof error === 'string' ? error : 'An error occurred'}
+        </p>
         <Button className="mt-4" onClick={() => router.push('/practice')}>
           Back to Practice
         </Button>

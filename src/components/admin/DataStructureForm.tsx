@@ -146,7 +146,7 @@ const ResourceForm = ({ resources, onAdd, onRemove }: ResourceFormProps) => {
           </Button>
         </div>
       ))}
-      <form onSubmit={handleAddResource} className="space-y-4">
+      <div className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Input
             placeholder="Title"
@@ -178,16 +178,157 @@ const ResourceForm = ({ resources, onAdd, onRemove }: ResourceFormProps) => {
             </SelectContent>
           </Select>
         </div>
-        <Button type="submit" size="sm" variant="outline">
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          onClick={handleAddResource}
+        >
           <Plus className="h-4 w-4 mr-2" /> Add Resource
         </Button>
-      </form>
+      </div>
     </div>
   );
 };
 
 // Dynamically import MDEditor to avoid SSR issues
 const MDEditor = dynamic(() => import('@uiw/react-md-editor'), { ssr: false });
+
+interface ExampleFormProps {
+  example: Example;
+  index: number;
+  onUpdate: (index: number, example: Example) => void;
+  onRemove: (index: number) => void;
+}
+
+const ExampleForm = ({
+  example,
+  index,
+  onUpdate,
+  onRemove,
+}: ExampleFormProps) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedExample, setEditedExample] = useState(example);
+
+  const handleSave = () => {
+    onUpdate(index, editedExample);
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setEditedExample(example);
+    setIsEditing(false);
+  };
+
+  if (isEditing) {
+    return (
+      <div className="border rounded-lg p-4 bg-muted/20">
+        <div className="flex justify-between items-center mb-4">
+          <h4 className="font-medium">Edit Example {index + 1}</h4>
+          <div className="flex gap-2">
+            <Button type="button" size="sm" onClick={handleSave}>
+              Save
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={handleCancel}
+            >
+              Cancel
+            </Button>
+          </div>
+        </div>
+        <div className="space-y-4">
+          <div>
+            <div className="text-sm font-medium mb-2">Input</div>
+            <Textarea
+              value={editedExample.input}
+              onChange={(e) =>
+                setEditedExample({ ...editedExample, input: e.target.value })
+              }
+              placeholder="Example input code..."
+              className="min-h-[100px] font-mono text-sm"
+            />
+          </div>
+          <div>
+            <div className="text-sm font-medium mb-2">Output</div>
+            <Textarea
+              value={editedExample.output}
+              onChange={(e) =>
+                setEditedExample({ ...editedExample, output: e.target.value })
+              }
+              placeholder="Expected output..."
+              className="min-h-[100px] font-mono text-sm"
+            />
+          </div>
+          <div>
+            <div className="text-sm font-medium mb-2">Explanation</div>
+            <Textarea
+              value={editedExample.explanation}
+              onChange={(e) =>
+                setEditedExample({
+                  ...editedExample,
+                  explanation: e.target.value,
+                })
+              }
+              placeholder="Explain what this example demonstrates..."
+              className="min-h-[80px]"
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div key={index} className="border rounded-lg p-4">
+      <div className="flex justify-between items-center mb-2">
+        <h4 className="font-medium">Example {index + 1}</h4>
+        <div className="flex gap-2">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsEditing(true)}
+          >
+            Edit
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => onRemove(index)}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+      <div className="space-y-2">
+        <div>
+          <div className="text-sm font-medium mb-1">Input</div>
+          <pre className="bg-muted p-2 rounded text-sm overflow-x-auto">
+            {example.input}
+          </pre>
+        </div>
+        <div>
+          <div className="text-sm font-medium mb-1">Output</div>
+          <pre className="bg-muted p-2 rounded text-sm overflow-x-auto">
+            {example.output}
+          </pre>
+        </div>
+        {example.explanation && (
+          <div>
+            <div className="text-sm font-medium mb-1">Explanation</div>
+            <p className="text-sm text-muted-foreground">
+              {example.explanation}
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
 export function DataStructureForm({
   initialData,
@@ -217,26 +358,11 @@ export function DataStructureForm({
   });
 
   const { watch, setValue } = form;
-  const tags = watch('tags') || [];
   const prerequisites = watch('prerequisites') || [];
   const operations = watch('operations') || [];
   const useCases = watch('useCases') || [];
   const resources = watch('resources') || [];
   const examples = watch('examples') || [];
-
-  const handleAddTag = (tag: string) => {
-    if (!tags.includes(tag)) {
-      setValue('tags', [...tags, tag], { shouldValidate: true });
-    }
-  };
-
-  const handleRemoveTag = (tag: string) => {
-    setValue(
-      'tags',
-      tags.filter((t) => t !== tag),
-      { shouldValidate: true }
-    );
-  };
 
   const handleAddPrerequisite = (prereq: string) => {
     if (!prerequisites.includes(prereq)) {
@@ -296,6 +422,12 @@ export function DataStructureForm({
     setValue('examples', [...examples, example], { shouldValidate: true });
   };
 
+  const handleUpdateExample = (index: number, example: Example) => {
+    const newExamples = [...examples];
+    newExamples[index] = example;
+    setValue('examples', newExamples, { shouldValidate: true });
+  };
+
   const handleRemoveExample = (index: number) => {
     const newExamples = [...examples];
     newExamples.splice(index, 1);
@@ -304,7 +436,13 @@ export function DataStructureForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form
+        onSubmit={form.handleSubmit((data) => {
+          console.log('Form submission data:', data);
+          onSubmit(data);
+        })}
+        className="space-y-8"
+      >
         <div className="space-y-6">
           <Card>
             <CardHeader>
@@ -518,14 +656,22 @@ export function DataStructureForm({
               <FormField
                 control={form.control}
                 name="tags"
-                render={() => (
+                render={({ field }) => (
                   <FormItem>
                     <FormLabel>Tags</FormLabel>
                     <FormControl>
                       <TagInput
-                        tags={tags}
-                        onAdd={handleAddTag}
-                        onRemove={handleRemoveTag}
+                        tags={field.value || []}
+                        onAdd={(tag) => {
+                          const newTags = [...(field.value || []), tag];
+                          field.onChange(newTags);
+                        }}
+                        onRemove={(tag) => {
+                          const newTags = (field.value || []).filter(
+                            (t) => t !== tag
+                          );
+                          field.onChange(newTags);
+                        }}
                         placeholder="e.g., array, linked-list, recursion"
                       />
                     </FormControl>
@@ -653,49 +799,13 @@ export function DataStructureForm({
                     <FormControl>
                       <div className="space-y-4">
                         {examples.map((example, index) => (
-                          <div key={index} className="border rounded-lg p-4">
-                            <div className="flex justify-between items-center mb-2">
-                              <h4 className="font-medium">
-                                Example {index + 1}
-                              </h4>
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleRemoveExample(index)}
-                              >
-                                <X className="h-4 w-4" />
-                              </Button>
-                            </div>
-                            <div className="space-y-2">
-                              <div>
-                                <div className="text-sm font-medium mb-1">
-                                  Input
-                                </div>
-                                <pre className="bg-muted p-2 rounded text-sm overflow-x-auto">
-                                  {example.input}
-                                </pre>
-                              </div>
-                              <div>
-                                <div className="text-sm font-medium mb-1">
-                                  Output
-                                </div>
-                                <pre className="bg-muted p-2 rounded text-sm overflow-x-auto">
-                                  {example.output}
-                                </pre>
-                              </div>
-                              {example.explanation && (
-                                <div>
-                                  <div className="text-sm font-medium mb-1">
-                                    Explanation
-                                  </div>
-                                  <p className="text-sm text-muted-foreground">
-                                    {example.explanation}
-                                  </p>
-                                </div>
-                              )}
-                            </div>
-                          </div>
+                          <ExampleForm
+                            key={index}
+                            example={example}
+                            index={index}
+                            onUpdate={handleUpdateExample}
+                            onRemove={handleRemoveExample}
+                          />
                         ))}
                         <Button
                           type="button"

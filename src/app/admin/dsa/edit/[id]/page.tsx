@@ -6,95 +6,75 @@ import { toast } from 'sonner';
 
 import { DataStructureForm } from '@/components/admin/DataStructureForm';
 import AuthGuard from '@/components/misc/authGuard';
+import { useDSATopicsRedux } from '@/hooks/useDSATopicsRedux';
 import type { DataStructureFormValues } from '@/lib/validations';
-import { dsaService, type DSATopic } from '@/services/firebase/dsaService';
+import { useGetTopicByIdQuery } from '@/store/slices/dsaTopicsSlice';
 
 export default function EditDataStructurePage() {
   const params = useParams<{ id?: string | string[] }>();
   const id = params?.id;
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(true);
+  const { updateTopic } = useDSATopicsRedux();
+
+  console.log('updateTopic hook returns:', updateTopic);
+
+  const { data: topic, isLoading } = useGetTopicByIdQuery(id as string, {
+    skip: !id || Array.isArray(id),
+  });
+
   const [data, setData] = useState<DataStructureFormValues | null>(null);
+  const [isFormLoading, setIsFormLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (!id || Array.isArray(id)) {
-        toast.error('Invalid data structure ID');
-        router.push('/admin/data-structures');
-        return;
-      }
+    if (!id || Array.isArray(id)) {
+      toast.error('Invalid data structure ID');
+      router.push('/admin/dsa');
+      return;
+    }
 
-      try {
-        // Fetch the specific topic by ID
-        const topic = await dsaService.getTopicById(id);
+    if (topic) {
+      // Map the topic data to the form values
+      const formValues: DataStructureFormValues = {
+        name: topic.title || '',
+        slug: topic.slug || '',
+        category: topic.category,
+        subcategory: topic.subcategory || '',
+        difficulty: topic.difficulty || 'beginner',
+        description: topic.description || '',
+        content: topic.content || '',
+        timeComplexity: topic.timeComplexity || '',
+        spaceComplexity: topic.spaceComplexity || '',
+        tags: topic.tags || [],
+        prerequisites: topic.prerequisites || [],
+        operations:
+          topic.operations?.map((op: any) =>
+            typeof op === 'string' ? op : op.name
+          ) || [],
+        examples: topic.examples || [],
+        lastUpdated: topic.updatedAt
+          ? topic.updatedAt instanceof Date
+            ? topic.updatedAt.toISOString()
+            : new Date().toISOString()
+          : new Date().toISOString(),
+      };
 
-        if (topic) {
-          // Map the topic data to the form values
-          const formValues: DataStructureFormValues = {
-            name: topic.title || '',
-            slug: topic.slug || '',
-            category: topic.category,
-            subcategory: topic.subcategory || '',
-            difficulty: topic.difficulty || 'beginner',
-            description: topic.description || '',
-            content: topic.content || '',
-            timeComplexity: topic.timeComplexity || '',
-            spaceComplexity: topic.spaceComplexity || '',
-            tags: topic.tags || [],
-            prerequisites: topic.prerequisites || [],
-            // Convert operations to string array for the form
-            operations:
-              topic.operations?.map((op) =>
-                typeof op === 'string' ? op : op.name
-              ) || [],
-            useCases: topic.useCases || [],
-            resources: topic.resources || [],
-            examples: topic.examples || [],
-            // Convert Date/Timestamp to ISO string for the form
-            lastUpdated: topic.lastUpdated
-              ? topic.lastUpdated instanceof Date
-                ? topic.lastUpdated.toISOString()
-                : (topic.lastUpdated as any).toDate
-                  ? (topic.lastUpdated as any).toDate().toISOString()
-                  : new Date().toISOString()
-              : new Date().toISOString(),
-          };
-
-          setData(formValues);
-        } else {
-          toast.error('Data structure not found');
-          router.push('/admin/data-structures');
-        }
-      } catch (error) {
-        console.error('Error fetching data structure:', error);
-        toast.error('Failed to load data structure');
-        router.push('/admin/data-structures');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [id, router]);
+      setData(formValues);
+      setIsFormLoading(false);
+    } else if (!isLoading) {
+      toast.error('Data structure not found');
+      router.push('/admin/dsa');
+    }
+  }, [topic, id, router, isLoading]);
 
   const handleSubmit = async (formData: DataStructureFormValues) => {
+    console.log('handleSubmit called with:', formData);
     if (!id || Array.isArray(id)) {
       toast.error('Invalid data structure ID');
       return;
     }
 
     try {
-      // Create the updated topic object with all fields from the form
-      // Get current topic to preserve any fields not in the form
-      const currentTopic = await dsaService.getTopicById(id);
-      if (!currentTopic) {
-        throw new Error('Topic not found');
-      }
-
-      const now = new Date();
-      // Create a new object with the correct types for Firestore
-      const updatedTopic: Partial<Omit<DSATopic, 'id' | 'createdAt'>> = {
-        // Map form data to topic fields
+      const updatedTopic = {
         title: formData.name,
         slug: formData.slug,
         description: formData.description,
@@ -106,7 +86,6 @@ export default function EditDataStructurePage() {
         spaceComplexity: formData.spaceComplexity,
         tags: formData.tags,
         prerequisites: formData.prerequisites,
-        // Convert string array to operations array with default values
         operations:
           formData.operations?.map((op) => ({
             name: op,
@@ -114,32 +93,32 @@ export default function EditDataStructurePage() {
             timeComplexity: '',
             spaceComplexity: '',
           })) || [],
-        useCases: formData.useCases,
-        resources: formData.resources,
         examples: formData.examples,
-        lastUpdated: now,
-        // Preserve existing status if not in form
-        status: currentTopic.status || 'active',
-        // Set updatedAt to current date
-        updatedAt: now,
       };
 
-      try {
-        // Update the topic in Firestore
-        await dsaService.updateTopic(id, updatedTopic);
-        toast.success('Data structure updated successfully');
-        router.push('/admin/data-structures');
-      } catch (error) {
-        console.error('Error updating data structure:', error);
-        toast.error('Failed to update data structure');
-      }
+      console.log('Updating topic with:', {
+        id: id as string,
+        updates: updatedTopic,
+      });
+
+      // Update the topic using Redux mutation
+      const result = await updateTopic.mutateAsync({
+        id: id as string,
+        updates: updatedTopic,
+      });
+
+      console.log('updateTopic successful:', result);
+      toast.success('Data structure updated successfully');
+      router.push('/admin/dsa');
     } catch (error) {
       console.error('Error updating data structure:', error);
-      toast.error('Failed to update data structure. Please try again.');
+      toast.error(
+        `Failed to update data structure: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   };
 
-  if (isLoading) {
+  if (isLoading || isFormLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500" />

@@ -7,8 +7,8 @@ import type { ComponentType } from 'react';
 
 import { AdminRoute } from '@/components/auth/ProtectedRoute';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { dsaService } from '@/services/firebase/dsaService';
 import { problemsService } from '@/services/firebase/problemsService';
+import { useGetAllTopicsQuery } from '@/store/slices/dsaTopicsSlice';
 
 interface StatCard {
   title: string;
@@ -20,42 +20,42 @@ interface StatCard {
 
 function AdminDashboard() {
   const [loading, setLoading] = useState(true);
-  const [dataStructures, setDataStructures] = useState<any[]>([]);
   const [problemsCount, setProblemsCount] = useState<number>(0);
 
+  const { data: topics = [], isLoading: topicsLoading } =
+    useGetAllTopicsQuery();
+
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchProblems = async () => {
       try {
-        const [topics, problems] = await Promise.all([
-          dsaService.getAllTopics(),
-          problemsService.getAllProblems(),
-        ]);
-        setDataStructures(topics);
+        const problems = await problemsService.getAllProblems();
         setProblemsCount(problems.length);
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('Error fetching problems:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
+    fetchProblems();
   }, []);
+
+  const isLoading = topicsLoading || loading;
 
   const stats: StatCard[] = [
     {
       title: 'Data Structures & Algorithms',
-      value: loading ? '...' : dataStructures?.length || 0,
+      value: isLoading ? '...' : topics?.length || 0,
       icon: Database,
       href: '/admin/dsa',
-      loading,
+      loading: isLoading,
     },
     {
       title: 'Problems',
-      value: loading ? '...' : problemsCount || 0,
+      value: isLoading ? '...' : problemsCount || 0,
       icon: BookOpen,
       href: '/admin/problems',
-      loading,
+      loading: isLoading,
     },
   ];
 

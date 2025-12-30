@@ -10,8 +10,8 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { dsaServerUtils } from '@/lib/dsaServerUtils';
 import { cn } from '@/lib/utils';
-import { dsaService } from '@/services/firebase/dsaService';
 
 export const dynamic = 'force-dynamic'; // Disable static generation
 
@@ -117,7 +117,7 @@ export default function DataStructuresPage() {
     const fetchTopics = async () => {
       try {
         setLoading(true);
-        const data = (await dsaService.getAllTopics()) as DSATopic[];
+        const data = (await dsaServerUtils.getAllTopics()) as DSATopic[];
         setTopics(data);
       } catch (err) {
         console.error('Error fetching topics:', err);

@@ -61,11 +61,11 @@ const customRender = (
 export * from '@testing-library/react';
 export { customRender as render };
 
-// Mock dsaService
+// Mock dsaServerUtils
 const mockGetAllTopics = jest.fn();
 
-jest.mock('@/services/firebase/dsaService', () => ({
-  dsaService: {
+jest.mock('@/lib/dsaServerUtils', () => ({
+  dsaServerUtils: {
     getAllTopics: jest.fn().mockImplementation(() => mockGetAllTopics()),
     getTopicBySlug: jest.fn(),
     getTopicById: jest.fn(),

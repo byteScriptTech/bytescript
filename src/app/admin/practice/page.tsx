@@ -22,8 +22,13 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { practiceQuestionsService } from '@/services/firebase/practiceQuestionsService';
 import { practiceTopicsService } from '@/services/firebase/practiceTopicsService';
+import {
+  useGetAllQuestionsQuery,
+  useCreateQuestionMutation,
+  useUpdateQuestionMutation,
+  useDeleteQuestionMutation,
+} from '@/store/slices/practiceQuestionsSlice';
 import type { PracticeTopic } from '@/types/practice';
 import { Option } from '@/types/practiceQuestion';
 import type { PracticeQuestion, TestCase } from '@/types/practiceQuestion';
@@ -31,9 +36,19 @@ import type { QuestionType } from '@/types/practiceQuestion';
 
 export default function AdminPracticeQuestions() {
   const { toast } = useToast();
-  const [questions, setQuestions] = useState<PracticeQuestion[]>([]);
+  const {
+    data: questions = [],
+    isLoading: questionsLoading,
+    refetch,
+  } = useGetAllQuestionsQuery();
+  const [createQuestion] = useCreateQuestionMutation();
+  const [updateQuestion] = useUpdateQuestionMutation();
+  const [deleteQuestion] = useDeleteQuestionMutation();
+
   const [topics, setTopics] = useState<PracticeTopic[]>([]);
   const [loading, setLoading] = useState(true);
+  // Combined loading state
+  const isLoadingCombined = loading || questionsLoading;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -97,16 +112,12 @@ export default function AdminPracticeQuestions() {
     });
   }, []);
 
-  // Fetch questions and topics
+  // Fetch topics (questions come from Redux)
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [questionsData, topicsData] = await Promise.all([
-          practiceQuestionsService.getAllQuestions(),
-          practiceTopicsService.getAllTopics(),
-        ]);
-        setQuestions(questionsData);
+        const topicsData = await practiceTopicsService.getAllTopics();
         setTopics(topicsData);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -168,24 +179,25 @@ export default function AdminPracticeQuestions() {
     setIsSubmitting(true);
     try {
       if (editingId) {
-        // Update existing question
-        await practiceQuestionsService.updateQuestion(editingId, questionData);
+        await updateQuestion({
+          id: editingId,
+          updates: questionData,
+        }).unwrap();
         toast({
           title: 'Success',
           description: 'Question updated successfully',
         });
       } else {
         // Create new question
-        await practiceQuestionsService.createQuestion(questionData);
+        await createQuestion(questionData).unwrap();
         toast({
           title: 'Success',
           description: 'Question created successfully',
         });
       }
 
-      // Refresh questions
-      const updatedQuestions = await practiceQuestionsService.getAllQuestions();
-      setQuestions(updatedQuestions);
+      // Refresh questions from Redux
+      refetch();
       resetForm();
     } catch (error) {
       console.error('Error saving question:', error);
@@ -212,8 +224,7 @@ export default function AdminPracticeQuestions() {
     if (!confirm('Are you sure you want to delete this question?')) return;
 
     try {
-      await practiceQuestionsService.deleteQuestion(id);
-      setQuestions(questions.filter((q) => q.id !== id));
+      await deleteQuestion(id).unwrap();
       toast({
         title: 'Success',
         description: 'Question deleted successfully',
@@ -612,7 +623,7 @@ export default function AdminPracticeQuestions() {
         </div>
       </div>
 
-      {loading ? (
+      {isLoadingCombined ? (
         <div className="space-y-4">
           {[...Array(3)].map((_, i) => (
             <div

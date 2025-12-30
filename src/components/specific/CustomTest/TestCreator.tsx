@@ -22,11 +22,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useAuthRedux } from '@/hooks/useAuthRedux';
 import { CustomTestService } from '@/services/firebase/customTestService';
-import { practiceQuestionsService } from '@/services/firebase/practiceQuestionsService';
 import { practiceTopicsService } from '@/services/firebase/practiceTopicsService';
+import { useGetAllQuestionsQuery } from '@/store/slices/practiceQuestionsSlice';
 import { CustomTest, TestQuestion } from '@/types/customTest';
 import { PracticeTopic } from '@/types/practice';
-import { PracticeQuestion } from '@/types/practiceQuestion';
 
 import QuestionEditor from './QuestionEditor';
 
@@ -42,11 +41,10 @@ export default function TestCreator({
   initialData,
 }: TestCreatorProps) {
   const { currentUser } = useAuthRedux();
+  const { data: practiceQuestions = [], isLoading: questionsLoading } =
+    useGetAllQuestionsQuery();
 
   const [isSaving, setIsSaving] = useState(false);
-  const [practiceQuestions, setPracticeQuestions] = useState<
-    PracticeQuestion[]
-  >([]);
   const [topics, setTopics] = useState<PracticeTopic[]>([]);
   const [selectedQuestions, setSelectedQuestions] = useState<Set<string>>(
     new Set()
@@ -75,11 +73,7 @@ export default function TestCreator({
     const loadData = async () => {
       try {
         setIsLoading(true);
-        const [questionsData, topicsData] = await Promise.all([
-          practiceQuestionsService.getAllQuestions(),
-          practiceTopicsService.getAllTopics(),
-        ]);
-        setPracticeQuestions(questionsData);
+        const topicsData = await practiceTopicsService.getAllTopics();
         setTopics(topicsData);
 
         // If we have initialData, update the testData state
@@ -100,6 +94,9 @@ export default function TestCreator({
 
     loadData();
   }, [initialData]);
+
+  // Combined loading state
+  const isLoadingCombined = isLoading || questionsLoading;
 
   // ----------------------------
   // Add custom question
@@ -446,7 +443,7 @@ export default function TestCreator({
 
           {/* LIBRARY */}
           <TabsContent value="library">
-            {isLoading ? (
+            {isLoadingCombined ? (
               <p className="text-center py-10">Loading...</p>
             ) : (
               <>
