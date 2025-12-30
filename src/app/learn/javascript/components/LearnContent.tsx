@@ -124,50 +124,36 @@ const LearnContentInner: FC<LearnContentInnerProps> = ({
     }
   }, []);
 
-  const fetchContent = useCallback(async () => {
-    try {
-      const data = javascriptContentQuery.data || null;
-      setContent(data);
-      if (data?.topics?.length) {
-        setActiveTopic(data.topics[0].id);
-      }
-      return data;
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error
-          ? err.message
-          : 'Failed to load JavaScript content';
-      setError(`Error: ${errorMessage}. Please try again later.`);
-      console.error('Error fetching JavaScript content:', err);
-      throw err;
-    }
-  }, [javascriptContentQuery.data]);
-
   useEffect(() => {
-    const loadContent = async () => {
-      try {
-        await fetchContent();
-      } catch (error) {
-        // Error is already handled in fetchContent
-      } finally {
-        setLoading(false);
-      }
-    };
+    const isLoading = javascriptContentQuery.isLoading;
+    const hasData = !!javascriptContentQuery.data;
+    const hasError = !!javascriptContentQuery.error;
 
-    loadContent();
-  }, [fetchContent]);
+    setLoading(isLoading);
 
-  // Update loading and error states from Redux
-  useEffect(() => {
-    setLoading(javascriptContentQuery.isLoading);
-    if (javascriptContentQuery.error) {
+    if (hasError) {
       const errorMessage =
         javascriptContentQuery.error instanceof Error
           ? javascriptContentQuery.error.message
           : 'Failed to load JavaScript content';
       setError(`Error: ${errorMessage}. Please try again later.`);
     }
-  }, [javascriptContentQuery.isLoading, javascriptContentQuery.error]);
+
+    // Set content when data is available
+    if (hasData) {
+      setContent(javascriptContentQuery.data || null);
+      if (javascriptContentQuery.data?.topics?.length) {
+        setActiveTopic(javascriptContentQuery.data.topics[0].id);
+      }
+    } else if (!isLoading && !hasError) {
+      // No data and not loading - set content to null to show "No content available"
+      setContent(null);
+    }
+  }, [
+    javascriptContentQuery.isLoading,
+    javascriptContentQuery.data,
+    javascriptContentQuery.error,
+  ]);
 
   // Handle initial content load and set the active topic/subtopic from URL params
   useEffect(() => {
