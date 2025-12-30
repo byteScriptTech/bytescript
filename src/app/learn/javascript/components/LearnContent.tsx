@@ -155,6 +155,18 @@ const LearnContentInner: FC<LearnContentInnerProps> = ({
     javascriptContentQuery.error,
   ]);
 
+  // Update loading and error states from Redux
+  useEffect(() => {
+    setLoading(javascriptContentQuery.isLoading);
+    if (javascriptContentQuery.error) {
+      const errorMessage =
+        javascriptContentQuery.error instanceof Error
+          ? javascriptContentQuery.error.message
+          : 'Failed to load JavaScript content';
+      setError(`Error: ${errorMessage}. Please try again later.`);
+    }
+  }, [javascriptContentQuery.isLoading, javascriptContentQuery.error]);
+
   // Handle initial content load and set the active topic/subtopic from URL params
   useEffect(() => {
     if (!content?.topics?.length) return;
