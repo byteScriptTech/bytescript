@@ -4,6 +4,7 @@ import { setupListeners } from '@reduxjs/toolkit/query';
 import { authSlice } from './slices/authSlice';
 import { contentApi } from './slices/contentSlice';
 import { dsaTopicsApi } from './slices/dsaTopicsSlice';
+import { javascriptApi } from './slices/javascriptSlice';
 import { languagesApi } from './slices/languagesSlice';
 import { notesApi } from './slices/notesSlice';
 import { practiceQuestionsApi } from './slices/practiceQuestionsSlice';
@@ -17,6 +18,7 @@ export const store = configureStore({
     [contentApi.reducerPath]: contentApi.reducer,
     [languagesApi.reducerPath]: languagesApi.reducer,
     [dsaTopicsApi.reducerPath]: dsaTopicsApi.reducer,
+    [javascriptApi.reducerPath]: javascriptApi.reducer,
     [practiceQuestionsApi.reducerPath]: practiceQuestionsApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
@@ -29,6 +31,7 @@ export const store = configureStore({
       .concat(contentApi.middleware)
       .concat(languagesApi.middleware)
       .concat(dsaTopicsApi.middleware)
+      .concat(javascriptApi.middleware)
       .concat(practiceQuestionsApi.middleware),
 });
 

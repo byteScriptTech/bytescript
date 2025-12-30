@@ -13,7 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { javascriptService } from '@/services/javascriptService';
+import { useJavascriptRedux } from '@/hooks/useJavascriptRedux';
 
 interface JavaScriptTopic {
   id: string;
@@ -27,36 +27,29 @@ interface JavaScriptTopic {
 export default function JavaScriptContentPage() {
   const router = useRouter();
   const [topics, setTopics] = useState<JavaScriptTopic[]>([]);
-  const [loading, setLoading] = useState(true);
+
+  // Redux hook for JavaScript content
+  const javascriptRedux = useJavascriptRedux();
+  const { allTopics, deleteTopic } = javascriptRedux;
 
   useEffect(() => {
-    fetchContent();
-  }, []);
-
-  const fetchContent = async () => {
-    try {
-      setLoading(true);
-      const data = await javascriptService.getAllTopics();
-      setTopics(data as JavaScriptTopic[]);
-    } catch (error) {
-      console.error('Error fetching JavaScript content:', error);
-    } finally {
-      setLoading(false);
+    if (allTopics.data) {
+      setTopics(allTopics.data as JavaScriptTopic[]);
     }
-  };
+  }, [allTopics.data]);
 
   const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this topic?')) {
       try {
-        await javascriptService.deleteTopic(id);
-        fetchContent();
+        await deleteTopic.mutateAsync(id);
+        // Data will be automatically updated via Redux cache invalidation
       } catch (error) {
         console.error('Error deleting topic:', error);
       }
     }
   };
 
-  if (loading) {
+  if (allTopics.isLoading) {
     return <div className="container mx-auto py-10">Loading...</div>;
   }
 

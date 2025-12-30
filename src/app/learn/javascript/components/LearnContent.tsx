@@ -10,7 +10,7 @@ import { FloatingMenuButton } from '@/components/common/FloatingMenuButton/Float
 import { Content } from '@/components/specific/LearnContent/Content';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { cn } from '@/lib/utils';
-import { getJavascriptContent } from '@/services/javascriptService';
+import { useGetJavascriptContentQuery } from '@/store/slices/javascriptSlice';
 import type { LanguageContent } from '@/types/content';
 
 const DraggableCircle = dynamic(
@@ -52,6 +52,9 @@ const LearnContentInner: FC<LearnContentInnerProps> = ({
   const [content, setContent] = useState<LanguageContent | null>(null);
   const [activeTopic, setActiveTopic] = useState<string | null>(null);
   const [activeSubtopic, setActiveSubtopic] = useState<string | null>(null);
+
+  // Redux hook for JavaScript content
+  const javascriptContentQuery = useGetJavascriptContentQuery();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showEditor, setShowEditor] = useState(false);
   const isMobile = useIsMobile();
@@ -123,7 +126,7 @@ const LearnContentInner: FC<LearnContentInnerProps> = ({
 
   const fetchContent = useCallback(async () => {
     try {
-      const data = await getJavascriptContent();
+      const data = javascriptContentQuery.data || null;
       setContent(data);
       if (data?.topics?.length) {
         setActiveTopic(data.topics[0].id);
@@ -138,7 +141,7 @@ const LearnContentInner: FC<LearnContentInnerProps> = ({
       console.error('Error fetching JavaScript content:', err);
       throw err;
     }
-  }, []);
+  }, [javascriptContentQuery.data]);
 
   useEffect(() => {
     const loadContent = async () => {
@@ -153,6 +156,18 @@ const LearnContentInner: FC<LearnContentInnerProps> = ({
 
     loadContent();
   }, [fetchContent]);
+
+  // Update loading and error states from Redux
+  useEffect(() => {
+    setLoading(javascriptContentQuery.isLoading);
+    if (javascriptContentQuery.error) {
+      const errorMessage =
+        javascriptContentQuery.error instanceof Error
+          ? javascriptContentQuery.error.message
+          : 'Failed to load JavaScript content';
+      setError(`Error: ${errorMessage}. Please try again later.`);
+    }
+  }, [javascriptContentQuery.isLoading, javascriptContentQuery.error]);
 
   // Handle initial content load and set the active topic/subtopic from URL params
   useEffect(() => {

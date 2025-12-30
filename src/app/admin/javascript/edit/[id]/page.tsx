@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 
-import { javascriptService } from '@/services/javascriptService';
+import { useJavascriptRedux } from '@/hooks/useJavascriptRedux';
 
 import { JavaScriptContentForm } from '../../JavaScriptContentForm';
 
@@ -19,6 +19,10 @@ export default function EditJavaScriptContentPage({
   const [content, setContent] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
+  // Redux hook for JavaScript content
+  const javascriptRedux = useJavascriptRedux();
+  const { getTopicById } = javascriptRedux;
+
   useEffect(() => {
     params.then((resolved) => {
       setId(resolved.id);
@@ -28,32 +32,30 @@ export default function EditJavaScriptContentPage({
   useEffect(() => {
     if (!id) return;
 
-    const fetchContent = async () => {
-      try {
-        const data = await javascriptService.getTopicById(id);
-        if (!data) {
-          setContent(null);
-          return;
-        }
-        setContent(data);
-      } catch (error) {
-        console.error('Error fetching content:', error);
-        router.push('/500');
-      } finally {
-        setLoading(false);
-      }
-    };
+    const topicQuery = getTopicById(id);
 
-    fetchContent();
-  }, [id, router]);
+    // Update loading state
+    setLoading(topicQuery.isLoading);
+
+    // Handle data
+    if (topicQuery.data) {
+      setContent(topicQuery.data);
+    } else if (topicQuery.isError) {
+      console.error('Error fetching content:', topicQuery.error);
+      router.push('/500');
+      setLoading(false);
+    }
+  }, [id, router, getTopicById]);
 
   const handleSuccess = async () => {
     if (!id) return;
 
     try {
-      const updatedContent = await javascriptService.getTopicById(id);
-      setContent(updatedContent);
-      toast.success('Content updated successfully!');
+      const topicQuery = getTopicById(id);
+      if (topicQuery.data) {
+        setContent(topicQuery.data);
+        toast.success('Content updated successfully!');
+      }
     } catch (error) {
       console.error('Error refetching content:', error);
       toast.error('Failed to refresh content');
