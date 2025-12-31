@@ -29,10 +29,7 @@ export default function TestTaker({
   onCancel,
 }: TestTakerProps) {
   const { currentUser } = useAuthRedux();
-<<<<<<< HEAD
   const { submitTestAttempt, startTestAttempt } = useCustomTestsRedux();
-=======
->>>>>>> a246de4 (refactor: add redux for better global state handling)
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<TestAnswer[]>([]);
   const [timeRemaining, setTimeRemaining] = useState(test.duration * 60); // Convert to seconds

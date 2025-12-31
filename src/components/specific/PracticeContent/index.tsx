@@ -1,6 +1,6 @@
 import { Play, Clock, BookOpen, Target, Timer } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
