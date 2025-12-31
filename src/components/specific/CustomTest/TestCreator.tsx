@@ -21,7 +21,7 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useAuthRedux } from '@/hooks/useAuthRedux';
-import { CustomTestService } from '@/services/firebase/customTestService';
+import { useCustomTestsRedux } from '@/hooks/useCustomTestsRedux';
 import { practiceTopicsService } from '@/services/firebase/practiceTopicsService';
 import { useGetAllQuestionsQuery } from '@/store/slices/practiceQuestionsSlice';
 import { CustomTest, TestQuestion } from '@/types/customTest';
@@ -41,6 +41,7 @@ export default function TestCreator({
   initialData,
 }: TestCreatorProps) {
   const { currentUser } = useAuthRedux();
+  const { createTest, updateTest } = useCustomTestsRedux();
   const { data: practiceQuestions = [], isLoading: questionsLoading } =
     useGetAllQuestionsQuery();
 
@@ -196,12 +197,12 @@ export default function TestCreator({
 
       if (testData.id) {
         // Update existing test
-        await CustomTestService.updateTest(testData.id, testPayload);
+        await updateTest(testData.id, testPayload);
         testId = testData.id;
         toast.success('Test updated successfully!');
       } else {
         // Create new test
-        testId = await CustomTestService.createTest(testPayload);
+        testId = await createTest(testPayload);
         toast.success('Test created successfully!');
       }
 

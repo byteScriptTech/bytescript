@@ -1,6 +1,6 @@
 import { Play, Clock, BookOpen, Target, Timer } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -26,37 +26,20 @@ const PracticeContent: React.FC<PracticeContentProps> = ({
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const router = useRouter();
 
-  const { getAllDataStructures, getAllAlgorithms } = useDSATopicsRedux();
+  const { getAllDataStructures } = useDSATopicsRedux();
 
-  // Get topics based on category
-  const getTopicsByCategory = useCallback(
-    (category: string) => {
-      if (category === 'dsa') {
-        return getAllDataStructures();
-      } else if (category === 'algorithms') {
-        return getAllAlgorithms();
-      }
-      // For other categories, return empty for now
-      return { data: [], isLoading: false, error: null };
-    },
-    [getAllDataStructures, getAllAlgorithms]
-  );
-
-  const allTopicsResult =
-    category === 'all' ? getAllDataStructures() : getTopicsByCategory(category);
-
-  const { data: topics = [], isLoading: queryLoading, error } = allTopicsResult;
+  const {
+    data: topics = [],
+    isLoading: queryLoading,
+    error,
+  } = getAllDataStructures();
+  console.log(topics, 'topics');
 
   useEffect(() => {
-    const filterTopics = () => {
+    const getTopics = () => {
       setIsLoading(true);
       try {
-        if (category === 'all') {
-          setFilteredTopics(topics);
-        } else {
-          const categoryTopics = getTopicsByCategory(category);
-          setFilteredTopics(categoryTopics.data || []);
-        }
+        setFilteredTopics(topics);
       } catch (err) {
         console.error('Error filtering topics:', err);
       } finally {
@@ -64,8 +47,8 @@ const PracticeContent: React.FC<PracticeContentProps> = ({
       }
     };
 
-    filterTopics();
-  }, [category, topics, getTopicsByCategory]);
+    getTopics();
+  }, [category, topics]);
 
   // Set current topic based on URL or first topic
   useEffect(() => {
@@ -77,7 +60,6 @@ const PracticeContent: React.FC<PracticeContentProps> = ({
           return;
         }
       }
-      // Set first topic if no topic is selected
       if (
         !currentTopic ||
         !filteredTopics.some((t) => t.id === currentTopic.id)
@@ -85,7 +67,7 @@ const PracticeContent: React.FC<PracticeContentProps> = ({
         setCurrentTopic(filteredTopics[0]);
       }
     }
-  }, [filteredTopics, topicId, currentTopic, setCurrentTopic]);
+  }, [filteredTopics, topicId, currentTopic]);
 
   if (queryLoading || isLoading) {
     return <ContentSkeleton />;

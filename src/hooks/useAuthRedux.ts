@@ -52,9 +52,14 @@ export const useAuthRedux = () => {
     }
 
     const updatedUserDoc = await getDoc(userDocRef);
+    const docData = updatedUserDoc.data();
     return {
       ...user,
-      ...updatedUserDoc.data(),
+      ...docData,
+      // Exclude Firestore timestamps to avoid Redux serialization issues
+      createdAt: docData?.createdAt?.toDate?.() || null,
+      updatedAt: docData?.updatedAt?.toDate?.() || null,
+      lastLogin: docData?.lastLogin?.toDate?.() || null,
     } as AppUser;
   };
 

@@ -10,8 +10,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { useAuthRedux } from '@/hooks/useAuthRedux';
-import { CustomTestService } from '@/services/firebase/customTestService';
-import { CustomTest, TestQuestion, TestAnswer } from '@/types/customTest';
+import { useCustomTestsRedux } from '@/hooks/useCustomTestsRedux';
+import { useStartTestAttemptMutation } from '@/store/slices/customTestsSlice';
+import { TestAnswer } from '@/types/customTest';
 
 export default function CustomTestPage() {
   const params = useParams<{ id: string }>();
@@ -19,9 +20,17 @@ export default function CustomTestPage() {
   const testId = params?.id;
 
   const { currentUser } = useAuthRedux();
+  const { getTest } = useCustomTestsRedux();
 
-  const [test, setTest] = useState<CustomTest | null>(null);
-  const [questions, setQuestions] = useState<TestQuestion[]>([]);
+  // Use RTK Query for test data
+  const {
+    data: test,
+    isLoading: testLoading,
+    error: testError,
+  } = getTest(testId || '');
+  const [startAttemptMutation, { isLoading: attemptLoading }] =
+    useStartTestAttemptMutation();
+
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [userCode, setUserCode] = useState('');
@@ -29,64 +38,43 @@ export default function CustomTestPage() {
   const [answers, setAnswers] = useState<TestAnswer[]>([]);
   const [attemptId, setAttemptId] = useState<string | null>(null);
 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [_isSubmitting, setIsSubmitting] = useState(false);
+  const questions = test?.questions || [];
+  const loading = testLoading || attemptLoading;
+  const error = testError;
 
-  // -------------------------------
-  // Fetch Test & Start Attempt
-  // -------------------------------
+  // Start test attempt when test is loaded
   useEffect(() => {
-    const fetchTest = async (id: string) => {
-      try {
-        setLoading(true);
+    const startAttempt = async () => {
+      if (test && currentUser && !attemptId) {
+        try {
+          const attempt = await startAttemptMutation({
+            testId: testId!,
+            userId: currentUser.uid,
+          }).unwrap();
+          setAttemptId(attempt);
 
-        if (!currentUser) {
-          setError('User not authenticated');
-          return;
+          // Prepare answers list
+          const initAnswers: TestAnswer[] = test.questions.map((q: any) => ({
+            questionId: q.id,
+            answer: '',
+            isCorrect: false,
+            pointsEarned: 0,
+            timeSpent: 0,
+          }));
+          setAnswers(initAnswers);
+
+          // Initial code template for coding questions
+          if (test.questions[0].type === 'coding') {
+            setUserCode(test.questions[0].codeTemplate || '');
+          }
+        } catch (err) {
+          console.error('Failed to start attempt:', err);
         }
-
-        const testData = await CustomTestService.getTest(id);
-        if (!testData) {
-          setError('Test not found');
-          return;
-        }
-
-        setTest(testData);
-        setQuestions(testData.questions);
-
-        // Create attempt
-        const attempt = await CustomTestService.startTestAttempt(
-          id,
-          currentUser.uid
-        );
-        setAttemptId(attempt);
-
-        // Prepare answers list
-        const initAnswers: TestAnswer[] = testData.questions.map((q) => ({
-          questionId: q.id,
-          answer: '',
-          isCorrect: false,
-          pointsEarned: 0,
-          timeSpent: 0,
-        }));
-
-        setAnswers(initAnswers);
-
-        // Initial code template for coding questions
-        if (testData.questions[0].type === 'coding') {
-          setUserCode(testData.questions[0].codeTemplate || '');
-        }
-      } catch (err) {
-        console.error(err);
-        setError('Failed to load test');
-      } finally {
-        setLoading(false);
       }
     };
 
-    if (testId && currentUser) fetchTest(testId);
-  }, [testId, currentUser]);
+    startAttempt();
+  }, [test, currentUser, testId, attemptId, startAttemptMutation]);
 
   // -------------------------------
   // Navigation
@@ -127,7 +115,6 @@ export default function CustomTestPage() {
   const handleSubmit = () => {
     if (!currentUser || !attemptId) return;
 
-    setIsSubmitting(true);
     setShowExplanation(true);
 
     const currentAnswer = selectedOption || userCode || '';
@@ -146,7 +133,6 @@ export default function CustomTestPage() {
       if (currentQuestionIndex < questions.length - 1) {
         handleNextQuestion();
       }
-      setIsSubmitting(false);
     }, 800);
   };
 
@@ -179,7 +165,9 @@ export default function CustomTestPage() {
   if (error || !test || !currentQuestion) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
-        <p className="text-red-500">{error ?? 'Test not found'}</p>
+        <p className="text-red-500">
+          {error ? String(error) : 'Test not found'}
+        </p>
         <Button className="mt-4" onClick={() => router.push('/customtest')}>
           Back to Practice
         </Button>

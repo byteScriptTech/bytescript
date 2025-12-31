@@ -8,6 +8,10 @@ import {
   RenderOptions,
 } from '@testing-library/react';
 import React, { ReactElement } from 'react';
+import { Provider } from 'react-redux';
+
+import { store } from '@/store/store';
+
 import '@testing-library/jest-dom';
 
 // Mock the useAuth hook
@@ -22,6 +26,17 @@ jest.mock('@/hooks/useAuthRedux', () => ({
   AuthProvider: ({ children }: { children: React.ReactNode }) => (
     <>{children}</>
   ),
+}));
+
+// Mock Redux hooks
+const mockUseGetAllTopicsQuery = jest.fn();
+jest.mock('@/store/slices/dsaTopicsSlice', () => ({
+  dsaTopicsApi: {
+    reducerPath: 'dsaTopicsApi',
+    reducer: {},
+    middleware: () => (next: any) => (action: any) => next(action),
+  },
+  useGetAllTopicsQuery: () => mockUseGetAllTopicsQuery(),
 }));
 
 // Mock the Navbar component to avoid testing it directly
@@ -49,7 +64,7 @@ import DataStructuresPage from './page';
 
 // Wrapper component for tests
 const TestWrapper = ({ children }: { children: React.ReactNode }) => {
-  return <>{children}</>;
+  return <Provider store={store}>{children}</Provider>;
 };
 
 // Custom render function with wrapper
@@ -58,8 +73,7 @@ const customRender = (
   options?: Omit<RenderOptions, 'wrapper'>
 ) => render(ui, { wrapper: TestWrapper, ...options });
 
-export * from '@testing-library/react';
-export { customRender as render };
+export { screen, fireEvent, act, customRender as render };
 
 // Mock dsaServerUtils
 const mockGetAllTopics = jest.fn();
@@ -148,6 +162,11 @@ describe('DataStructuresPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockGetAllTopics.mockResolvedValue(mockTopics);
+    mockUseGetAllTopicsQuery.mockReturnValue({
+      data: mockTopics,
+      isLoading: false,
+      error: null,
+    });
     console.error = jest.fn();
   });
 
@@ -157,6 +176,11 @@ describe('DataStructuresPage', () => {
   });
 
   it('displays loading state initially', () => {
+    mockUseGetAllTopicsQuery.mockReturnValue({
+      data: [],
+      isLoading: true,
+      error: null,
+    });
     render(<DataStructuresPage />);
     // The component renders skeleton loaders with Skeleton components
     const skeletons = document.querySelectorAll('.animate-pulse');
@@ -164,7 +188,11 @@ describe('DataStructuresPage', () => {
   });
 
   it('displays topics after loading', async () => {
-    mockGetAllTopics.mockResolvedValue(mockTopics);
+    mockUseGetAllTopicsQuery.mockReturnValue({
+      data: mockTopics,
+      isLoading: false,
+      error: null,
+    });
     render(<DataStructuresPage />);
 
     // Wait for topics to be loaded and verify they are displayed
@@ -175,7 +203,11 @@ describe('DataStructuresPage', () => {
   });
 
   it('filters topics by search query', async () => {
-    mockGetAllTopics.mockResolvedValue(mockTopics);
+    mockUseGetAllTopicsQuery.mockReturnValue({
+      data: mockTopics,
+      isLoading: false,
+      error: null,
+    });
     render(<DataStructuresPage />);
 
     // Wait for topics to be loaded
@@ -191,7 +223,11 @@ describe('DataStructuresPage', () => {
   });
 
   it('filters topics by category tab', async () => {
-    mockGetAllTopics.mockResolvedValue(mockTopics);
+    mockUseGetAllTopicsQuery.mockReturnValue({
+      data: mockTopics,
+      isLoading: false,
+      error: null,
+    });
     render(<DataStructuresPage />);
 
     // Wait for topics to be loaded
@@ -215,13 +251,16 @@ describe('DataStructuresPage', () => {
   });
 
   it('handles errors when fetching topics', async () => {
-    const errorMessage = 'Failed to load topics. Please try again later.';
-    mockGetAllTopics.mockRejectedValueOnce(new Error('Failed to fetch'));
+    mockUseGetAllTopicsQuery.mockReturnValue({
+      data: [],
+      isLoading: false,
+      error: new Error('Failed to fetch'),
+    });
 
     render(<DataStructuresPage />);
 
     // Check if error message is displayed
-    const errorElement = await screen.findByText(errorMessage);
+    const errorElement = await screen.findByText('Failed to fetch');
     expect(errorElement).toBeInTheDocument();
 
     // Verify retry button is displayed
@@ -230,7 +269,11 @@ describe('DataStructuresPage', () => {
   });
 
   it('navigates to topic details when a topic is clicked', async () => {
-    mockGetAllTopics.mockResolvedValue(mockTopics);
+    mockUseGetAllTopicsQuery.mockReturnValue({
+      data: mockTopics,
+      isLoading: false,
+      error: null,
+    });
     render(<DataStructuresPage />);
 
     // Wait for topics to be loaded

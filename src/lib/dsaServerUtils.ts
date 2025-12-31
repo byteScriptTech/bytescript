@@ -1,41 +1,9 @@
 import { collection, doc, getDoc, getDocs } from 'firebase/firestore';
 
 import { db } from '@/firebase/config';
+import type { DSATopic } from '@/store/slices/dsaTopicsSlice';
 
-export interface DSATopic {
-  id: string;
-  title: string;
-  slug: string;
-  description: string;
-  category: 'data-structures' | 'algorithms';
-  subcategory?: string;
-  difficulty?: 'beginner' | 'intermediate' | 'advanced';
-  content?: string;
-  timeComplexity?: string;
-  spaceComplexity?: string;
-  tags?: string[];
-  prerequisites?: string[];
-  operations?: Array<{
-    name: string;
-    description: string;
-    timeComplexity: string;
-    spaceComplexity: string;
-  }>;
-  examples?: Array<{
-    input: string;
-    output: string;
-    explanation?: string;
-  }>;
-  visualizations?: Array<{
-    type: 'array' | 'tree' | 'graph' | 'linked-list';
-    data: any;
-    description: string;
-  }>;
-  createdAt?: Date;
-  updatedAt?: Date;
-}
-
-// Transform Firestore document to DSATopic
+// Transform Firestore document to DSATopic (same as Redux slice)
 const transformDoc = (doc: any): DSATopic => {
   const data = doc.data();
   return {
@@ -46,7 +14,7 @@ const transformDoc = (doc: any): DSATopic => {
   } as DSATopic;
 };
 
-// Server-side DSA utilities for static generation
+// Server-side DSA utilities that mirror Redux logic
 export const dsaServerUtils = {
   async getTopicBySlug(slug: string): Promise<DSATopic | null> {
     try {

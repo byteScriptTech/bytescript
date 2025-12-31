@@ -30,9 +30,7 @@ export const useDSATopicsRedux = () => {
   const getAllDataStructures = () => {
     return {
       ...getAllDataStructuresQuery,
-      data: getAllDataStructuresQuery.data?.filter(
-        (topic) => !topic.subcategory || topic.subcategory === 'basic'
-      ),
+      data: getAllDataStructuresQuery.data,
     };
   };
 

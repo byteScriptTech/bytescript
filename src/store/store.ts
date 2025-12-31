@@ -3,6 +3,7 @@ import { setupListeners } from '@reduxjs/toolkit/query';
 
 import { authSlice } from './slices/authSlice';
 import { contentApi } from './slices/contentSlice';
+import { customTestsApi } from './slices/customTestsSlice';
 import { dsaTopicsApi } from './slices/dsaTopicsSlice';
 import { javascriptApi } from './slices/javascriptSlice';
 import { languagesApi } from './slices/languagesSlice';
@@ -20,6 +21,7 @@ export const store = configureStore({
     [dsaTopicsApi.reducerPath]: dsaTopicsApi.reducer,
     [javascriptApi.reducerPath]: javascriptApi.reducer,
     [practiceQuestionsApi.reducerPath]: practiceQuestionsApi.reducer,
+    [customTestsApi.reducerPath]: customTestsApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -32,7 +34,8 @@ export const store = configureStore({
       .concat(languagesApi.middleware)
       .concat(dsaTopicsApi.middleware)
       .concat(javascriptApi.middleware)
-      .concat(practiceQuestionsApi.middleware),
+      .concat(practiceQuestionsApi.middleware)
+      .concat(customTestsApi.middleware),
 });
 
 setupListeners(store.dispatch);
