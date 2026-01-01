@@ -11,7 +11,6 @@ export function Navbar() {
   const navItems = [
     { name: 'Pair Programming', href: '/pair-programming' },
     { name: 'Interview', href: '/interview' },
-    { name: 'Practice', href: '/practice' },
     { name: 'Learn', href: '/learn' },
   ];
 

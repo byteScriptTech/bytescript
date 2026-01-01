@@ -15,7 +15,6 @@ const LandingPageHeader = ({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuItems = [
     { text: 'Learn', href: '/learn' },
-    { text: 'Practice', href: '/practice' },
     { text: 'Community', href: '/community' },
     { text: 'Peer Programming', href: '/peer-programming' },
     { text: 'Editor', href: '/editor' },
