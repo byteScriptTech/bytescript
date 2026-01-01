@@ -79,11 +79,6 @@ jest.mock('next/navigation', () => ({
   notFound: jest.fn(),
 }));
 
-// Mock the useLanguages hook
-jest.mock('@/context/LanguagesContext', () => ({
-  useLanguages: jest.fn(),
-}));
-
 describe('LanguageBody', () => {
   const mockLanguages = [
     { name: 'javascript', id: '1' },
