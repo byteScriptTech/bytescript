@@ -27,42 +27,39 @@ describe('LandingPageBody', () => {
 
   it('renders three feature cards', () => {
     // Get all feature card containers by their test IDs
-    const interactiveCard = screen.getByTestId('feature-card-interactive');
-    const problemSolvingCard = screen.getByTestId(
-      'feature-card-problem-solving'
-    );
-    const communityCard = screen.getByTestId(
-      'feature-card-community-collaboration'
-    );
+    const competitiveCard = screen.getByTestId('feature-card-competitive');
+    const problemsCard = screen.getByTestId('feature-card-problems');
+    const dsaCard = screen.getByTestId('feature-card-dsa');
 
-    expect(interactiveCard).toBeInTheDocument();
-    expect(problemSolvingCard).toBeInTheDocument();
-    expect(communityCard).toBeInTheDocument();
+    expect(competitiveCard).toBeInTheDocument();
+    expect(problemsCard).toBeInTheDocument();
+    expect(dsaCard).toBeInTheDocument();
 
     // Verify card headings
-    expect(interactiveCard).toHaveTextContent('Interactive Coding Challenges');
-    expect(problemSolvingCard).toHaveTextContent('Adaptive Problem-Solving');
-    expect(communityCard).toHaveTextContent('Community Collaboration');
+    expect(competitiveCard).toHaveTextContent('Competitive Programming');
+    expect(problemsCard).toHaveTextContent('Problem Solving');
+    expect(dsaCard).toHaveTextContent('Data Structures');
 
     // Verify card descriptions
-    expect(interactiveCard).toHaveTextContent(
-      'Dive into byte‑sized exercises tailored to your level. Share your solutions, get community driven feedback, and learn together one challenge at a time.'
+    expect(competitiveCard).toHaveTextContent(
+      'Practice curated patterns and templates for contest problems with explanations and variations.'
     );
-    expect(problemSolvingCard).toHaveTextContent(
-      'Tackle complex problems with adaptive learning paths, designed to challenge and improve your analytical abilities.'
+    expect(problemsCard).toHaveTextContent(
+      'Large catalog of practice problems with difficulty tags, solutions, and testcases.'
     );
-    expect(communityCard).toHaveTextContent(
-      'Join a vibrant community of learners and experts, collaborate on projects, and share your knowledge.'
+    expect(dsaCard).toHaveTextContent(
+      'Learn core data structures with interactive visualizations and step-through animations.'
     );
   });
 
-  it('renders get started button with correct styling', () => {
-    const button = screen.getByRole('button', { name: /get started/i });
+  it('renders start learning button with correct styling', () => {
+    const button = screen.getByRole('button', { name: /start learning now/i });
     expect(button).toBeInTheDocument();
-    expect(button).toHaveClass('bg-[#00BFA6]', 'hover:bg-[#00A38C]');
+    expect(button).toHaveClass('bg-primary', 'hover:bg-primary/90');
 
-    // Test button click
-    button.click();
-    expect(mockHandleExploreByteScriptClick).toHaveBeenCalled();
+    // Verify the button is wrapped in a link to /learn
+    const link = button.closest('a');
+    expect(link).toBeInTheDocument();
+    expect(link).toHaveAttribute('href', '/learn');
   });
 });

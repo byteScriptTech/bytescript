@@ -1,5 +1,4 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import React from 'react';
 
 import LandingPageHeader from '../index';
 
@@ -26,20 +25,20 @@ describe('LandingPageHeader', () => {
     expect(learnLink).toHaveAttribute('href', '/learn');
     expect(learnLink).toHaveTextContent(/learn/i);
 
-    const communityLink = menuItems[1];
-    expect(communityLink).toBeInTheDocument();
-    expect(communityLink).toHaveAttribute('href', '/community');
-    expect(communityLink).toHaveTextContent(/community/i);
+    const practiceLink = menuItems[1];
+    expect(practiceLink).toBeInTheDocument();
+    expect(practiceLink).toHaveAttribute('href', '/practice');
+    expect(practiceLink).toHaveTextContent(/practice/i);
 
-    const peerProgrammingLink = menuItems[2];
-    expect(peerProgrammingLink).toBeInTheDocument();
-    expect(peerProgrammingLink).toHaveAttribute('href', '/peer-programming');
-    expect(peerProgrammingLink).toHaveTextContent(/peer programming/i);
+    const competitiveLink = menuItems[2];
+    expect(competitiveLink).toBeInTheDocument();
+    expect(competitiveLink).toHaveAttribute('href', '/competitive-programming');
+    expect(competitiveLink).toHaveTextContent(/competitive/i);
 
-    const editorLink = menuItems[3];
-    expect(editorLink).toBeInTheDocument();
-    expect(editorLink).toHaveAttribute('href', '/editor');
-    expect(editorLink).toHaveTextContent(/editor/i);
+    const playgroundLink = menuItems[3];
+    expect(playgroundLink).toBeInTheDocument();
+    expect(playgroundLink).toHaveAttribute('href', '/editor');
+    expect(playgroundLink).toHaveTextContent(/playground/i);
   });
 
   it('renders get started button with correct styling', () => {
