@@ -18,24 +18,19 @@ describe('LandingPageHeader', () => {
     expect(menuContainer).toBeInTheDocument();
 
     const menuItems = menuContainer.querySelectorAll('a');
-    expect(menuItems.length).toBe(4);
+    expect(menuItems.length).toBe(3);
 
     const learnLink = menuItems[0];
     expect(learnLink).toBeInTheDocument();
     expect(learnLink).toHaveAttribute('href', '/learn');
     expect(learnLink).toHaveTextContent(/learn/i);
 
-    const practiceLink = menuItems[1];
-    expect(practiceLink).toBeInTheDocument();
-    expect(practiceLink).toHaveAttribute('href', '/practice');
-    expect(practiceLink).toHaveTextContent(/practice/i);
-
-    const competitiveLink = menuItems[2];
+    const competitiveLink = menuItems[1];
     expect(competitiveLink).toBeInTheDocument();
     expect(competitiveLink).toHaveAttribute('href', '/competitive-programming');
     expect(competitiveLink).toHaveTextContent(/competitive/i);
 
-    const playgroundLink = menuItems[3];
+    const playgroundLink = menuItems[2];
     expect(playgroundLink).toBeInTheDocument();
     expect(playgroundLink).toHaveAttribute('href', '/editor');
     expect(playgroundLink).toHaveTextContent(/playground/i);

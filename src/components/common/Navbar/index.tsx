@@ -149,7 +149,6 @@ const Navbar = () => {
           <div className="flex items-center gap-2">
             <NavLink href="/dashboard">Dashboard</NavLink>
             <NavLink href="/learn">Learn</NavLink>
-            <NavLink href="/practice">Practice</NavLink>
             <NavLink href="/peer-programming">Peer Programming</NavLink>
             <NavigationControls
               canGoBack={canGoBack}
@@ -220,7 +219,6 @@ const Navbar = () => {
             {[
               { href: '/dashboard', label: 'Dashboard' },
               { href: '/learn', label: 'Learn' },
-              { href: '/practice', label: 'Practice' },
               { href: '/peer-programming', label: 'Peer Programming' },
             ].map((item) => (
               <li key={item.href}>
