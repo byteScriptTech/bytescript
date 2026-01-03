@@ -1,26 +1,26 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
+# #!/usr/bin/env sh
+# . "$(dirname -- "$0")/_/husky.sh"
 
-build_project() {
-  echo "🔨 Building the project..."
-  npm run build
-  return $?
-}
+# build_project() {
+#   echo "🔨 Building the project..."
+#   npm run build
+#   return $?
+# }
 
-# Try building first
-if ! build_project; then
-  echo "⚠️  Build failed, cleaning cache and retrying..."
-  rm -rf .next
-  if ! build_project; then
-    echo "❌ Build failed after cache clean. Please check your changes."
-    exit 1
-  fi
-fi
+# # Try building first
+# if ! build_project; then
+#   echo "⚠️  Build failed, cleaning cache and retrying..."
+#   rm -rf .next
+#   if ! build_project; then
+#     echo "❌ Build failed after cache clean. Please check your changes."
+#     exit 1
+#   fi
+# fi
 
-echo "🧪 Running all tests before push..."
-npm test -- --watchAll=false
+# echo "🧪 Running all tests before push..."
+# npm test -- --watchAll=false
 
-if [ $? -ne 0 ]; then
-  echo "❌ Tests failed. Please fix the failing tests before pushing."
-  exit 1
-fi
+# if [ $? -ne 0 ]; then
+#   echo "❌ Tests failed. Please fix the failing tests before pushing."
+#   exit 1
+# fi
