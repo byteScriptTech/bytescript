@@ -8,9 +8,23 @@ const resourceSchema = z.object({
 });
 
 const exampleSchema = z.object({
+  id: z.string().optional(),
   input: z.string().min(1, 'Input is required'),
   output: z.string().min(1, 'Output is required'),
   explanation: z.string().optional(),
+});
+
+const problemSchema = z.object({
+  id: z.string().optional(),
+  title: z.string().min(1, 'Problem title is required'),
+  difficulty: z.enum(['easy', 'medium', 'hard']),
+  description: z
+    .string()
+    .min(10, 'Problem description must be at least 10 characters'),
+  tags: z.array(z.string()).optional(),
+  initialCode: z.string().optional(),
+  hint: z.string().optional(),
+  solution: z.string().optional(),
 });
 
 // Main schema
@@ -47,6 +61,7 @@ export const dataStructureFormSchema = z.object({
   // Nested objects
   resources: z.array(resourceSchema).optional(),
   examples: z.array(exampleSchema).optional(),
+  problems: z.array(problemSchema).optional(),
 
   // Metadata
   lastUpdated: z.string().optional(),
@@ -59,3 +74,4 @@ export type Resource = z.infer<typeof resourceSchema> & {
   id?: string; // Optional id for form handling
 };
 export type Example = z.infer<typeof exampleSchema>;
+export type Problem = z.infer<typeof problemSchema>;

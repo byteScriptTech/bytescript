@@ -29,6 +29,10 @@ export const javascriptApi = createApi({
     getJavascriptContent: builder.query<LanguageContent | null, void>({
       queryFn: async () => {
         try {
+          if (!db) {
+            throw new Error('Firestore not initialized');
+          }
+
           const docRef = doc(
             db,
             JAVASCRIPT_CONTENT_COLLECTION,
@@ -50,6 +54,10 @@ export const javascriptApi = createApi({
     getAllTopics: builder.query<Topic[], void>({
       queryFn: async () => {
         try {
+          if (!db) {
+            throw new Error('Firestore not initialized');
+          }
+
           const docRef = doc(
             db,
             JAVASCRIPT_CONTENT_COLLECTION,
@@ -72,6 +80,10 @@ export const javascriptApi = createApi({
     getTopicById: builder.query<Topic | null, string>({
       queryFn: async (topicId) => {
         try {
+          if (!db) {
+            throw new Error('Firestore not initialized');
+          }
+
           const docRef = doc(
             db,
             JAVASCRIPT_CONTENT_COLLECTION,
@@ -96,6 +108,10 @@ export const javascriptApi = createApi({
     getTopicBySlug: builder.query<Topic | null, string>({
       queryFn: async (slug) => {
         try {
+          if (!db) {
+            throw new Error('Firestore not initialized');
+          }
+
           const docRef = doc(
             db,
             JAVASCRIPT_CONTENT_COLLECTION,
@@ -123,6 +139,10 @@ export const javascriptApi = createApi({
     >({
       queryFn: async (difficulty) => {
         try {
+          if (!db) {
+            throw new Error('Firestore not initialized');
+          }
+
           const docRef = doc(
             db,
             JAVASCRIPT_CONTENT_COLLECTION,
@@ -149,6 +169,10 @@ export const javascriptApi = createApi({
     createTopic: builder.mutation<Topic, Omit<Topic, 'id'>>({
       queryFn: async (topicData) => {
         try {
+          if (!db) {
+            throw new Error('Firestore not initialized');
+          }
+
           const docRef = doc(
             db,
             JAVASCRIPT_CONTENT_COLLECTION,
@@ -189,6 +213,10 @@ export const javascriptApi = createApi({
     >({
       queryFn: async ({ id, topicData }) => {
         try {
+          if (!db) {
+            throw new Error('Firestore not initialized');
+          }
+
           const docRef = doc(
             db,
             JAVASCRIPT_CONTENT_COLLECTION,
@@ -235,6 +263,10 @@ export const javascriptApi = createApi({
     deleteTopic: builder.mutation<boolean, string>({
       queryFn: async (id) => {
         try {
+          if (!db) {
+            throw new Error('Firestore not initialized');
+          }
+
           const docRef = doc(
             db,
             JAVASCRIPT_CONTENT_COLLECTION,

@@ -6,7 +6,6 @@ Allow: /
 Allow: /learn
 Allow: /community
 Allow: /competitive-programming
-Allow: /data-structures
 Allow: /editor
 
 # Disallow crawling of admin and private pages
@@ -25,8 +24,8 @@ Disallow: /*?*
 Disallow: /*/edit/
 Disallow: /*/new/
 
-# Sitemap location (uncomment and update with your actual sitemap URL once deployed)
-# Sitemap: https://byteScript.tech/sitemap.xml
+# Sitemap location
+Sitemap: https://bytescript.tech/sitemap.xml
 
 # Crawl-delay: 10
 

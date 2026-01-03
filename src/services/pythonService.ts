@@ -10,6 +10,9 @@ const PYTHON_CONTENT_ID = 'python';
  * Fetches Python language content from Firestore
  */
 export const getPythonContent = async (): Promise<LanguageContent | null> => {
+  if (!db) {
+    throw new Error('Firebase is not initialized');
+  }
   try {
     const docRef = doc(db, PYTHON_CONTENT_COLLECTION, PYTHON_CONTENT_ID);
     const docSnap = await getDoc(docRef);
@@ -28,6 +31,9 @@ export const getPythonContent = async (): Promise<LanguageContent | null> => {
 
 export const pythonService = {
   async getAllTopics() {
+    if (!db) {
+      throw new Error('Firebase is not initialized');
+    }
     try {
       const docRef = doc(db, PYTHON_CONTENT_COLLECTION, PYTHON_CONTENT_ID);
       const docSnap = await getDoc(docRef);
@@ -48,6 +54,9 @@ export const pythonService = {
 
   // Get a single Python topic by ID
   async getTopicById(id: string) {
+    if (!db) {
+      throw new Error('Firebase is not initialized');
+    }
     try {
       const docRef = doc(db, PYTHON_CONTENT_COLLECTION, PYTHON_CONTENT_ID);
       const docSnap = await getDoc(docRef);
@@ -68,6 +77,9 @@ export const pythonService = {
 
   // Create a new Python topic
   async createTopic(topicData: Omit<Topic, 'id'>) {
+    if (!db) {
+      throw new Error('Firebase is not initialized');
+    }
     try {
       const docRef = doc(db, PYTHON_CONTENT_COLLECTION, PYTHON_CONTENT_ID);
       const docSnap = await getDoc(docRef);
@@ -99,6 +111,9 @@ export const pythonService = {
 
   // Update an existing Python topic
   async updateTopic(id: string, topicData: Partial<Omit<Topic, 'id'>>) {
+    if (!db) {
+      throw new Error('Firebase is not initialized');
+    }
     try {
       const docRef = doc(db, PYTHON_CONTENT_COLLECTION, PYTHON_CONTENT_ID);
       const docSnap = await getDoc(docRef);
@@ -138,6 +153,9 @@ export const pythonService = {
 
   // Delete a Python topic
   async deleteTopic(id: string) {
+    if (!db) {
+      throw new Error('Firebase is not initialized');
+    }
     try {
       const docRef = doc(db, PYTHON_CONTENT_COLLECTION, PYTHON_CONTENT_ID);
       const docSnap = await getDoc(docRef);
@@ -168,6 +186,9 @@ export const pythonService = {
 
   // Get Python topics by difficulty
   async getTopicsByDifficulty(difficulty: string) {
+    if (!db) {
+      throw new Error('Firebase is not initialized');
+    }
     try {
       const docRef = doc(db, PYTHON_CONTENT_COLLECTION, PYTHON_CONTENT_ID);
       const docSnap = await getDoc(docRef);

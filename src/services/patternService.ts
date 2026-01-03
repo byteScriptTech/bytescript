@@ -9,7 +9,7 @@ import {
   where,
 } from 'firebase/firestore';
 
-import { db } from '@/config/firebase';
+import { db } from '@/firebase/config';
 
 export interface PatternData {
   id: string;
@@ -32,6 +32,7 @@ export const patternService = {
   // Get all patterns
   async getPatterns(): Promise<PatternData[]> {
     try {
+      if (!db) return [];
       const querySnapshot = await getDocs(collection(db, PATTERNS_COLLECTION));
       return querySnapshot.docs.map((doc) => ({
         id: doc.id,
@@ -46,6 +47,7 @@ export const patternService = {
   // Get a single pattern by document ID
   async getPatternById(id: string): Promise<PatternData | null> {
     try {
+      if (!db) return null;
       const docRef = doc(db, PATTERNS_COLLECTION, id);
       const docSnap = await getDoc(docRef);
 
@@ -62,6 +64,7 @@ export const patternService = {
   // Get a single pattern by slug
   async getPatternBySlug(slug: string): Promise<PatternData | null> {
     try {
+      if (!db) return null;
       const patternsRef = collection(db, PATTERNS_COLLECTION);
       const q = query(patternsRef, where('slug', '==', slug));
       const querySnapshot = await getDocs(q);
@@ -83,6 +86,7 @@ export const patternService = {
     id?: string
   ): Promise<string> {
     try {
+      if (!db) return '';
       const patternRef = id
         ? doc(db, PATTERNS_COLLECTION, id)
         : doc(collection(db, PATTERNS_COLLECTION));
@@ -103,6 +107,9 @@ export const patternService = {
 
   // Delete a pattern by ID
   async deletePattern(id: string): Promise<void> {
+    if (!db) {
+      throw new Error('Firebase is not initialized');
+    }
     try {
       const docRef = doc(db, PATTERNS_COLLECTION, id);
       await deleteDoc(docRef);
@@ -114,6 +121,9 @@ export const patternService = {
 
   // Seed initial patterns data
   async seedPatterns(patterns: Omit<PatternData, 'id'>[]): Promise<void> {
+    if (!db) {
+      throw new Error('Firebase is not initialized');
+    }
     try {
       const batch = [];
 

@@ -17,6 +17,10 @@ export const contentApi = createApi({
     getContent: builder.query<LanguageContent[], string>({
       queryFn: async (topicName) => {
         try {
+          if (!db) {
+            throw new Error('Firestore not initialized');
+          }
+
           const cachedContent = localStorage.getItem(`content_${topicName}`);
           if (cachedContent) {
             return { data: JSON.parse(cachedContent) };
@@ -46,6 +50,10 @@ export const contentApi = createApi({
     getScrollToList: builder.query<ScrollToListItem[], void>({
       queryFn: async () => {
         try {
+          if (!db) {
+            throw new Error('Firestore not initialized');
+          }
+
           const cachedScrollToList = localStorage.getItem('scrollToList');
           if (cachedScrollToList) {
             return { data: JSON.parse(cachedScrollToList) };

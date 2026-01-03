@@ -7,6 +7,7 @@ import { Topic } from '../types/content';
 
 export const addTopic = async (topic: Omit<Topic, 'id'>) => {
   try {
+    if (!db) return;
     const docRef = doc(db, 'topics', topic.slug);
     await setDoc(docRef, {
       ...topic,
@@ -26,6 +27,7 @@ export const useTopics = () => {
   useEffect(() => {
     const fetchTopics = async () => {
       try {
+        if (!db) return;
         const querySnapshot = await getDocs(collection(db, 'topics'));
         const topicsData = querySnapshot.docs.map(
           (doc) =>
@@ -47,6 +49,7 @@ export const useTopics = () => {
 
   const addTopic = async (topic: Omit<Topic, 'id'>) => {
     try {
+      if (!db) return;
       await setDoc(doc(db, 'topics', topic.slug), {
         ...topic,
         id: topic.slug,

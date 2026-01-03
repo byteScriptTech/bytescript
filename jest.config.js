@@ -18,6 +18,8 @@ const customJestConfig = {
   transform: {
     '^.+\\.tsx?$': 'ts-jest', // Use ts-jest for TypeScript files
   },
+  collectCoverageFrom: ['src/**/*.{ts,tsx}', '!src/**/*.d.ts'],
+  coveragePathIgnorePatterns: ['/node_modules/', '/.next/'],
 };
 
 module.exports = createJestConfig(customJestConfig);

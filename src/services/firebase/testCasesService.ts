@@ -39,6 +39,7 @@ export interface TestCase extends DocumentData {
 
 export const testCasesService = {
   async getTestCasesByProblemId(problemId: string): Promise<TestCase[]> {
+    if (!db) return [];
     const q = query(
       collection(db, 'testCases'),
       where('problemId', '==', problemId)
@@ -72,7 +73,7 @@ export const testCasesService = {
       createdAt: now,
       updatedAt: now,
     };
-
+    if (!db) return {} as TestCase;
     const docRef = await addDoc(collection(db, 'testCases'), testCaseData);
 
     return {
@@ -87,6 +88,7 @@ export const testCasesService = {
     id: string,
     updates: Partial<TestCase>
   ): Promise<TestCase | null> {
+    if (!db) return null;
     const testCaseRef = doc(db, 'testCases', id);
     await updateDoc(testCaseRef, {
       ...updates,
@@ -109,6 +111,7 @@ export const testCasesService = {
   },
 
   async deleteTestCase(id: string): Promise<void> {
+    if (!db) return;
     await deleteDoc(doc(db, 'testCases', id));
   },
 };

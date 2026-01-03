@@ -49,6 +49,9 @@ export const notesApi = createApi({
     getNotes: builder.query<Note[], string>({
       queryFn: async (userId) => {
         try {
+          if (!db) {
+            throw new Error('Firebase is not initialized');
+          }
           const notesQuery = query(
             collection(db, 'users', userId, 'notes'),
             where('userId', '==', userId)
@@ -67,6 +70,9 @@ export const notesApi = createApi({
     createNote: builder.mutation<Note, { content: string; userId: string }>({
       queryFn: async ({ content, userId }) => {
         try {
+          if (!db) {
+            throw new Error('Firebase is not initialized');
+          }
           const noteRef = doc(collection(db, 'users', userId, 'notes'));
           const noteData = {
             content,
@@ -89,6 +95,9 @@ export const notesApi = createApi({
     >({
       queryFn: async ({ userId, noteId, content }) => {
         try {
+          if (!db) {
+            throw new Error('Firebase is not initialized');
+          }
           const noteRef = doc(db, 'users', userId, 'notes', noteId);
           await updateDoc(noteRef, {
             content,
@@ -104,6 +113,9 @@ export const notesApi = createApi({
     deleteNote: builder.mutation<void, { userId: string; noteId: string }>({
       queryFn: async ({ userId, noteId }) => {
         try {
+          if (!db) {
+            throw new Error('Firebase is not initialized');
+          }
           const noteRef = doc(db, 'users', userId, 'notes', noteId);
           await deleteDoc(noteRef);
           return { data: undefined };

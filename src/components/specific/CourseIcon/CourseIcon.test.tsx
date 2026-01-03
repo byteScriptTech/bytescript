@@ -8,31 +8,35 @@ jest.mock('next/navigation', () => ({
   })),
 }));
 
-jest.mock('../../../assets/CourseIcons/Javascript', () => {
+jest.mock('@/assets/CourseIcons/Javascript', () => {
   const MockedComponent = () => <div data-testid="javascript-icon" />;
   MockedComponent.displayName = 'JavascriptIcon';
   return MockedComponent;
 });
 
-jest.mock('../../../assets/CourseIcons/Python', () => {
+jest.mock('@/assets/CourseIcons/Python', () => {
   const MockedComponent = () => <div data-testid="python-icon" />;
   MockedComponent.displayName = 'PythonIcon';
   return MockedComponent;
 });
 
-jest.mock('../../../assets/CourseIcons/TypeScriptIcon', () => {
-  const MockedComponent = () => <div data-testid="typescript-icon" />;
-  MockedComponent.displayName = 'TypeScriptIcon';
-  return MockedComponent;
-});
+jest.mock(
+  '@/assets/CourseIcons/TypescriptIcon',
+  () => {
+    const MockedComponent = () => <div data-testid="typescript-icon" />;
+    MockedComponent.displayName = 'TypeScriptIcon';
+    return MockedComponent;
+  },
+  { virtual: true }
+);
 
-jest.mock('../../../assets/CourseIcons/DataStructuresIcon', () => {
+jest.mock('@/assets/CourseIcons/DataStructuresIcon', () => {
   const MockedComponent = () => <div data-testid="data-structures-icon" />;
   MockedComponent.displayName = 'DataStructuresIcon';
   return MockedComponent;
 });
 
-jest.mock('../../../assets/CourseIcons/CompetitiveProgrammingIcon', () => {
+jest.mock('@/assets/CourseIcons/CompetitiveProgrammingIcon', () => {
   const MockedComponent = () => (
     <div data-testid="competitive-programming-icon" />
   );

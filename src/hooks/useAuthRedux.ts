@@ -32,6 +32,10 @@ export const useAuthRedux = () => {
     async (user: AppUser): Promise<AppUser> => {
       if (!user.uid) return user;
 
+      if (!db) {
+        throw new Error('Firestore not initialized');
+      }
+
       const userDocRef = doc(db, 'users', user.uid);
       const userDoc = await getDoc(userDocRef);
 
@@ -100,6 +104,9 @@ export const useAuthRedux = () => {
 
   const signInWithGithub = async () => {
     try {
+      if (!githubProvider) {
+        throw new Error('GitHub provider not initialized');
+      }
       const result = await signInWithPopup(auth, githubProvider);
       const userWithRole = await createUserDocument(result.user as AppUser);
       // userWithRole already has serializable string properties

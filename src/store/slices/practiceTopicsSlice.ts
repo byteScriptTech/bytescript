@@ -33,6 +33,9 @@ export const practiceTopicsApi = createApi({
     // Get all practice topics
     getAllTopics: builder.query<PracticeTopic[], void>({
       queryFn: async () => {
+        if (!db) {
+          return { error: { status: 500, data: 'Firebase not initialized' } };
+        }
         try {
           const querySnapshot = await getDocs(
             collection(db, 'practice_topics')
@@ -49,6 +52,9 @@ export const practiceTopicsApi = createApi({
     // Get topic by ID
     getTopicById: builder.query<PracticeTopic, string>({
       queryFn: async (id) => {
+        if (!db) {
+          return { error: { status: 500, data: 'Firebase not initialized' } };
+        }
         try {
           const docRef = doc(db, 'practice_topics', id);
           const docSnap = await getDoc(docRef);
@@ -69,6 +75,9 @@ export const practiceTopicsApi = createApi({
     // Get topics by category
     getTopicsByCategory: builder.query<PracticeTopic[], Category>({
       queryFn: async (category) => {
+        if (!db) {
+          return { error: { status: 500, data: 'Firebase not initialized' } };
+        }
         try {
           const q = query(
             collection(db, 'practice_topics'),
@@ -87,6 +96,9 @@ export const practiceTopicsApi = createApi({
     // Get topics by difficulty
     getTopicsByDifficulty: builder.query<PracticeTopic[], Difficulty>({
       queryFn: async (difficulty) => {
+        if (!db) {
+          return { error: { status: 500, data: 'Firebase not initialized' } };
+        }
         try {
           const q = query(
             collection(db, 'practice_topics'),
@@ -105,6 +117,9 @@ export const practiceTopicsApi = createApi({
     // Get all categories
     getCategories: builder.query<Category[], void>({
       queryFn: async () => {
+        if (!db) {
+          return { error: { status: 500, data: 'Firebase not initialized' } };
+        }
         try {
           const querySnapshot = await getDocs(
             collection(db, 'practice_topics')
@@ -126,6 +141,9 @@ export const practiceTopicsApi = createApi({
       Omit<PracticeTopic, 'id' | 'createdAt' | 'updatedAt'>
     >({
       queryFn: async (topicData) => {
+        if (!db) {
+          return { error: { status: 500, data: 'Firebase not initialized' } };
+        }
         try {
           const docRef = doc(collection(db, 'practice_topics'));
           const newTopic = {
@@ -156,6 +174,9 @@ export const practiceTopicsApi = createApi({
       { id: string; updates: Partial<PracticeTopic> }
     >({
       queryFn: async ({ id, updates }) => {
+        if (!db) {
+          return { error: { status: 500, data: 'Firebase not initialized' } };
+        }
         try {
           const docRef = doc(db, 'practice_topics', id);
           const updateData = {
@@ -181,6 +202,9 @@ export const practiceTopicsApi = createApi({
     // Delete practice topic (admin only)
     deleteTopic: builder.mutation<void, string>({
       queryFn: async (id) => {
+        if (!db) {
+          return { error: { status: 500, data: 'Firebase not initialized' } };
+        }
         try {
           const docRef = doc(db, 'practice_topics', id);
           await deleteDoc(docRef);

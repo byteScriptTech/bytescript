@@ -20,6 +20,7 @@ const AuthGuard = ({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!auth) return;
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (requireAuth && !user) {
         // User is not authenticated and auth is required

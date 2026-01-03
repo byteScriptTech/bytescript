@@ -19,6 +19,11 @@ export interface UserData {
  * Get user data from Firestore
  */
 export const getUserData = async (userId: string): Promise<UserData | null> => {
+  if (!adminDb) {
+    console.warn('Firebase Admin not initialized. Cannot get user data.');
+    return null;
+  }
+
   try {
     const userDoc = await adminDb.collection('users').doc(userId).get();
     if (!userDoc.exists) return null;
@@ -36,6 +41,11 @@ export const updateUserRole = async (
   userId: string,
   role: UserRole
 ): Promise<boolean> => {
+  if (!adminDb) {
+    console.warn('Firebase Admin not initialized. Cannot update user role.');
+    return false;
+  }
+
   try {
     await adminDb.collection('users').doc(userId).set(
       {
@@ -63,6 +73,11 @@ export const isUserAdmin = async (userId: string): Promise<boolean> => {
  * Get all users
  */
 export const getAdminUsers = async (): Promise<UserData[]> => {
+  if (!adminDb) {
+    console.warn('Firebase Admin not initialized. Cannot get users.');
+    return [];
+  }
+
   try {
     const snapshot = await adminDb.collection('users').get();
 
@@ -90,6 +105,13 @@ export const getAdminUsers = async (): Promise<UserData[]> => {
  * Create or update a user in Firestore
  */
 export const createOrUpdateUser = async (user: FirebaseUser) => {
+  if (!adminDb) {
+    console.warn(
+      'Firebase Admin not initialized. Cannot create or update user.'
+    );
+    return null;
+  }
+
   const userRef = adminDb.collection('users').doc(user.uid);
   const userDoc = await userRef.get();
 

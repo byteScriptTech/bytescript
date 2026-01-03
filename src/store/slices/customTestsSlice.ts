@@ -68,6 +68,10 @@ const firebaseBaseQuery: BaseQueryFn<
   queryParams,
 }) => {
   try {
+    if (!db) {
+      throw new Error('Firestore not initialized');
+    }
+
     let result: any;
 
     switch (method) {

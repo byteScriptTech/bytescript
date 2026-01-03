@@ -46,6 +46,10 @@ export const dsaTopicsApi = createApi({
     getAllTopics: builder.query<DSATopic[], void>({
       queryFn: async () => {
         try {
+          if (!db) {
+            throw new Error('Firestore not initialized');
+          }
+
           const querySnapshot = await getDocs(collection(db, 'dsa-topics'));
           const topics = querySnapshot.docs.map(transformDoc);
           return { data: topics };
@@ -60,6 +64,10 @@ export const dsaTopicsApi = createApi({
     getTopicBySlug: builder.query<DSATopic, string>({
       queryFn: async (slug) => {
         try {
+          if (!db) {
+            throw new Error('Firestore not initialized');
+          }
+
           const querySnapshot = await getDocs(collection(db, 'dsa-topics'));
           const topics = querySnapshot.docs.map(transformDoc);
           const topic = topics.find((t) => t.slug === slug);
@@ -81,6 +89,10 @@ export const dsaTopicsApi = createApi({
     getTopicById: builder.query<DSATopic, string>({
       queryFn: async (id) => {
         try {
+          if (!db) {
+            throw new Error('Firestore not initialized');
+          }
+
           const docRef = doc(db, 'dsa-topics', id);
           const docSnap = await getDoc(docRef);
 
@@ -104,6 +116,10 @@ export const dsaTopicsApi = createApi({
     >({
       queryFn: async (category) => {
         try {
+          if (!db) {
+            throw new Error('Firestore not initialized');
+          }
+
           const querySnapshot = await getDocs(collection(db, 'dsa-topics'));
           const topics = querySnapshot.docs
             .map(transformDoc)
@@ -123,6 +139,10 @@ export const dsaTopicsApi = createApi({
     >({
       queryFn: async (difficulty) => {
         try {
+          if (!db) {
+            throw new Error('Firestore not initialized');
+          }
+
           const querySnapshot = await getDocs(collection(db, 'dsa-topics'));
           const topics = querySnapshot.docs
             .map(transformDoc)
@@ -142,6 +162,10 @@ export const dsaTopicsApi = createApi({
     >({
       queryFn: async (topicData) => {
         try {
+          if (!db) {
+            throw new Error('Firestore not initialized');
+          }
+
           const docRef = doc(collection(db, 'dsa-topics'));
           const newTopic = {
             ...topicData,
@@ -172,6 +196,10 @@ export const dsaTopicsApi = createApi({
     >({
       queryFn: async ({ id, updates }) => {
         try {
+          if (!db) {
+            throw new Error('Firestore not initialized');
+          }
+
           const docRef = doc(db, 'dsa-topics', id);
           const updateData = {
             ...updates,
@@ -197,6 +225,10 @@ export const dsaTopicsApi = createApi({
     deleteTopic: builder.mutation<void, string>({
       queryFn: async (id) => {
         try {
+          if (!db) {
+            throw new Error('Firestore not initialized');
+          }
+
           const docRef = doc(db, 'dsa-topics', id);
           await setDoc(
             docRef,

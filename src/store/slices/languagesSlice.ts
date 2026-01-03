@@ -36,6 +36,14 @@ export const languagesApi = createApi({
     getLanguages: builder.query<Language[], void>({
       queryFn: async () => {
         try {
+          if (!db) {
+            return {
+              error: {
+                status: 'CUSTOM_ERROR',
+                error: new Error('Firebase not initialized'),
+              },
+            };
+          }
           const cachedData = localStorage.getItem('languages');
           if (cachedData) {
             return { data: JSON.parse(cachedData) };
@@ -58,6 +66,15 @@ export const languagesApi = createApi({
     addLanguage: builder.mutation<void, { name: string }>({
       queryFn: async ({ name }) => {
         try {
+          if (!db) {
+            return {
+              error: {
+                status: 'CUSTOM_ERROR',
+                error: new Error('Firebase not initialized'),
+              },
+            };
+          }
+
           await addDoc(collection(db, 'languages'), { name });
           localStorage.removeItem('languages');
           return { data: undefined };
@@ -70,6 +87,15 @@ export const languagesApi = createApi({
     updateLanguage: builder.mutation<void, { id: string; name: string }>({
       queryFn: async ({ id, name }) => {
         try {
+          if (!db) {
+            return {
+              error: {
+                status: 'CUSTOM_ERROR',
+                error: new Error('Firebase not initialized'),
+              },
+            };
+          }
+
           const languageRef = doc(db, 'languages', id);
           await updateDoc(languageRef, { name });
           localStorage.removeItem('languages');
@@ -83,6 +109,15 @@ export const languagesApi = createApi({
     deleteLanguage: builder.mutation<void, { id: string }>({
       queryFn: async ({ id }) => {
         try {
+          if (!db) {
+            return {
+              error: {
+                status: 'CUSTOM_ERROR',
+                error: new Error('Firebase not initialized'),
+              },
+            };
+          }
+
           const languageRef = doc(db, 'languages', id);
           await deleteDoc(languageRef);
           localStorage.removeItem('languages');
@@ -99,6 +134,15 @@ export const languagesApi = createApi({
     >({
       queryFn: async ({ userUUID, language }) => {
         try {
+          if (!db) {
+            return {
+              error: {
+                status: 'CUSTOM_ERROR',
+                error: new Error('Firebase not initialized'),
+              },
+            };
+          }
+
           const languageRef = doc(
             db,
             `user_learnings/${userUUID}/languages`,
@@ -128,6 +172,15 @@ export const languagesApi = createApi({
             topics,
           };
 
+          if (!db) {
+            return {
+              error: {
+                status: 'CUSTOM_ERROR',
+                error: new Error('Firebase not initialized'),
+              },
+            };
+          }
+
           await setDoc(
             doc(db, `user_learnings/${userUUID}/languages`, language),
             learningProgress
@@ -155,6 +208,15 @@ export const languagesApi = createApi({
         updatedTopics,
       }) => {
         try {
+          if (!db) {
+            return {
+              error: {
+                status: 'CUSTOM_ERROR',
+                error: new Error('Firebase not initialized'),
+              },
+            };
+          }
+
           const languageRef = doc(
             db,
             `user_learnings/${userUUID}/languages`,

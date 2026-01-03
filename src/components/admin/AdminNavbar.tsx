@@ -7,8 +7,8 @@ import React from 'react';
 
 import UserDropDown from '@/components/specific/UserDropDown';
 import { Button } from '@/components/ui/button';
-import { useAuthRedux } from '@/hooks/useAuthRedux';
 import { auth } from '@/firebase/config';
+import { useAuthRedux } from '@/hooks/useAuthRedux';
 
 export function AdminNavbar() {
   const router = useRouter();
@@ -22,6 +22,11 @@ export function AdminNavbar() {
   };
 
   const handleSignOut = async () => {
+    if (!auth) {
+      console.warn('Firebase auth not initialized');
+      return;
+    }
+
     await signOut(auth);
     router.push('/login');
   };

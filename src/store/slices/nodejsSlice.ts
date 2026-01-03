@@ -19,6 +19,9 @@ export const nodejsApi = createApi({
         | { error: { status: number; data: string } }
       > => {
         try {
+          if (!db) {
+            throw new Error('Firebase Firestore is not initialized');
+          }
           const docRef = doc(db, NODEJS_CONTENT_COLLECTION, NODEJS_CONTENT_ID);
           const docSnap = await getDoc(docRef);
           return {
@@ -167,6 +170,9 @@ export const nodejsApi = createApi({
         { data: Topic } | { error: { status: number; data: string } }
       > => {
         try {
+          if (!db) {
+            throw new Error('Firebase Firestore is not initialized');
+          }
           const docRef = doc(db, NODEJS_CONTENT_COLLECTION, NODEJS_CONTENT_ID);
           const docSnap = await getDoc(docRef);
 
@@ -217,6 +223,9 @@ export const nodejsApi = createApi({
         { data: Topic } | { error: { status: number; data: string } }
       > => {
         try {
+          if (!db) {
+            throw new Error('Firebase Firestore is not initialized');
+          }
           const docRef = doc(db, NODEJS_CONTENT_COLLECTION, NODEJS_CONTENT_ID);
           const docSnap = await getDoc(docRef);
 
@@ -270,6 +279,9 @@ export const nodejsApi = createApi({
         { data: boolean } | { error: { status: number; data: string } }
       > => {
         try {
+          if (!db) {
+            throw new Error('Firebase Firestore is not initialized');
+          }
           const docRef = doc(db, NODEJS_CONTENT_COLLECTION, NODEJS_CONTENT_ID);
           const docSnap = await getDoc(docRef);
 

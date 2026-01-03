@@ -39,6 +39,9 @@ export const problemsApi = createApi({
     getAllProblems: builder.query<Problem[], void>({
       queryFn: async () => {
         try {
+          if (!db) {
+            return { error: { status: 500, data: 'Firebase not initialized' } };
+          }
           const querySnapshot = await getDocs(collection(db, 'problems'));
           const problems = querySnapshot.docs.map(transformDoc);
           return { data: problems };
@@ -53,6 +56,9 @@ export const problemsApi = createApi({
     getProblemById: builder.query<Problem, string>({
       queryFn: async (id) => {
         try {
+          if (!db) {
+            return { error: { status: 500, data: 'Firebase not initialized' } };
+          }
           const docRef = doc(db, 'problems', id);
           const docSnap = await getDoc(docRef);
 
@@ -76,6 +82,9 @@ export const problemsApi = createApi({
     >({
       queryFn: async (difficulty) => {
         try {
+          if (!db) {
+            return { error: { status: 500, data: 'Firebase not initialized' } };
+          }
           const querySnapshot = await getDocs(collection(db, 'problems'));
           const problems = querySnapshot.docs
             .map(transformDoc)
@@ -93,6 +102,9 @@ export const problemsApi = createApi({
     getProblemsByCategory: builder.query<Problem[], string>({
       queryFn: async (category) => {
         try {
+          if (!db) {
+            return { error: { status: 500, data: 'Firebase not initialized' } };
+          }
           const querySnapshot = await getDocs(collection(db, 'problems'));
           const problems = querySnapshot.docs
             .map(transformDoc)
@@ -112,6 +124,9 @@ export const problemsApi = createApi({
     >({
       queryFn: async (problemData) => {
         try {
+          if (!db) {
+            return { error: { status: 500, data: 'Firebase not initialized' } };
+          }
           const docRef = doc(collection(db, 'problems'));
           const newProblem = {
             ...problemData,
@@ -142,6 +157,9 @@ export const problemsApi = createApi({
     >({
       queryFn: async ({ id, updates }) => {
         try {
+          if (!db) {
+            return { error: { status: 500, data: 'Firebase not initialized' } };
+          }
           const docRef = doc(db, 'problems', id);
           const updateData = {
             ...updates,
@@ -167,6 +185,9 @@ export const problemsApi = createApi({
     deleteProblem: builder.mutation<void, string>({
       queryFn: async (id) => {
         try {
+          if (!db) {
+            return { error: { status: 500, data: 'Firebase not initialized' } };
+          }
           const docRef = doc(db, 'problems', id);
           await deleteDoc(docRef);
           return { data: undefined };

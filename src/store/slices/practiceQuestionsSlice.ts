@@ -40,6 +40,10 @@ export const practiceQuestionsApi = createApi({
     >({
       queryFn: async (params = {}) => {
         try {
+          if (!db) {
+            throw new Error('Firestore is not initialized');
+          }
+
           const { limit: limitParam = 20 } = params || {};
           let q = query(
             collection(db, 'practice_questions'),
@@ -64,6 +68,10 @@ export const practiceQuestionsApi = createApi({
     getQuestionById: builder.query<PracticeQuestion, string>({
       queryFn: async (id) => {
         try {
+          if (!db) {
+            throw new Error('Firestore is not initialized');
+          }
+
           const docRef = doc(db, 'practice_questions', id);
           const docSnap = await getDoc(docRef);
 
@@ -84,6 +92,10 @@ export const practiceQuestionsApi = createApi({
     getQuestionsByType: builder.query<PracticeQuestion[], QuestionType>({
       queryFn: async (type) => {
         try {
+          if (!db) {
+            throw new Error('Firestore is not initialized');
+          }
+
           const q = query(
             collection(db, 'practice_questions'),
             where('type', '==', type),
@@ -103,6 +115,10 @@ export const practiceQuestionsApi = createApi({
     getQuestionsByTopic: builder.query<PracticeQuestion[], string>({
       queryFn: async (topicId) => {
         try {
+          if (!db) {
+            throw new Error('Firestore is not initialized');
+          }
+
           const q = query(
             collection(db, 'practice_questions'),
             where('topicId', '==', topicId),
@@ -125,6 +141,10 @@ export const practiceQuestionsApi = createApi({
     >({
       queryFn: async ({ query: searchQuery, type, topicId }) => {
         try {
+          if (!db) {
+            throw new Error('Firestore is not initialized');
+          }
+
           let q = query(
             collection(db, 'practice_questions'),
             orderBy('createdAt', 'desc')
@@ -166,6 +186,10 @@ export const practiceQuestionsApi = createApi({
     >({
       queryFn: async (questionData) => {
         try {
+          if (!db) {
+            throw new Error('Firestore is not initialized');
+          }
+
           const docRef = await addDoc(collection(db, 'practice_questions'), {
             ...questionData,
             createdAt: serverTimestamp(),
@@ -189,6 +213,10 @@ export const practiceQuestionsApi = createApi({
     >({
       queryFn: async ({ id, updates }) => {
         try {
+          if (!db) {
+            throw new Error('Firestore is not initialized');
+          }
+
           const docRef = doc(db, 'practice_questions', id);
           const updateData = {
             ...updates,
@@ -214,6 +242,10 @@ export const practiceQuestionsApi = createApi({
     deleteQuestion: builder.mutation<void, string>({
       queryFn: async (id) => {
         try {
+          if (!db) {
+            throw new Error('Firestore is not initialized');
+          }
+
           const docRef = doc(db, 'practice_questions', id);
           await deleteDoc(docRef);
           return { data: undefined };
@@ -235,6 +267,10 @@ export const practiceQuestionsApi = createApi({
     >({
       queryFn: async () => {
         try {
+          if (!db) {
+            throw new Error('Firestore is not initialized');
+          }
+
           const querySnapshot = await getDocs(
             collection(db, 'practice_questions')
           );

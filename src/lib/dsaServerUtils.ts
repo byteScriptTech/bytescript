@@ -20,6 +20,10 @@ const transformDoc = (doc: any): DSATopic => {
 export const dsaServerUtils = {
   async getTopicBySlug(slug: string): Promise<DSATopic | null> {
     try {
+      if (!db) {
+        throw new Error('Firestore not initialized');
+      }
+
       const querySnapshot = await getDocs(collection(db, 'dsa-topics'));
       const topics = querySnapshot.docs.map(transformDoc);
       const topic = topics.find((t) => t.slug === slug);
@@ -37,6 +41,10 @@ export const dsaServerUtils = {
 
   async getTopicById(id: string): Promise<DSATopic | null> {
     try {
+      if (!db) {
+        throw new Error('Firestore not initialized');
+      }
+
       const docRef = doc(db, 'dsa-topics', id);
       const docSnap = await getDoc(docRef);
 
@@ -53,6 +61,10 @@ export const dsaServerUtils = {
 
   async getAllTopics(): Promise<DSATopic[]> {
     try {
+      if (!db) {
+        throw new Error('Firestore not initialized');
+      }
+
       const querySnapshot = await getDocs(collection(db, 'dsa-topics'));
       const topics = querySnapshot.docs.map(transformDoc);
       return topics;

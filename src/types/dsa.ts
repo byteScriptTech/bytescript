@@ -31,6 +31,16 @@ export interface DSATopic {
     output?: string;
     explanation?: string;
   }>;
+  problems?: Array<{
+    id?: string;
+    title: string;
+    difficulty: 'easy' | 'medium' | 'hard';
+    description: string;
+    tags?: string[];
+    initialCode?: string;
+    hint?: string;
+    solution?: string;
+  }>;
   relatedTopics?: string[];
   createdAt?: Date | Timestamp | string;
   updatedAt?: Date | Timestamp | string;

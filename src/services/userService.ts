@@ -14,6 +14,9 @@ export interface UserData {
 const userService = {
   // Get user by ID
   getUser: async (userId: string): Promise<UserData | null> => {
+    if (!db) {
+      throw new Error('Firebase is not initialized');
+    }
     try {
       const userDoc = await getDoc(doc(db, 'users', userId));
       if (userDoc.exists()) {
@@ -38,6 +41,9 @@ const userService = {
     userId: string,
     userData: Partial<UserData>
   ): Promise<void> => {
+    if (!db) {
+      throw new Error('Firebase is not initialized');
+    }
     try {
       const userRef = doc(db, 'users', userId);
       await updateDoc(userRef, {

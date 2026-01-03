@@ -47,8 +47,12 @@ export const patternsApi = createApi({
     // Get all patterns
     getAllPatterns: builder.query<Pattern[], void>({
       queryFn: async () => {
+        if (!db) {
+          return { error: { status: 500, data: 'Firebase not initialized' } };
+        }
+
         try {
-          const querySnapshot = await getDocs(collection(db, 'patterns'));
+          const querySnapshot = await getDocs(collection(db!, 'patterns'));
           const patterns = querySnapshot.docs.map(transformDoc);
           return { data: patterns };
         } catch (error) {
@@ -61,8 +65,12 @@ export const patternsApi = createApi({
     // Get pattern by slug
     getPatternBySlug: builder.query<Pattern, string>({
       queryFn: async (slug) => {
+        if (!db) {
+          return { error: { status: 500, data: 'Firebase not initialized' } };
+        }
+
         try {
-          const querySnapshot = await getDocs(collection(db, 'patterns'));
+          const querySnapshot = await getDocs(collection(db!, 'patterns'));
           const patterns = querySnapshot.docs.map(transformDoc);
           const pattern = patterns.find((p) => p.slug === slug);
 
@@ -82,8 +90,12 @@ export const patternsApi = createApi({
     // Get pattern by ID
     getPatternById: builder.query<Pattern, string>({
       queryFn: async (id) => {
+        if (!db) {
+          return { error: { status: 500, data: 'Firebase not initialized' } };
+        }
+
         try {
-          const docRef = doc(db, 'patterns', id);
+          const docRef = doc(db!, 'patterns', id);
           const docSnap = await getDoc(docRef);
 
           if (!docSnap.exists()) {
@@ -102,8 +114,12 @@ export const patternsApi = createApi({
     // Get patterns by category
     getPatternsByCategory: builder.query<Pattern[], string>({
       queryFn: async (category) => {
+        if (!db) {
+          return { error: { status: 500, data: 'Firebase not initialized' } };
+        }
+
         try {
-          const querySnapshot = await getDocs(collection(db, 'patterns'));
+          const querySnapshot = await getDocs(collection(db!, 'patterns'));
           const patterns = querySnapshot.docs
             .map(transformDoc)
             .filter((pattern) => {
@@ -126,8 +142,12 @@ export const patternsApi = createApi({
       Omit<Pattern, 'id' | 'createdAt' | 'updatedAt'>
     >({
       queryFn: async (patternData) => {
+        if (!db) {
+          return { error: { status: 500, data: 'Firebase not initialized' } };
+        }
+
         try {
-          const docRef = doc(collection(db, 'patterns'));
+          const docRef = doc(collection(db!, 'patterns'));
           const newPattern = {
             ...patternData,
             createdAt: Timestamp.now(),
@@ -156,8 +176,12 @@ export const patternsApi = createApi({
       { id: string; updates: Partial<Pattern> }
     >({
       queryFn: async ({ id, updates }) => {
+        if (!db) {
+          return { error: { status: 500, data: 'Firebase not initialized' } };
+        }
+
         try {
-          const docRef = doc(db, 'patterns', id);
+          const docRef = doc(db!, 'patterns', id);
           const updateData = {
             ...updates,
             updatedAt: Timestamp.now(),
@@ -181,8 +205,12 @@ export const patternsApi = createApi({
     // Delete pattern (admin only)
     deletePattern: builder.mutation<void, string>({
       queryFn: async (id) => {
+        if (!db) {
+          return { error: { status: 500, data: 'Firebase not initialized' } };
+        }
+
         try {
-          const docRef = doc(db, 'patterns', id);
+          const docRef = doc(db!, 'patterns', id);
           await deleteDoc(docRef);
           return { data: undefined };
         } catch (error) {
