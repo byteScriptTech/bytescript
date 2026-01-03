@@ -9,7 +9,7 @@ import useIsMobile from '@/hooks/useIsMobile';
 
 const JsEditor = dynamic(
   () =>
-    import('@/components/CodeEditor').then((mod) => {
+    import('@/components/common/CodeEditor').then((mod) => {
       const JsEditorComponent = (props: {
         initialCode?: string;
         showAlgorithm?: boolean;
@@ -18,10 +18,10 @@ const JsEditor = dynamic(
           props.initialCode || '// Write your JavaScript code here'
         );
         return (
-          <mod.default
-            code={code}
+          <mod.JavaScriptCodeEditor
+            initialCode={code}
             onCodeChange={setCode}
-            showAlgorithm={props.showAlgorithm}
+            showOutput={false}
           />
         );
       };

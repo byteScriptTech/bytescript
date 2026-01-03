@@ -15,39 +15,24 @@ import {
   GitCompare,
   Layers,
 } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
-
-import { patternService, type PatternData } from '@/services/patternService';
+import React from 'react';
 
 import { PatternCard } from './PatternCard';
+import { useGetAllPatternsQuery } from '../../../store/slices/patternsSlice';
 
 export const Patterns = () => {
-  const [patterns, setPatterns] = useState<PatternData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: patterns, isLoading, error } = useGetAllPatternsQuery();
 
-  useEffect(() => {
-    const fetchPatterns = async () => {
-      try {
-        const data = await patternService.getPatterns();
-        setPatterns(data);
-      } catch (err) {
-        console.error('Failed to fetch patterns:', err);
-        setError('Failed to load patterns. Please try again later.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPatterns();
-  }, []);
-
-  if (loading) {
+  if (isLoading) {
     return <div>Loading patterns...</div>;
   }
 
   if (error) {
-    return <div className="text-red-500">{error}</div>;
+    return (
+      <div className="text-red-500">
+        Failed to load patterns. Please try again later.
+      </div>
+    );
   }
 
   // Map icon names to their corresponding components
@@ -69,7 +54,7 @@ export const Patterns = () => {
     'trie-prefix-tree': <GitCompare />,
     'breadth-first-search': <GitFork />,
   } as const;
-  const patternCards = patterns.map((pattern) => ({
+  const patternCards = (patterns || []).map((pattern) => ({
     title: pattern.title,
     description: pattern.description,
     icon: iconMap[pattern.slug as keyof typeof iconMap] || <Code2 />,

@@ -26,9 +26,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Problem } from '@/services/firebase/problemsService';
-import { problemsService } from '@/services/firebase/problemsService';
-import { patternService } from '@/services/patternService';
+import { Problem } from '@/types/problem';
+import { useProblemsRedux } from '@/hooks/useProblemsRedux';
+import { useGetAllPatternsQuery } from '@/store/slices/patternsSlice';
 
 interface Pattern {
   id: string;
@@ -90,24 +90,12 @@ interface ProblemFormInput {
 
 export function ProblemForm({ problem }: ProblemFormProps) {
   const router = useRouter();
+  const { createProblem, updateProblem } = useProblemsRedux();
 
-  useEffect(() => {
-    const loadPatterns = async () => {
-      try {
-        const patternData = await patternService.getPatterns();
-        setPatterns(patternData);
-      } catch (error) {
-        console.error('Error loading patterns:', error);
-      } finally {
-        setIsLoadingPatterns(false);
-      }
-    };
+  const { data: patterns = [], isLoading: isLoadingPatterns } =
+    useGetAllPatternsQuery();
 
-    loadPatterns();
-  }, []);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [patterns, setPatterns] = useState<Pattern[]>([]);
-  const [isLoadingPatterns, setIsLoadingPatterns] = useState(true);
   const [examples, setExamples] = useState(
     problem?.examples || [{ input: '', output: '', explanation: '' }]
   );
@@ -190,9 +178,12 @@ export function ProblemForm({ problem }: ProblemFormProps) {
       console.log('Processed problem data:', problemData);
 
       if (problem) {
-        await problemsService.updateProblem(problem.id, problemData);
+        await updateProblem.mutateAsync({
+          id: problem.id,
+          updates: problemData,
+        });
       } else {
-        await problemsService.createProblem(problemData);
+        await createProblem.mutateAsync(problemData);
       }
 
       router.push('/admin/problems');

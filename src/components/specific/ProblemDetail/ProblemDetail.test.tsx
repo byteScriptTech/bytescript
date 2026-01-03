@@ -17,6 +17,7 @@ describe('ProblemDetail', () => {
     title: 'Test Problem',
     difficulty: 'Medium' as const,
     category: 'Algorithms',
+    tags: ['arrays', 'sorting'],
     description: 'This is a test problem description.',
     examples: [
       {

@@ -2,39 +2,18 @@
 
 import { Plus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
 
-import { ProblemsTable } from '@/components/admin/ProblemsTable';
-import { Button } from '@/components/ui/button';
-import {
-  problemsService,
-  type Problem,
-} from '@/services/firebase/problemsService';
+import { ProblemsTable } from '../../../components/admin/ProblemsTable';
+import { Button } from '../../../components/ui/button';
+import { useProblemsRedux } from '../../../hooks/useProblemsRedux';
 
 export default function ProblemsPage() {
   const router = useRouter();
-  const [problems, setProblems] = useState<Problem[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchProblems = async () => {
-      try {
-        const data = await problemsService.getAllProblems();
-        setProblems(data);
-      } catch (error) {
-        console.error('Error fetching problems:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProblems();
-  }, []);
+  const { allProblems, deleteProblem } = useProblemsRedux();
 
   const handleDelete = async (id: string) => {
     try {
-      await problemsService.deleteProblem(id);
-      setProblems(problems.filter((problem) => problem.id !== id));
+      await deleteProblem.mutateAsync(id);
       return { success: true };
     } catch (error) {
       console.error('Error deleting problem:', error);
@@ -50,7 +29,7 @@ export default function ProblemsPage() {
     router.push(`/admin/problems/edit/${id}`);
   };
 
-  if (loading) {
+  if (allProblems.isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
@@ -73,7 +52,7 @@ export default function ProblemsPage() {
 
       <div className="bg-white dark:bg-gray-900 rounded-lg shadow">
         <ProblemsTable
-          data={problems}
+          data={allProblems.data || []}
           onDelete={handleDelete}
           onEdit={handleEdit}
         />

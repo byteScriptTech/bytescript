@@ -5,6 +5,9 @@ export type UserRole = 'admin' | 'user';
 
 export interface AppUser extends User {
   role?: UserRole;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+  lastLogin?: string | null;
 }
 
 interface AuthState {

@@ -51,17 +51,6 @@ jest.mock('@/firebase/config', () => ({
   },
 }));
 
-// Mock Firebase services
-jest.mock('@/services/firebase/problemsService', () => ({
-  problemsService: {
-    getAllProblems: jest.fn(),
-    getProblemById: jest.fn(),
-    createProblem: jest.fn(),
-    updateProblem: jest.fn(),
-    deleteProblem: jest.fn(),
-  },
-}));
-
 // Mock Redux hooks
 const mockUseLanguagesRedux = jest.fn();
 jest.mock('@/hooks/useLanguagesRedux', () => ({

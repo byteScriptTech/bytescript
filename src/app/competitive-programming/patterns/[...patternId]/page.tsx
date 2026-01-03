@@ -64,15 +64,13 @@ async function fetchPatternData(slug: string) {
 
     const problems = allProblems.filter((problem) => {
       return (
-        problem.tags?.some(
-          (tag) =>
-            typeof tag === 'string' && tag.toLowerCase() === patternSlugLower
-        ) ||
-        (problem.category &&
-          typeof problem.category === 'string' &&
-          problem.category.toLowerCase() === patternSlugLower)
+        problem.category &&
+        typeof problem.category === 'string' &&
+        problem.category.toLowerCase() === patternSlugLower
       );
     });
+
+    console.log('Matching problems count:', problems.length);
 
     return { pattern, problems };
   } catch (error) {
@@ -155,7 +153,6 @@ export default async function PatternPage({ params }: PageProps) {
                         title={problem.title}
                         description={problem.description}
                         difficulty={problem.difficulty}
-                        tags={problem.tags}
                       />
                     );
                   })}

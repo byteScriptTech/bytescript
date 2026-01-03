@@ -7,8 +7,9 @@ import { toast } from 'sonner';
 import ProblemDetail from '@/components/specific/ProblemDetail';
 import ProblemEditor from '@/components/specific/ProblemEditor';
 import { useAuthRedux } from '@/hooks/useAuthRedux';
-import { problemsService } from '@/services/firebase/problemsService';
+import { useProblemsRedux } from '@/hooks/useProblemsRedux';
 import { testCasesService } from '@/services/firebase/testCasesService';
+import { useGetProblemByIdQuery } from '@/store/slices/problemsSlice';
 import type { Problem, TestCase } from '@/types/problem';
 
 import styles from './ProblemPageContent.module.css';
@@ -47,14 +48,20 @@ const ProblemPageContent = () => {
     useState<CodeExecutionResult | null>(null);
 
   const { currentUser } = useAuthRedux();
+  const { getProblemByIdWithFallback } = useProblemsRedux();
+  const problemQuery = useGetProblemByIdQuery(problemId || '');
+  const problemWithFallback = getProblemByIdWithFallback(
+    problemId || '',
+    problemQuery
+  );
 
   useEffect(() => {
     const fetchProblemAndTestCases = async () => {
       if (!problemId) return;
       setLoading(true);
       try {
-        const fetchedProblem = await problemsService.getProblemById(problemId);
-        if (!fetchedProblem) {
+        const fetchedProblem = problemWithFallback.data;
+        if (!fetchedProblem || fetchedProblem.id === 'fallback') {
           toast.error('Problem not found');
           return;
         }
@@ -172,9 +179,7 @@ const ProblemPageContent = () => {
       } else if (typeof input === 'string') {
         try {
           // Parse the entire input string as JSON
-          console.log(input, ' this is input data!');
           const parsed = JSON.parse(input);
-          console.log(parsed, ' this is parsed data!');
           // If it's an array, use it directly, otherwise wrap it in an array
           fnArgs = Array.isArray(parsed) ? parsed : [parsed];
         } catch (e) {

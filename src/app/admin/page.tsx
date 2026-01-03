@@ -2,13 +2,12 @@
 
 import { Database, BookOpen, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
 import type { ComponentType } from 'react';
 
 import { AdminRoute } from '@/components/auth/ProtectedRoute';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { problemsService } from '@/services/firebase/problemsService';
 import { useGetAllTopicsQuery } from '@/store/slices/dsaTopicsSlice';
+import { useGetAllProblemsQuery } from '@/store/slices/problemsSlice';
 
 interface StatCard {
   title: string;
@@ -19,28 +18,12 @@ interface StatCard {
 }
 
 function AdminDashboard() {
-  const [loading, setLoading] = useState(true);
-  const [problemsCount, setProblemsCount] = useState<number>(0);
-
   const { data: topics = [], isLoading: topicsLoading } =
     useGetAllTopicsQuery();
+  const { data: problems = [], isLoading: problemsLoading } =
+    useGetAllProblemsQuery();
 
-  useEffect(() => {
-    const fetchProblems = async () => {
-      try {
-        const problems = await problemsService.getAllProblems();
-        setProblemsCount(problems.length);
-      } catch (error) {
-        console.error('Error fetching problems:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProblems();
-  }, []);
-
-  const isLoading = topicsLoading || loading;
+  const isLoading = topicsLoading || problemsLoading;
 
   const stats: StatCard[] = [
     {
@@ -52,7 +35,7 @@ function AdminDashboard() {
     },
     {
       title: 'Problems',
-      value: isLoading ? '...' : problemsCount || 0,
+      value: isLoading ? '...' : problems?.length || 0,
       icon: BookOpen,
       href: '/admin/problems',
       loading: isLoading,

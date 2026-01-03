@@ -8,13 +8,17 @@ import {
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 
-import { db, githubProvider } from '@/firebase/config';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { setUser, setLoading, clearUser } from '@/store/slices/authSlice';
-import { AppUser } from '@/store/slices/authSlice';
+import { db, githubProvider } from '../firebase/config';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import {
+  setUser,
+  setLoading,
+  clearUser,
+  AppUser,
+} from '../store/slices/authSlice';
 
 export const useAuthRedux = () => {
   const dispatch = useAppDispatch();
@@ -24,49 +28,55 @@ export const useAuthRedux = () => {
   const router = useRouter();
   const auth = getAuth();
 
-  const createUserDocument = async (user: AppUser): Promise<AppUser> => {
-    if (!user.uid) return user;
+  const createUserDocument = useCallback(
+    async (user: AppUser): Promise<AppUser> => {
+      if (!user.uid) return user;
 
-    const userDocRef = doc(db, 'users', user.uid);
-    const userDoc = await getDoc(userDocRef);
+      const userDocRef = doc(db, 'users', user.uid);
+      const userDoc = await getDoc(userDocRef);
 
-    if (!userDoc.exists()) {
-      await setDoc(userDocRef, {
-        uid: user.uid,
-        email: user.email,
-        displayName: user.displayName,
-        photoURL: user.photoURL,
-        role: 'user',
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      });
-    } else {
-      await setDoc(
-        userDocRef,
-        {
-          lastLogin: serverTimestamp(),
+      if (!userDoc.exists()) {
+        await setDoc(userDocRef, {
+          uid: user.uid,
+          email: user.email,
+          displayName: user.displayName,
+          photoURL: user.photoURL,
+          role: 'user',
+          createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
-        },
-        { merge: true }
-      );
-    }
+        });
+      } else {
+        await setDoc(
+          userDocRef,
+          {
+            lastLogin: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+          },
+          { merge: true }
+        );
+      }
 
-    const updatedUserDoc = await getDoc(userDocRef);
-    const docData = updatedUserDoc.data();
-    return {
-      ...user,
-      ...docData,
-      // Exclude Firestore timestamps to avoid Redux serialization issues
-      createdAt: docData?.createdAt?.toDate?.() || null,
-      updatedAt: docData?.updatedAt?.toDate?.() || null,
-      lastLogin: docData?.lastLogin?.toDate?.() || null,
-    } as AppUser;
-  };
+      const updatedUserDoc = await getDoc(userDocRef);
+      const docData = updatedUserDoc.data();
+      return {
+        ...user,
+        ...docData,
+        // Convert all Firestore Timestamps to ISO strings
+        createdAt: docData?.createdAt?.toDate?.() || null,
+        updatedAt: docData?.updatedAt?.toDate?.() || null,
+        lastLogin: docData?.lastLogin?.toDate?.() || null,
+        // Filter out any non-serializable properties
+        proactiveRefresh: undefined,
+      } as AppUser;
+    },
+    []
+  );
 
   const signInWithGithub = async () => {
     try {
       const result = await signInWithPopup(auth, githubProvider);
       const userWithRole = await createUserDocument(result.user as AppUser);
+      // userWithRole already has serializable string properties
       dispatch(setUser(userWithRole));
       toast.success('Signed in successfully!');
       router.push('/dashboard');
@@ -97,23 +107,35 @@ export const useAuthRedux = () => {
       dispatch(setLoading(true));
 
       if (user) {
-        const userWithRole = await createUserDocument(user as AppUser);
-        dispatch(setUser(userWithRole));
-        if (window.location.pathname === '/login') {
-          router.push('/dashboard');
+        try {
+          const userWithRole = await createUserDocument(user as AppUser);
+          if (isMounted) {
+            // userWithRole already has serializable string properties
+            dispatch(setUser(userWithRole));
+            if (window.location.pathname === '/login') {
+              router.push('/dashboard');
+            }
+          }
+        } catch (error) {
+          console.error('Error creating user document:', error);
+          if (isMounted) {
+            dispatch(clearUser());
+          }
         }
       } else {
         dispatch(clearUser());
       }
 
-      dispatch(setLoading(false));
+      if (isMounted) {
+        dispatch(setLoading(false));
+      }
     });
 
     return () => {
       isMounted = false;
       unsubscribe();
     };
-  }, [auth, router, dispatch]);
+  }, [auth, router, dispatch, createUserDocument]);
 
   return {
     currentUser,

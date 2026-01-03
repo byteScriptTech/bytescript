@@ -1,4 +1,12 @@
+import { TextEncoder, TextDecoder } from 'util';
+
+import { configureStore } from '@reduxjs/toolkit';
 import { render, screen, waitFor } from '@testing-library/react';
+import { Provider } from 'react-redux';
+
+// Polyfill TextEncoder for test environment
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder as any;
 
 // Mock dependencies
 jest.mock('sonner', () => ({
@@ -9,15 +17,16 @@ jest.mock('sonner', () => ({
   },
 }));
 
-jest.mock('@/services/firebase/problemsService', () => ({
-  problemsService: {
-    getProblemById: jest.fn(),
-  },
-}));
-
 jest.mock('@/services/firebase/testCasesService', () => ({
   testCasesService: {
     getTestCasesByProblemId: jest.fn(),
+  },
+}));
+
+jest.mock('@/firebase/config', () => ({
+  db: {},
+  auth: {
+    currentUser: null,
   },
 }));
 
@@ -52,7 +61,149 @@ jest.mock('@/hooks/useAuthRedux', () => ({
   useAuthRedux: () => mockUseAuth(),
 }));
 
+// Mock Redux hooks
+jest.mock('@/hooks/useProblemsRedux', () => ({
+  useProblemsRedux: () => ({
+    getProblemByIdWithFallback: (id: string, queryResult: any) => {
+      // Handle undefined queryResult
+      if (!queryResult) {
+        return {
+          isLoading: false,
+          data: undefined,
+          isError: true,
+        };
+      }
+      // If problem not found, return a fallback
+      if (queryResult.isError && !queryResult.data) {
+        return {
+          ...queryResult,
+          data: {
+            id: 'fallback',
+            title: 'Problem Not Found',
+            description:
+              'This problem could not be found. It may have been moved or deleted.',
+            difficulty: 'Easy' as const,
+            category: 'General',
+            constraints: [],
+            examples: [],
+            starterCode: '',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
+          isError: false,
+        };
+      }
+      return queryResult;
+    },
+  }),
+}));
+
+const mockUseGetProblemByIdQuery = jest.fn();
+
+jest.mock('@/store/slices/problemsSlice', () => ({
+  useGetProblemByIdQuery: () => mockUseGetProblemByIdQuery(),
+  problemsApi: {
+    reducerPath: 'problemsApi',
+    reducer: (state = {}) => state,
+    middleware: () => (next: any) => (action: any) => next(action),
+  },
+}));
+
+// Mock all other API slices
+jest.mock('@/store/slices/authSlice', () => ({
+  authSlice: {
+    reducer: (state = {}) => state,
+  },
+}));
+
+jest.mock('@/store/slices/timerSlice', () => ({
+  __esModule: true,
+  default: (state = {}) => state,
+}));
+
+jest.mock('@/store/slices/notesSlice', () => ({
+  notesApi: {
+    reducerPath: 'notesApi',
+    reducer: (state = {}) => state,
+    middleware: () => (next: any) => (action: any) => next(action),
+  },
+}));
+
+jest.mock('@/store/slices/contentSlice', () => ({
+  contentApi: {
+    reducerPath: 'contentApi',
+    reducer: (state = {}) => state,
+    middleware: () => (next: any) => (action: any) => next(action),
+  },
+}));
+
+jest.mock('@/store/slices/languagesSlice', () => ({
+  languagesApi: {
+    reducerPath: 'languagesApi',
+    reducer: (state = {}) => state,
+    middleware: () => (next: any) => (action: any) => next(action),
+  },
+}));
+
+jest.mock('@/store/slices/dsaTopicsSlice', () => ({
+  dsaTopicsApi: {
+    reducerPath: 'dsaTopicsApi',
+    reducer: (state = {}) => state,
+    middleware: () => (next: any) => (action: any) => next(action),
+  },
+}));
+
+jest.mock('@/store/slices/javascriptSlice', () => ({
+  javascriptApi: {
+    reducerPath: 'javascriptApi',
+    reducer: (state = {}) => state,
+    middleware: () => (next: any) => (action: any) => next(action),
+  },
+}));
+
+jest.mock('@/store/slices/practiceQuestionsSlice', () => ({
+  practiceQuestionsApi: {
+    reducerPath: 'practiceQuestionsApi',
+    reducer: (state = {}) => state,
+    middleware: () => (next: any) => (action: any) => next(action),
+  },
+}));
+
+jest.mock('@/store/slices/practiceTopicsSlice', () => ({
+  practiceTopicsApi: {
+    reducerPath: 'practiceTopicsApi',
+    reducer: (state = {}) => state,
+    middleware: () => (next: any) => (action: any) => next(action),
+  },
+}));
+
+jest.mock('@/store/slices/customTestsSlice', () => ({
+  customTestsApi: {
+    reducerPath: 'customTestsApi',
+    reducer: (state = {}) => state,
+    middleware: () => (next: any) => (action: any) => next(action),
+  },
+}));
+
 import ProblemPageContent from '.';
+
+// Create a test store
+const testStore = configureStore({
+  reducer: {
+    auth: (state = {}) => state,
+    timer: (state = {}) => state,
+    notesApi: (state = {}) => state,
+    contentApi: (state = {}) => state,
+    languagesApi: (state = {}) => state,
+    dsaTopicsApi: (state = {}) => state,
+    javascriptApi: (state = {}) => state,
+    practiceQuestionsApi: (state = {}) => state,
+    practiceTopicsApi: (state = {}) => state,
+    problemsApi: (state = {}) => state,
+    customTestsApi: (state = {}) => state,
+  },
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware(),
+});
 
 describe('ProblemPageContent', () => {
   beforeEach(() => {
@@ -62,30 +213,48 @@ describe('ProblemPageContent', () => {
     mockUseAuth.mockReturnValue({
       currentUser: { uid: 'test-user' },
     });
-  });
 
-  it('renders loading state initially', async () => {
-    render(<ProblemPageContent />);
-
-    // Check if the loading text is shown
-    expect(screen.getByTestId('loading')).toBeInTheDocument();
-
-    // Verify the problem fetch was initiated
-    expect(
-      require('@/services/firebase/problemsService').problemsService
-        .getProblemById
-    ).toHaveBeenCalledTimes(1);
-    expect(
-      require('@/services/firebase/problemsService').problemsService
-        .getProblemById
-    ).toHaveBeenCalledWith('test-problem');
-
-    // Wait for the async effect to finish to avoid act(...) warning
-    await waitFor(() => {
-      expect(screen.queryByTestId('loading')).not.toBeInTheDocument();
+    mockUseGetProblemByIdQuery.mockReturnValue({
+      isLoading: false,
+      data: {
+        id: 'test-problem',
+        title: 'Test Problem',
+        description: 'Test Description',
+        difficulty: 'Easy',
+        category: 'test',
+        constraints: [],
+        examples: [],
+        starterCode: '',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      isError: false,
     });
   });
 
+  it('renders problem detail when data is loaded', async () => {
+    render(
+      <Provider store={testStore}>
+        <ProblemPageContent />
+      </Provider>
+    );
+
+    // Wait for the component to render
+    await waitFor(() => {
+      expect(screen.getByTestId('problem-detail')).toBeInTheDocument();
+    });
+  });
+
+  it('shows loading state initially', () => {
+    render(
+      <Provider store={testStore}>
+        <ProblemPageContent />
+      </Provider>
+    );
+
+    // Check if the loading text is shown initially
+    expect(screen.getByTestId('loading')).toBeInTheDocument();
+  });
   it('fetches and displays problem data', async () => {
     // Mock the problem data
     const mockProblem = {
@@ -118,14 +287,20 @@ describe('ProblemPageContent', () => {
     ];
 
     // Set up the mocks
-    require('@/services/firebase/problemsService').problemsService.getProblemById.mockResolvedValueOnce(
-      mockProblem
-    );
+    mockUseGetProblemByIdQuery.mockReturnValue({
+      isLoading: false,
+      data: mockProblem,
+      isError: false,
+    });
     require('@/services/firebase/testCasesService').testCasesService.getTestCasesByProblemId.mockResolvedValueOnce(
       mockTestCases
     );
 
-    render(<ProblemPageContent />);
+    render(
+      <Provider store={testStore}>
+        <ProblemPageContent />
+      </Provider>
+    );
 
     // Wait for the loading to finish and the component to update
     await waitFor(() => {
@@ -138,11 +313,17 @@ describe('ProblemPageContent', () => {
   });
 
   it('shows error when problem is not found', async () => {
-    require('@/services/firebase/problemsService').problemsService.getProblemById.mockResolvedValueOnce(
-      null
-    );
+    mockUseGetProblemByIdQuery.mockReturnValue({
+      isLoading: false,
+      data: undefined,
+      isError: true,
+    });
 
-    render(<ProblemPageContent />);
+    render(
+      <Provider store={testStore}>
+        <ProblemPageContent />
+      </Provider>
+    );
 
     // Wait for the loading to finish and the error to be shown
     await waitFor(() => {
@@ -158,14 +339,15 @@ describe('ProblemPageContent', () => {
   });
 
   it('handles error when fetching problem data fails', async () => {
-    const error = new Error('Network error');
     // Suppress console.error for this test
     const consoleErrorSpy = jest
       .spyOn(console, 'error')
       .mockImplementation(() => {});
-    require('@/services/firebase/problemsService').problemsService.getProblemById.mockRejectedValueOnce(
-      error
-    );
+    mockUseGetProblemByIdQuery.mockReturnValue({
+      isLoading: false,
+      data: undefined,
+      isError: true,
+    });
 
     render(<ProblemPageContent />);
 
@@ -176,7 +358,9 @@ describe('ProblemPageContent', () => {
 
     // Check that the error was toasted
     expect(require('sonner').toast.error).toHaveBeenCalledTimes(1);
-    expect(require('sonner').toast.error).toHaveBeenCalledWith('Network error');
+    expect(require('sonner').toast.error).toHaveBeenCalledWith(
+      'Problem not found'
+    );
 
     // Restore console.error
     consoleErrorSpy.mockRestore();
@@ -188,8 +372,9 @@ describe('ProblemPageContent', () => {
       .spyOn(console, 'error')
       .mockImplementation(() => {});
     // Mock successful problem fetch but failed test cases fetch
-    require('@/services/firebase/problemsService').problemsService.getProblemById.mockResolvedValueOnce(
-      {
+    mockUseGetProblemByIdQuery.mockReturnValue({
+      isLoading: false,
+      data: {
         id: 'test-problem',
         title: 'Test Problem',
         description: 'Test description',
@@ -200,13 +385,19 @@ describe('ProblemPageContent', () => {
         starterCode: 'function solve() {}',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-      }
-    );
+      },
+      isError: false,
+    });
 
     require('@/services/firebase/testCasesService').testCasesService.getTestCasesByProblemId.mockRejectedValueOnce(
       new Error('Failed to load')
     );
 
+    render(
+      <Provider store={testStore}>
+        <ProblemPageContent />
+      </Provider>
+    );
     render(<ProblemPageContent />);
 
     // Wait for the loading to finish and the warning to be shown
