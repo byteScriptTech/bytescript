@@ -13,7 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { type Problem } from '@/services/firebase/problemsService';
+import { type Problem } from '@/types/problem';
 
 import { DeleteConfirmationDialog } from './DeleteConfirmationDialog';
 
@@ -109,23 +109,6 @@ export function ProblemsTable({ data, onDelete, onEdit }: ProblemsTableProps) {
                 {item.category.replace('-', ' ')}
               </TableCell>
               <TableCell>{getDifficultyBadge(item.difficulty)}</TableCell>
-              <TableCell>
-                <div className="flex flex-wrap gap-1">
-                  {item.tags?.slice(0, 2).map((tag, index) => (
-                    <span
-                      key={index}
-                      className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                  {item.tags?.length > 2 && (
-                    <span className="text-xs text-muted-foreground">
-                      +{item.tags.length - 2} more
-                    </span>
-                  )}
-                </div>
-              </TableCell>
               <TableCell className="text-sm text-muted-foreground">
                 {new Date(item.updatedAt).toLocaleDateString()}
               </TableCell>

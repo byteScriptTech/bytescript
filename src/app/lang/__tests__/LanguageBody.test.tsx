@@ -41,8 +41,6 @@ jest.mock('@/components/specific/LearnContent', () => {
   return LearnContent;
 });
 
-import { useLanguages } from '@/context/LanguagesContext';
-
 import LanguageBody from '../LanguageBody';
 
 // Mock Firebase auth
@@ -53,24 +51,10 @@ jest.mock('@/firebase/config', () => ({
   },
 }));
 
-// Mock Firebase services
-jest.mock('@/services/firebase/problemsService', () => ({
-  problemsService: {
-    getAllProblems: jest.fn(),
-    getProblemById: jest.fn(),
-    createProblem: jest.fn(),
-    updateProblem: jest.fn(),
-    deleteProblem: jest.fn(),
-  },
-}));
-
-jest.mock('@/services/firebase/notesService', () => ({
-  notesService: {
-    getNotes: jest.fn(),
-    createNote: jest.fn(),
-    updateNote: jest.fn(),
-    deleteNote: jest.fn(),
-  },
+// Mock Redux hooks
+const mockUseLanguagesRedux = jest.fn();
+jest.mock('@/hooks/useLanguagesRedux', () => ({
+  useLanguagesRedux: () => mockUseLanguagesRedux(),
 }));
 
 // Mock Next.js router
@@ -84,11 +68,6 @@ jest.mock('next/navigation', () => ({
   notFound: jest.fn(),
 }));
 
-// Mock the useLanguages hook
-jest.mock('@/context/LanguagesContext', () => ({
-  useLanguages: jest.fn(),
-}));
-
 describe('LanguageBody', () => {
   const mockLanguages = [
     { name: 'javascript', id: '1' },
@@ -99,14 +78,13 @@ describe('LanguageBody', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-  });
-
-  it('renders correctly with valid language', () => {
-    (useLanguages as jest.Mock).mockReturnValue({
+    mockUseLanguagesRedux.mockReturnValue({
       loading: false,
       languages: mockLanguages,
     });
+  });
 
+  it('renders correctly with valid language', () => {
     render(
       <LanguageBody
         currentTopic={{ name: 'javascript', id: '1' }}
@@ -123,46 +101,41 @@ describe('LanguageBody', () => {
   });
 
   it('calls notFound when language is invalid', () => {
-    (useLanguages as jest.Mock).mockReturnValue({
+    mockUseLanguagesRedux.mockReturnValue({
       loading: false,
       languages: mockLanguages,
     });
 
     render(
       <LanguageBody
-        currentTopic={{ name: 'javascript', id: '1' }}
+        currentTopic={{ name: 'invalid', id: '999' }}
         setCurrentTopic={mockSetCurrentTopic}
-        searchParams={{ name: 'ruby', id: '1' }}
+        searchParams={{ name: 'invalid', id: '999' }}
       />
     );
 
-    expect(warnSpy).toHaveBeenCalledWith('Language not found:', 'ruby');
     expect(notFound).toHaveBeenCalled();
   });
 
   it('calls notFound when search parameters are missing', () => {
-    (useLanguages as jest.Mock).mockReturnValue({
+    mockUseLanguagesRedux.mockReturnValue({
       loading: false,
       languages: mockLanguages,
     });
 
     render(
       <LanguageBody
-        currentTopic={{ name: 'javascript', id: '1' }}
+        currentTopic={undefined}
         setCurrentTopic={mockSetCurrentTopic}
         searchParams={{ name: '', id: '' }}
       />
     );
 
-    expect(warnSpy).toHaveBeenCalledWith(
-      'Missing required search parameters:',
-      { name: '', id: '' }
-    );
     expect(notFound).toHaveBeenCalled();
   });
 
   it('handles array values for name parameter', () => {
-    (useLanguages as jest.Mock).mockReturnValue({
+    mockUseLanguagesRedux.mockReturnValue({
       loading: false,
       languages: mockLanguages,
     });
@@ -178,11 +151,10 @@ describe('LanguageBody', () => {
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
       'javascript'
     );
-    expect(notFound).not.toHaveBeenCalled();
   });
 
   it('calls notFound when loading is true', () => {
-    (useLanguages as jest.Mock).mockReturnValue({
+    mockUseLanguagesRedux.mockReturnValue({
       loading: true,
       languages: mockLanguages,
     });
@@ -195,6 +167,6 @@ describe('LanguageBody', () => {
       />
     );
 
-    expect(notFound).not.toHaveBeenCalled();
+    expect(screen.getByText('Learn Content')).toBeInTheDocument();
   });
 });

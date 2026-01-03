@@ -11,16 +11,21 @@ import {
   Globe,
   History,
 } from 'lucide-react';
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import { toast } from 'sonner';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useAuth } from '@/context/AuthContext';
+import { useAuthRedux } from '@/hooks/useAuthRedux';
+import { useCustomTestsRedux } from '@/hooks/useCustomTestsRedux';
 import { cn } from '@/lib/utils';
-import { CustomTestService } from '@/services/firebase/customTestService';
+import {
+  useGetUserTestsQuery,
+  useGetPublicTestsQuery,
+  useGetUserTestAttemptsQuery,
+} from '@/store/slices/customTestsSlice';
 import { CustomTest, TestAttempt } from '@/types/customTest';
 
 interface CustomTestListProps {
@@ -36,51 +41,57 @@ export default function CustomTestList({
   onEditTest,
   onViewAttemptResults,
 }: CustomTestListProps) {
-  const { currentUser } = useAuth();
-  const [tests, setTests] = useState<CustomTest[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { currentUser } = useAuthRedux();
+  const { deleteTest } = useCustomTestsRedux();
   const [activeTab, setActiveTab] = useState<
     'my-tests' | 'public' | 'attempts'
   >('my-tests');
-  const [attempts, setAttempts] = useState<TestAttempt[]>([]);
 
-  const loadTests = useCallback(async () => {
-    if (!currentUser) return;
+  // Use Redux hooks directly for data fetching
+  const {
+    data: userTests = [],
+    isLoading: userTestsLoading,
+    error: _userTestsError,
+  } = useGetUserTestsQuery(currentUser?.uid || '', {
+    skip: !currentUser || activeTab !== 'my-tests',
+  });
 
-    setLoading(true);
-    try {
-      if (activeTab === 'attempts') {
-        const userAttempts = await CustomTestService.getUserTestAttempts(
-          currentUser.uid
-        );
-        setAttempts(userAttempts);
-        setTests([]);
-      } else {
-        const testList =
-          activeTab === 'my-tests'
-            ? await CustomTestService.getUserTests(currentUser.uid)
-            : await CustomTestService.getPublicTests();
-        setTests(testList);
-        setAttempts([]);
-      }
-    } catch (error) {
-      console.error('Error loading tests:', error);
-      toast.error('Failed to load tests');
-    } finally {
-      setLoading(false);
-    }
-  }, [activeTab, currentUser]);
+  const {
+    data: publicTests = [],
+    isLoading: publicTestsLoading,
+    error: _publicTestsError,
+  } = useGetPublicTestsQuery(20, {
+    skip: activeTab !== 'public',
+  });
 
-  // Add this to your useEffect or call it manually
-  useEffect(() => {
-    loadTests();
-  }, [loadTests]);
+  const {
+    data: userAttempts = [],
+    isLoading: attemptsLoading,
+    error: _attemptsError,
+  } = useGetUserTestAttemptsQuery(currentUser?.uid || '', {
+    skip: !currentUser || activeTab !== 'attempts',
+  });
+
+  // Determine current data based on active tab
+  const tests =
+    activeTab === 'my-tests'
+      ? userTests
+      : activeTab === 'public'
+        ? publicTests
+        : [];
+  const attempts = activeTab === 'attempts' ? userAttempts : [];
+  const loading =
+    activeTab === 'my-tests'
+      ? userTestsLoading
+      : activeTab === 'public'
+        ? publicTestsLoading
+        : attemptsLoading;
+
   const handleDeleteTest = async (testId: string) => {
     if (!confirm('Are you sure you want to delete this test?')) return;
 
     try {
-      await CustomTestService.deleteTest(testId);
-      setTests((prev) => prev.filter((test) => test.id !== testId));
+      await deleteTest(testId);
       toast.success('Test deleted successfully');
     } catch (error) {
       console.error('Error deleting test:', error);
@@ -375,7 +386,8 @@ function AttemptCard({
         </CardTitle>
 
         <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed">
-          Completed on {formatDate(attempt.completedAt || attempt.startedAt)}
+          Completed on{' '}
+          {formatDate(new Date(attempt.completedAt || attempt.startedAt))}
         </p>
       </CardHeader>
 

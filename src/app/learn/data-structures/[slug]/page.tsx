@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 
 import { MarkdownRenderer } from '@/components/markdown/MarkdownRenderer';
-import { dsaService } from '@/services/firebase/dsaService';
+import { dsaServerUtils } from '@/lib/dsaServerUtils';
 
 import { DSATopicClient } from './DSATopicClient';
 
@@ -14,7 +14,7 @@ interface DSATopicPageProps {
 export default async function DSATopicPage({ params }: DSATopicPageProps) {
   const { slug } = await params;
   try {
-    const topic = await dsaService.getTopicBySlug(slug);
+    const topic = await dsaServerUtils.getTopicBySlug(slug);
 
     if (!topic) {
       notFound();
@@ -35,8 +35,8 @@ export default async function DSATopicPage({ params }: DSATopicPageProps) {
       ...topic,
       createdAt: toISOString(topic.createdAt),
       updatedAt: toISOString(topic.updatedAt),
-      lastUpdated: toISOString(topic.lastUpdated),
-      deletedAt: toISOString(topic.deletedAt),
+      lastUpdated: toISOString(topic.updatedAt), // Use updatedAt as fallback
+      deletedAt: null,
     };
 
     return (
@@ -122,8 +122,8 @@ export default async function DSATopicPage({ params }: DSATopicPageProps) {
 }
 
 export async function generateStaticParams() {
-  const topics = await dsaService.getAllTopics();
-  return topics.map((topic) => ({
+  const topics = await dsaServerUtils.getAllTopics();
+  return topics.map((topic: any) => ({
     slug: topic.slug,
   }));
 }

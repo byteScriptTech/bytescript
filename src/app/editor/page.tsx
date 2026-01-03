@@ -9,14 +9,30 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ThemeProvider } from '@/context/theme-provider';
 
 // Import the CodeEditor components with SSR disabled since they use browser APIs
-const JsEditor = dynamic(() => import('@/components/CodeEditor'), {
-  ssr: false,
-  loading: () => (
-    <div className="flex-1 flex items-center justify-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary" />
-    </div>
-  ),
-});
+const JsEditor = dynamic<{
+  initialCode: string;
+  className?: string;
+  height?: string | number;
+  readOnly?: boolean;
+  showRunButton?: boolean;
+  showOutput?: boolean;
+  showAlgorithm?: boolean;
+  onCodeChange?: (code: string) => void;
+  onOutput?: (output: string) => void;
+}>(
+  () =>
+    import('@/components/common/CodeEditor').then(
+      (mod) => mod.JavaScriptCodeEditor
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex-1 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary" />
+      </div>
+    ),
+  }
+);
 
 const PythonEditor = dynamic<{
   initialCode: string;
@@ -45,6 +61,7 @@ const PythonEditor = dynamic<{
 
 type EditorType = 'javascript' | 'python';
 
+const DEFAULT_JAVASCRIPT_CODE = `// Write your JavaScript code here and click Run to execute it`;
 const DEFAULT_PYTHON_CODE = `# Write your Python code here and click Run to execute it`;
 
 export default function EditorPage() {
@@ -91,7 +108,10 @@ export default function EditorPage() {
 
           <div className="flex-1 flex flex-col min-h-0 rounded-lg overflow-hidden border">
             {editorType === 'javascript' ? (
-              <JsEditor showAlgorithm={true} />
+              <JsEditor
+                initialCode={DEFAULT_JAVASCRIPT_CODE}
+                showAlgorithm={true}
+              />
             ) : (
               <PythonEditor
                 initialCode={pythonCode}

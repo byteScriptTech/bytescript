@@ -6,12 +6,10 @@ import { MarkdownRenderer } from '@/components/markdown/MarkdownRenderer';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { problemsService } from '@/services/firebase/problemsService';
 import { patternService } from '@/services/patternService';
 
 import { PatternCategories } from './components/PatternCategories';
 import { PatternHeader } from './components/PatternHeader';
-import { ProblemCard } from './components/ProblemCard';
 import { PatternPageClient } from './PatternPageClient';
 
 // Cache the pattern fetch to deduplicate requests
@@ -58,23 +56,7 @@ async function fetchPatternData(slug: string) {
       notFound();
     }
 
-    // Get all problems and filter by the pattern's slug
-    const allProblems = await problemsService.getAllProblems();
-    const patternSlugLower = pattern.slug.toLowerCase();
-    if (!allProblems) return { pattern, problems: [] };
-    const problems = allProblems.filter((problem) => {
-      return (
-        problem.tags?.some(
-          (tag) =>
-            typeof tag === 'string' && tag.toLowerCase() === patternSlugLower
-        ) ||
-        (problem.category &&
-          typeof problem.category === 'string' &&
-          problem.category.toLowerCase() === patternSlugLower)
-      );
-    });
-
-    return { pattern, problems };
+    return { pattern };
   } catch (error) {
     console.error('Error fetching pattern data:', error);
     notFound();
@@ -84,10 +66,10 @@ async function fetchPatternData(slug: string) {
 export default async function PatternPage({ params }: PageProps) {
   const resolvedParams = await params;
   const patternId = resolvedParams.patternId?.[0] || '';
-  const { pattern, problems } = await fetchPatternData(patternId);
+  const { pattern } = await fetchPatternData(patternId);
 
   return (
-    <PatternPageClient>
+    <PatternPageClient pattern={pattern}>
       <div className="container mx-auto max-w-5xl px-4 py-8">
         <div className="mb-8">
           <PatternHeader
@@ -113,8 +95,9 @@ export default async function PatternPage({ params }: PageProps) {
                 <Badge
                   variant="secondary"
                   className="flex h-5 w-5 items-center justify-center p-0 bg-muted-foreground/10 dark:bg-muted-foreground/20 text-foreground/80"
+                  data-problems-badge
                 >
-                  {problems.length}
+                  {/* Will be updated by client component */}0
                 </Badge>
               </div>
             </TabsTrigger>
@@ -138,29 +121,11 @@ export default async function PatternPage({ params }: PageProps) {
           </TabsContent>
 
           <TabsContent value="problems" className="space-y-4">
-            <div className="grid gap-4">
-              {problems.length === 0 ? (
-                <div className="text-center py-8">
-                  <p className="text-muted-foreground">
-                    No problems found for this pattern.
-                  </p>
-                </div>
-              ) : (
-                <div className="grid gap-4">
-                  {problems.map((problem) => {
-                    return (
-                      <ProblemCard
-                        key={problem.id}
-                        id={problem.id}
-                        title={problem.title}
-                        description={problem.description}
-                        difficulty={problem.difficulty}
-                        tags={problem.tags}
-                      />
-                    );
-                  })}
-                </div>
-              )}
+            {/* Problems will be rendered by client component */}
+            <div className="grid gap-4" data-problems-list>
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">Loading problems...</p>
+              </div>
             </div>
           </TabsContent>
         </Tabs>

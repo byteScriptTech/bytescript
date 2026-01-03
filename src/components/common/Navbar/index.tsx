@@ -7,8 +7,8 @@ import React, { useState, useEffect } from 'react';
 import Logo from '@/components/common/Logo';
 import UserDropDown from '@/components/specific/UserDropDown';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/context/AuthContext';
 import { auth } from '@/firebase/config';
+import { useAuthRedux } from '@/hooks/useAuthRedux';
 
 // Navigation Link Component
 interface NavLinkProps {
@@ -98,7 +98,7 @@ const NavigationControls = ({
 );
 
 const Navbar = () => {
-  const { currentUser } = useAuth();
+  const { currentUser } = useAuthRedux();
   const router = useRouter();
   const [canGoBack, setCanGoBack] = useState(false);
   const [canGoForward, setCanGoForward] = useState(false);
@@ -153,7 +153,6 @@ const Navbar = () => {
           <div className="flex items-center gap-2">
             <NavLink href="/dashboard">Dashboard</NavLink>
             <NavLink href="/learn">Learn</NavLink>
-            <NavLink href="/practice">Practice</NavLink>
             <NavLink href="/peer-programming">Peer Programming</NavLink>
             <NavigationControls
               canGoBack={canGoBack}
@@ -224,7 +223,6 @@ const Navbar = () => {
             {[
               { href: '/dashboard', label: 'Dashboard' },
               { href: '/learn', label: 'Learn' },
-              { href: '/practice', label: 'Practice' },
               { href: '/peer-programming', label: 'Peer Programming' },
             ].map((item) => (
               <li key={item.href}>

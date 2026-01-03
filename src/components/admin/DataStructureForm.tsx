@@ -1,7 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Plus, Trash2, X } from 'lucide-react';
+import { Plus, X } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -38,7 +38,6 @@ import {
   type DataStructureFormValues,
   type Resource,
   type Example,
-  type Problem,
 } from '@/lib/validations';
 
 const formSchema = dataStructureFormSchema;
@@ -147,7 +146,7 @@ const ResourceForm = ({ resources, onAdd, onRemove }: ResourceFormProps) => {
           </Button>
         </div>
       ))}
-      <form onSubmit={handleAddResource} className="space-y-4">
+      <div className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Input
             placeholder="Title"
@@ -179,245 +178,13 @@ const ResourceForm = ({ resources, onAdd, onRemove }: ResourceFormProps) => {
             </SelectContent>
           </Select>
         </div>
-        <Button type="submit" size="sm" variant="outline">
-          <Plus className="h-4 w-4 mr-2" /> Add Resource
-        </Button>
-      </form>
-    </div>
-  );
-};
-
-interface ProblemFormProps {
-  problems: Problem[];
-  onAdd: (problem: Problem) => void;
-  onRemove: (index: number) => void;
-  onUpdate: (index: number, problem: Problem) => void;
-}
-
-const ProblemForm = ({
-  problems,
-  onAdd,
-  onRemove,
-  onUpdate,
-}: ProblemFormProps) => {
-  const [activeForms, setActiveForms] = useState<number[]>([]);
-  const [editingIndex, setEditingIndex] = useState<number | null>(null);
-
-  const handleAddProblemForm = () => {
-    const formId = Date.now();
-    setActiveForms([...activeForms, formId]);
-  };
-
-  const handleRemoveProblemForm = (formId: number) => {
-    setActiveForms(activeForms.filter((id) => id !== formId));
-  };
-
-  const handleEditProblem = (index: number) => {
-    setEditingIndex(index);
-  };
-
-  const handleSaveProblem = (
-    formId: number,
-    problemData: Omit<Problem, 'id'>
-  ) => {
-    if (problemData.title && problemData.description) {
-      const newProblem = { ...problemData, id: Date.now().toString() };
-      onAdd(newProblem);
-      handleRemoveProblemForm(formId);
-    }
-  };
-
-  const handleUpdateProblem = (
-    index: number,
-    problemData: Omit<Problem, 'id'>
-  ) => {
-    if (problemData.title && problemData.description) {
-      const updatedProblem = {
-        ...problemData,
-        id: problems[index].id || Date.now().toString(),
-      };
-      onUpdate(index, updatedProblem);
-      setEditingIndex(null);
-    }
-  };
-
-  const handleCancelEdit = () => {
-    setEditingIndex(null);
-  };
-
-  return (
-    <div className="space-y-4">
-      {problems.map((prob, index) => (
-        <div key={prob.id || index} className="border rounded-lg p-4">
-          {editingIndex === index ? (
-            <ProblemFormInstance
-              initialData={prob}
-              onSave={(problemData) => handleUpdateProblem(index, problemData)}
-              onCancel={handleCancelEdit}
-              isEdit={true}
-            />
-          ) : (
-            <div className="flex justify-between items-center mb-2">
-              <div className="flex-1">
-                <h4 className="font-medium">{prob.title}</h4>
-                <div className="text-sm text-muted-foreground">
-                  {prob.description}
-                </div>
-                <div className="flex gap-2 mt-2">
-                  <Badge variant="outline" className="text-xs">
-                    {prob.difficulty}
-                  </Badge>
-                  {prob.tags?.map((tag) => (
-                    <Badge key={tag} variant="secondary" className="text-xs">
-                      {tag}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleEditProblem(index)}
-                >
-                  Edit
-                </Button>
-                <Button
-                  type="button"
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => onRemove(index)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          )}
-        </div>
-      ))}
-
-      {activeForms.map((formId) => (
-        <ProblemFormInstance
-          key={formId}
-          onSave={(problemData) => handleSaveProblem(formId, problemData)}
-          onCancel={() => handleRemoveProblemForm(formId)}
-        />
-      ))}
-
-      {editingIndex === null && (
         <Button
           type="button"
           size="sm"
           variant="outline"
-          onClick={handleAddProblemForm}
+          onClick={handleAddResource}
         >
-          <Plus className="h-4 w-4 mr-2" /> Add Problem
-        </Button>
-      )}
-    </div>
-  );
-};
-
-interface ProblemFormInstanceProps {
-  onSave: (problem: Omit<Problem, 'id'>) => void;
-  onCancel: () => void;
-  initialData?: Problem;
-  isEdit?: boolean;
-}
-
-const ProblemFormInstance = ({
-  onSave,
-  onCancel,
-  initialData,
-  isEdit = false,
-}: ProblemFormInstanceProps) => {
-  const [problem, setProblem] = useState<Omit<Problem, 'id'>>({
-    title: initialData?.title || '',
-    difficulty: initialData?.difficulty || 'easy',
-    description: initialData?.description || '',
-    tags: initialData?.tags || [],
-    initialCode: initialData?.initialCode || '',
-    hint: initialData?.hint || '',
-    solution: initialData?.solution || '',
-  });
-
-  const handleSave = () => {
-    onSave(problem);
-  };
-
-  return (
-    <div className="border rounded-lg p-4 space-y-4">
-      <div className="flex justify-between items-center">
-        <h4 className="font-medium">
-          {isEdit ? 'Edit Problem' : 'New Problem'}
-        </h4>
-        <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
-          <X className="h-4 w-4" />
-        </Button>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Input
-          placeholder="Problem title"
-          value={problem.title}
-          onChange={(e) => setProblem({ ...problem, title: e.target.value })}
-        />
-        <Select
-          value={problem.difficulty}
-          onValueChange={(value: Problem['difficulty']) =>
-            setProblem({ ...problem, difficulty: value })
-          }
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Difficulty" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="easy">Easy</SelectItem>
-            <SelectItem value="medium">Medium</SelectItem>
-            <SelectItem value="hard">Hard</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <Textarea
-        placeholder="Problem description"
-        value={problem.description}
-        onChange={(e) =>
-          setProblem({ ...problem, description: e.target.value })
-        }
-        className="min-h-[100px]"
-      />
-
-      <Textarea
-        placeholder="Initial code (optional)"
-        value={problem.initialCode}
-        onChange={(e) =>
-          setProblem({ ...problem, initialCode: e.target.value })
-        }
-        className="min-h-[80px]"
-      />
-
-      <Textarea
-        placeholder="Hint (optional)"
-        value={problem.hint}
-        onChange={(e) => setProblem({ ...problem, hint: e.target.value })}
-        className="min-h-[80px]"
-      />
-
-      <Textarea
-        placeholder="Solution (optional)"
-        value={problem.solution}
-        onChange={(e) => setProblem({ ...problem, solution: e.target.value })}
-        className="min-h-[80px]"
-      />
-
-      <div className="flex gap-2">
-        <Button type="button" size="sm" onClick={handleSave}>
-          Save Problem
-        </Button>
-        <Button type="button" size="sm" variant="outline" onClick={onCancel}>
-          Cancel
+          <Plus className="h-4 w-4 mr-2" /> Add Resource
         </Button>
       </div>
     </div>
@@ -427,251 +194,137 @@ const ProblemFormInstance = ({
 // Dynamically import MDEditor to avoid SSR issues
 const MDEditor = dynamic(() => import('@uiw/react-md-editor'), { ssr: false });
 
-// Dynamically import JavaScriptCodeEditor to avoid SSR issues
-const JavaScriptCodeEditor = dynamic(
-  () =>
-    import('@/components/common/CodeEditor').then(
-      (mod) => mod.JavaScriptCodeEditor
-    ),
-  { ssr: false }
-);
-
 interface ExampleFormProps {
-  examples: Example[];
-  onAdd: (example: Example) => void;
-  onRemove: (index: number) => void;
+  example: Example;
+  index: number;
   onUpdate: (index: number, example: Example) => void;
+  onRemove: (index: number) => void;
 }
 
 const ExampleForm = ({
-  examples,
-  onAdd,
-  onRemove,
+  example,
+  index,
   onUpdate,
+  onRemove,
 }: ExampleFormProps) => {
-  const [activeForms, setActiveForms] = useState<number[]>([]);
-  const [editingIndex, setEditingIndex] = useState<number | null>(null);
-
-  const handleAddExampleForm = () => {
-    const formId = Date.now();
-    setActiveForms([...activeForms, formId]);
-  };
-
-  const handleRemoveExampleForm = (formId: number) => {
-    setActiveForms(activeForms.filter((id) => id !== formId));
-  };
-
-  const handleEditExample = (index: number) => {
-    setEditingIndex(index);
-  };
-
-  const handleSaveExample = (
-    formId: number,
-    exampleData: Omit<Example, 'id'>
-  ) => {
-    if (exampleData.input && exampleData.output) {
-      const newExample = { ...exampleData, id: Date.now().toString() };
-      onAdd(newExample);
-      handleRemoveExampleForm(formId);
-    }
-  };
-
-  const handleUpdateExample = (
-    index: number,
-    exampleData: Omit<Example, 'id'>
-  ) => {
-    if (exampleData.input && exampleData.output) {
-      const updatedExample = {
-        ...exampleData,
-        id: examples[index]?.id || Date.now().toString(),
-      };
-      onUpdate(index, updatedExample);
-      setEditingIndex(null);
-    }
-  };
-
-  const handleCancelEdit = () => {
-    setEditingIndex(null);
-  };
-
-  return (
-    <div className="space-y-4">
-      {examples.map((example, index) => (
-        <div
-          key={examples[index]?.id || index}
-          className="border rounded-lg p-4"
-        >
-          {editingIndex === index ? (
-            <ExampleFormInstance
-              initialData={example}
-              onSave={(exampleData) => handleUpdateExample(index, exampleData)}
-              onCancel={handleCancelEdit}
-              isEdit={true}
-            />
-          ) : (
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <h4 className="font-medium">Example {index + 1}</h4>
-                <div className="flex gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleEditExample(index)}
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => onRemove(index)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <div>
-                  <div className="text-sm font-medium mb-2">Input</div>
-                  <JavaScriptCodeEditor
-                    initialCode={example.input}
-                    height="150px"
-                    readOnly={true}
-                    showRunButton={false}
-                    showOutput={false}
-                    className="border rounded"
-                  />
-                </div>
-
-                <div>
-                  <div className="text-sm font-medium mb-2">Output</div>
-                  <JavaScriptCodeEditor
-                    initialCode={example.output}
-                    height="150px"
-                    readOnly={true}
-                    showRunButton={false}
-                    showOutput={false}
-                    className="border rounded"
-                  />
-                </div>
-
-                {example.explanation && (
-                  <div>
-                    <div className="text-sm font-medium mb-1">Explanation</div>
-                    <p className="text-sm text-muted-foreground bg-muted p-3 rounded">
-                      {example.explanation}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-      ))}
-
-      {activeForms.map((formId) => (
-        <ExampleFormInstance
-          key={formId}
-          onSave={(exampleData) => handleSaveExample(formId, exampleData)}
-          onCancel={() => handleRemoveExampleForm(formId)}
-        />
-      ))}
-
-      {editingIndex === null && (
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          onClick={handleAddExampleForm}
-        >
-          <Plus className="h-4 w-4 mr-2" /> Add Example
-        </Button>
-      )}
-    </div>
-  );
-};
-
-interface ExampleFormInstanceProps {
-  onSave: (example: Omit<Example, 'id'>) => void;
-  onCancel: () => void;
-  initialData?: Example;
-  isEdit?: boolean;
-}
-
-const ExampleFormInstance = ({
-  onSave,
-  onCancel,
-  initialData,
-  isEdit = false,
-}: ExampleFormInstanceProps) => {
-  const [example, setExample] = useState<Omit<Example, 'id'>>({
-    input: initialData?.input || '// Example input code',
-    output: initialData?.output || '// Expected output',
-    explanation: initialData?.explanation || '',
-  });
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedExample, setEditedExample] = useState(example);
 
   const handleSave = () => {
-    onSave(example);
+    onUpdate(index, editedExample);
+    setIsEditing(false);
   };
 
+  const handleCancel = () => {
+    setEditedExample(example);
+    setIsEditing(false);
+  };
+
+  if (isEditing) {
+    return (
+      <div className="border rounded-lg p-4 bg-muted/20">
+        <div className="flex justify-between items-center mb-4">
+          <h4 className="font-medium">Edit Example {index + 1}</h4>
+          <div className="flex gap-2">
+            <Button type="button" size="sm" onClick={handleSave}>
+              Save
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={handleCancel}
+            >
+              Cancel
+            </Button>
+          </div>
+        </div>
+        <div className="space-y-4">
+          <div>
+            <div className="text-sm font-medium mb-2">Input</div>
+            <Textarea
+              value={editedExample.input}
+              onChange={(e) =>
+                setEditedExample({ ...editedExample, input: e.target.value })
+              }
+              placeholder="Example input code..."
+              className="min-h-[100px] font-mono text-sm"
+            />
+          </div>
+          <div>
+            <div className="text-sm font-medium mb-2">Output</div>
+            <Textarea
+              value={editedExample.output}
+              onChange={(e) =>
+                setEditedExample({ ...editedExample, output: e.target.value })
+              }
+              placeholder="Expected output..."
+              className="min-h-[100px] font-mono text-sm"
+            />
+          </div>
+          <div>
+            <div className="text-sm font-medium mb-2">Explanation</div>
+            <Textarea
+              value={editedExample.explanation}
+              onChange={(e) =>
+                setEditedExample({
+                  ...editedExample,
+                  explanation: e.target.value,
+                })
+              }
+              placeholder="Explain what this example demonstrates..."
+              className="min-h-[80px]"
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="border rounded-lg p-4 space-y-4">
-      <div className="flex justify-between items-center">
-        <h4 className="font-medium">
-          {isEdit ? 'Edit Example' : 'New Example'}
-        </h4>
-        <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
-          <X className="h-4 w-4" />
-        </Button>
+    <div key={index} className="border rounded-lg p-4">
+      <div className="flex justify-between items-center mb-2">
+        <h4 className="font-medium">Example {index + 1}</h4>
+        <div className="flex gap-2">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsEditing(true)}
+          >
+            Edit
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => onRemove(index)}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
-
-      <div>
-        <div className="text-sm font-medium mb-2">Input Code</div>
-        <JavaScriptCodeEditor
-          initialCode={example.input}
-          height="200px"
-          readOnly={false}
-          showRunButton={true}
-          showOutput={true}
-          onCodeChange={(code) => setExample({ ...example, input: code })}
-          className="border rounded"
-        />
-      </div>
-
-      <div>
-        <div className="text-sm font-medium mb-2">Output Code</div>
-        <JavaScriptCodeEditor
-          initialCode={example.output}
-          height="200px"
-          readOnly={false}
-          showRunButton={true}
-          showOutput={true}
-          onCodeChange={(code) => setExample({ ...example, output: code })}
-          className="border rounded"
-        />
-      </div>
-
-      <div>
-        <div className="text-sm font-medium mb-2">Explanation</div>
-        <Textarea
-          placeholder="Explanation of what this example demonstrates..."
-          value={example.explanation}
-          onChange={(e) =>
-            setExample({ ...example, explanation: e.target.value })
-          }
-          className="min-h-[80px]"
-        />
-      </div>
-
-      <div className="flex gap-2">
-        <Button type="button" size="sm" onClick={handleSave}>
-          Save Example
-        </Button>
-        <Button type="button" size="sm" variant="outline" onClick={onCancel}>
-          Cancel
-        </Button>
+      <div className="space-y-2">
+        <div>
+          <div className="text-sm font-medium mb-1">Input</div>
+          <pre className="bg-muted p-2 rounded text-sm overflow-x-auto">
+            {example.input}
+          </pre>
+        </div>
+        <div>
+          <div className="text-sm font-medium mb-1">Output</div>
+          <pre className="bg-muted p-2 rounded text-sm overflow-x-auto">
+            {example.output}
+          </pre>
+        </div>
+        {example.explanation && (
+          <div>
+            <div className="text-sm font-medium mb-1">Explanation</div>
+            <p className="text-sm text-muted-foreground">
+              {example.explanation}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -701,31 +354,15 @@ export function DataStructureForm({
       useCases: [],
       resources: [],
       examples: [],
-      problems: [],
     },
   });
 
   const { watch, setValue } = form;
-  const tags = watch('tags') || [];
   const prerequisites = watch('prerequisites') || [];
   const operations = watch('operations') || [];
   const useCases = watch('useCases') || [];
   const resources = watch('resources') || [];
   const examples = watch('examples') || [];
-
-  const handleAddTag = (tag: string) => {
-    if (!tags.includes(tag)) {
-      setValue('tags', [...tags, tag], { shouldValidate: true });
-    }
-  };
-
-  const handleRemoveTag = (tag: string) => {
-    setValue(
-      'tags',
-      tags.filter((t) => t !== tag),
-      { shouldValidate: true }
-    );
-  };
 
   const handleAddPrerequisite = (prereq: string) => {
     if (!prerequisites.includes(prereq)) {
@@ -785,21 +422,27 @@ export function DataStructureForm({
     setValue('examples', [...examples, example], { shouldValidate: true });
   };
 
-  const handleRemoveExample = (index: number) => {
-    const newExamples = [...examples];
-    newExamples.splice(index, 1);
-    setValue('examples', newExamples, { shouldValidate: true });
-  };
-
   const handleUpdateExample = (index: number, example: Example) => {
     const newExamples = [...examples];
     newExamples[index] = example;
     setValue('examples', newExamples, { shouldValidate: true });
   };
 
+  const handleRemoveExample = (index: number) => {
+    const newExamples = [...examples];
+    newExamples.splice(index, 1);
+    setValue('examples', newExamples, { shouldValidate: true });
+  };
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form
+        onSubmit={form.handleSubmit((data) => {
+          console.log('Form submission data:', data);
+          onSubmit(data);
+        })}
+        className="space-y-8"
+      >
         <div className="space-y-6">
           <Card>
             <CardHeader>
@@ -1013,14 +656,22 @@ export function DataStructureForm({
               <FormField
                 control={form.control}
                 name="tags"
-                render={() => (
+                render={({ field }) => (
                   <FormItem>
                     <FormLabel>Tags</FormLabel>
                     <FormControl>
                       <TagInput
-                        tags={tags}
-                        onAdd={handleAddTag}
-                        onRemove={handleRemoveTag}
+                        tags={field.value || []}
+                        onAdd={(tag) => {
+                          const newTags = [...(field.value || []), tag];
+                          field.onChange(newTags);
+                        }}
+                        onRemove={(tag) => {
+                          const newTags = (field.value || []).filter(
+                            (t) => t !== tag
+                          );
+                          field.onChange(newTags);
+                        }}
                         placeholder="e.g., array, linked-list, recursion"
                       />
                     </FormControl>
@@ -1146,60 +797,31 @@ export function DataStructureForm({
                 render={() => (
                   <FormItem>
                     <FormControl>
-                      <ExampleForm
-                        examples={examples}
-                        onAdd={handleAddExample}
-                        onRemove={handleRemoveExample}
-                        onUpdate={handleUpdateExample}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Problems</CardTitle>
-              <CardDescription>
-                Practice problems for this data structure
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <FormField
-                control={form.control}
-                name="problems"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <ProblemForm
-                        problems={field.value || []}
-                        onAdd={(problem) => {
-                          const updatedProblems = [
-                            ...(field.value || []),
-                            problem,
-                          ];
-                          setValue('problems', updatedProblems, {
-                            shouldValidate: true,
-                          });
-                        }}
-                        onRemove={(index) => {
-                          const updatedProblems = [...(field.value || [])];
-                          updatedProblems.splice(index, 1);
-                          setValue('problems', updatedProblems, {
-                            shouldValidate: true,
-                          });
-                        }}
-                        onUpdate={(index, problem) => {
-                          const updatedProblems = [...(field.value || [])];
-                          updatedProblems[index] = problem;
-                          setValue('problems', updatedProblems, {
-                            shouldValidate: true,
-                          });
-                        }}
-                      />
+                      <div className="space-y-4">
+                        {examples.map((example, index) => (
+                          <ExampleForm
+                            key={index}
+                            example={example}
+                            index={index}
+                            onUpdate={handleUpdateExample}
+                            onRemove={handleRemoveExample}
+                          />
+                        ))}
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            handleAddExample({
+                              input: '// Example input',
+                              output: '// Expected output',
+                              explanation: '',
+                            })
+                          }
+                        >
+                          <Plus className="h-4 w-4 mr-2" /> Add Example
+                        </Button>
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>

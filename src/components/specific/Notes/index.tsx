@@ -13,9 +13,9 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { useNotes } from '@/context/NotesContext';
+import { useNotesRedux } from '@/hooks/useNotesRedux';
 import { cn } from '@/lib/utils';
-import { Note } from '@/services/firebase/notesService';
+import { Note } from '@/store/slices/notesSlice';
 
 export function Notes(): React.JSX.Element {
   const {
@@ -27,7 +27,7 @@ export function Notes(): React.JSX.Element {
     handleDeleteNote,
     setNewNoteContent,
     setEditingNote,
-  } = useNotes();
+  } = useNotesRedux();
 
   const handleCreate = async () => {
     if (!newNoteContent.trim()) return;

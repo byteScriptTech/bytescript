@@ -1,8 +1,8 @@
 import { useRouter } from 'next/navigation';
 import React, { useEffect } from 'react';
 
-import { useContentContext } from '@/context/ContentContext';
 import { useLocalStorage } from '@/context/LocalhostContext';
+import { useContentRedux } from '@/hooks/useContentRedux';
 import { useTopics } from '@/hooks/useTopics';
 import { cn } from '@/lib/utils';
 
@@ -11,7 +11,7 @@ import CourseIcon from '../CourseIcon';
 export const LanguagesList = () => {
   const router = useRouter();
   const { topics, loading } = useTopics();
-  const { content } = useContentContext();
+  const { content } = useContentRedux();
   const { getItem, setItem } = useLocalStorage();
   const progress = getItem('progressCache');
 

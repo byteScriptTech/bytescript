@@ -1,11 +1,11 @@
 import { render, screen } from '@testing-library/react';
 
-import { useAuth } from '@/context/AuthContext';
+import { useAuthRedux } from '@/hooks/useAuthRedux';
 
 import Greetings from '.';
 
-jest.mock('@/context/AuthContext', () => ({
-  useAuth: jest.fn(),
+jest.mock('@/hooks/useAuthRedux', () => ({
+  useAuthRedux: jest.fn(),
 }));
 
 describe('Greetings Component', () => {
@@ -20,7 +20,7 @@ describe('Greetings Component', () => {
   });
 
   test('Should render the Greetings message without user', () => {
-    (useAuth as jest.Mock).mockReturnValue({
+    (useAuthRedux as jest.Mock).mockReturnValue({
       currentUser: null,
     });
     render(<Greetings />);
@@ -28,7 +28,7 @@ describe('Greetings Component', () => {
     expect(greetingMessage).toBeInTheDocument();
   });
   test('Should render greeting message with user', () => {
-    (useAuth as jest.Mock).mockReturnValue({
+    (useAuthRedux as jest.Mock).mockReturnValue({
       currentUser: {
         displayName: 'Hemant Nirmalkar',
       },
@@ -42,7 +42,7 @@ describe('Greetings Component', () => {
     const mockDate = new Date(2024, 10, 15, 9, 30, 0);
     jest.spyOn(global, 'Date').mockImplementation(() => mockDate as any);
 
-    (useAuth as jest.Mock).mockReturnValue({
+    (useAuthRedux as jest.Mock).mockReturnValue({
       currentUser: {
         displayName: 'Hemant Nirmalkar',
       },
@@ -62,7 +62,7 @@ describe('Greetings Component', () => {
     const mockDate = new Date(2024, 10, 15, 20, 30, 0);
     jest.spyOn(global, 'Date').mockImplementation(() => mockDate as any);
 
-    (useAuth as jest.Mock).mockReturnValue({
+    (useAuthRedux as jest.Mock).mockReturnValue({
       currentUser: { displayName: 'John Doe' },
     });
 

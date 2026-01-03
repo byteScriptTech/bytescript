@@ -8,8 +8,8 @@ import { JavaScriptCodeEditor } from '@/components/common/CodeEditor';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { useAuth } from '@/context/AuthContext';
-import { CustomTestService } from '@/services/firebase/customTestService';
+import { useAuthRedux } from '@/hooks/useAuthRedux';
+import { useCustomTestsRedux } from '@/hooks/useCustomTestsRedux';
 import {
   CustomTest,
   TestQuestion,
@@ -28,7 +28,8 @@ export default function TestTaker({
   onComplete,
   onCancel,
 }: TestTakerProps) {
-  const { currentUser } = useAuth();
+  const { currentUser } = useAuthRedux();
+  const { submitTestAttempt, startTestAttempt } = useCustomTestsRedux();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<TestAnswer[]>([]);
   const [timeRemaining, setTimeRemaining] = useState(test.duration * 60); // Convert to seconds
@@ -97,13 +98,12 @@ export default function TestTaker({
 
       // Update the attempt with final scores
       console.log('Updating attempt...');
-      await CustomTestService.updateTestAttempt(attemptId, scoredAnswers);
+      await submitTestAttempt(attemptId, scoredAnswers, totalTime);
       console.log('Attempt updated successfully');
 
       // Complete the attempt with final data
       console.log('Completing attempt...');
       try {
-        await CustomTestService.completeTestAttempt(attemptId);
         console.log('Attempt completed successfully');
       } catch (completeError) {
         console.log(
@@ -114,21 +114,27 @@ export default function TestTaker({
 
       // Get the final attempt data
       console.log('Getting final attempt data...');
-      const finalAttempt = await CustomTestService.getTestAttempt(attemptId);
-      console.log('Final attempt:', finalAttempt);
+      // Create a completed attempt object since we don't have direct access to getTestAttempt in Redux
+
+      if (!currentUser?.uid) {
+        throw new Error('User not authenticated');
+      }
+
+      const completedAttempt = {
+        id: attemptId,
+        testId: test.id,
+        userId: currentUser.uid,
+        status: 'completed' as const,
+        answers: scoredAnswers,
+        score: scoredAnswers.reduce((sum, a) => sum + a.pointsEarned, 0),
+        totalPoints,
+        timeSpent: totalTime,
+        startedAt: new Date(Date.now() - totalTime * 1000).toISOString(),
+        completedAt: new Date().toISOString(),
+      };
+      console.log('Final attempt:', completedAttempt);
 
       // Create a completed attempt object even if we couldn't update Firestore
-      const completedAttempt = finalAttempt
-        ? {
-            ...finalAttempt,
-            answers: scoredAnswers,
-            score: totalPoints,
-            timeSpent: totalTime,
-            status: 'completed' as const,
-            completedAt: new Date(),
-          }
-        : null;
-
       if (completedAttempt) {
         onComplete(completedAttempt);
         toast.success('Test submitted successfully!');
@@ -142,17 +148,22 @@ export default function TestTaker({
     } finally {
       setIsSubmitting(false);
     }
-  }, [attemptId, isSubmitting, answers, test, onComplete]);
+  }, [
+    attemptId,
+    isSubmitting,
+    answers,
+    test,
+    onComplete,
+    submitTestAttempt,
+    currentUser?.uid,
+  ]);
 
   useEffect(() => {
     const initializeTest = async () => {
       if (!currentUser) return;
 
       try {
-        const testAttemptId = await CustomTestService.startTestAttempt(
-          test.id,
-          currentUser.uid
-        );
+        const testAttemptId = await startTestAttempt(test.id, currentUser.uid);
         setAttemptId(testAttemptId);
 
         // Initialize answers
@@ -172,7 +183,7 @@ export default function TestTaker({
     };
 
     initializeTest();
-  }, [test.id, currentUser, onCancel, test.questions]);
+  }, [test.id, currentUser, onCancel, test.questions, startTestAttempt]);
 
   useEffect(() => {
     if (timeRemaining <= 0) {

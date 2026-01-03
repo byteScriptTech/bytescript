@@ -26,6 +26,7 @@ export const JavaScriptCodeEditor = ({
   readOnly = false,
   showRunButton = true,
   showOutput = true,
+  showAlgorithm: _showAlgorithm = false,
   onCodeChange,
   onOutput,
 }: {
@@ -35,6 +36,7 @@ export const JavaScriptCodeEditor = ({
   readOnly?: boolean;
   showRunButton?: boolean;
   showOutput?: boolean;
+  showAlgorithm?: boolean;
   onCodeChange?: (value: string) => void;
   onOutput?: (output: string) => void;
 }) => {
@@ -50,21 +52,24 @@ export const JavaScriptCodeEditor = ({
   const [isRunning, setIsRunning] = useState(false);
   const [showStop, setShowStop] = useState(false);
 
-  const flush = () => {
+  const flush = useCallback(() => {
     const newOutput = bufferRef.current;
     setOutput(newOutput);
     onOutput?.(newOutput);
-  };
+  }, [onOutput]);
 
-  const append = (line: string) => {
-    bufferRef.current += line + '\n';
-    if (debounceRef.current !== null) {
-      clearTimeout(debounceRef.current);
-    }
-    debounceRef.current = window.setTimeout(() => {
-      flush();
-    }, OUTPUT_DEBOUNCE_MS);
-  };
+  const append = useCallback(
+    (line: string) => {
+      bufferRef.current += line + '\n';
+      if (debounceRef.current !== null) {
+        clearTimeout(debounceRef.current);
+      }
+      debounceRef.current = window.setTimeout(() => {
+        flush();
+      }, OUTPUT_DEBOUNCE_MS);
+    },
+    [flush]
+  );
 
   const clearConsole = () => {
     bufferRef.current = '';
@@ -131,7 +136,7 @@ export const JavaScriptCodeEditor = ({
     worker.postMessage({
       code: editorRef.current.getValue(),
     });
-  }, []);
+  }, [append]);
 
   const stopExecution = () => {
     if (workerRef.current) {

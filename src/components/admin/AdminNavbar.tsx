@@ -7,13 +7,13 @@ import React from 'react';
 
 import UserDropDown from '@/components/specific/UserDropDown';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/context/AuthContext';
 import { auth } from '@/firebase/config';
+import { useAuthRedux } from '@/hooks/useAuthRedux';
 
 export function AdminNavbar() {
   const router = useRouter();
   const pathname = usePathname();
-  const { currentUser } = useAuth();
+  const { currentUser } = useAuthRedux();
 
   const isDashboard = pathname === '/admin';
 

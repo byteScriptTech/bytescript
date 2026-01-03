@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useContentContext } from '@/context/ContentContext';
+import { useContentRedux } from '@/hooks/useContentRedux';
 import { useLocalStorage } from '@/context/LocalhostContext';
 
 export type ScrollToTopicProps = {
@@ -14,7 +14,7 @@ const ScrollToTopic: React.FC<ScrollToTopicProps> = ({
   loading,
   lastVisitedSubTopic = null,
 }) => {
-  const { scrollToList } = useContentContext();
+  const { scrollToList } = useContentRedux();
   const { setItem } = useLocalStorage();
   const handleScrollToTopic = (id: string) => {
     const element = document.getElementById(id);

@@ -10,7 +10,7 @@ import { FloatingMenuButton } from '@/components/common/FloatingMenuButton/Float
 import { Content } from '@/components/specific/LearnContent/Content';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { cn } from '@/lib/utils';
-import { getJavascriptContent } from '@/services/javascriptService';
+import { useGetJavascriptContentQuery } from '@/store/slices/javascriptSlice';
 import type { LanguageContent } from '@/types/content';
 
 const DraggableCircle = dynamic(
@@ -52,6 +52,9 @@ const LearnContentInner: FC<LearnContentInnerProps> = ({
   const [content, setContent] = useState<LanguageContent | null>(null);
   const [activeTopic, setActiveTopic] = useState<string | null>(null);
   const [activeSubtopic, setActiveSubtopic] = useState<string | null>(null);
+
+  // Redux hook for JavaScript content
+  const javascriptContentQuery = useGetJavascriptContentQuery();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showEditor, setShowEditor] = useState(false);
   const isMobile = useIsMobile();
@@ -121,38 +124,36 @@ const LearnContentInner: FC<LearnContentInnerProps> = ({
     }
   }, []);
 
-  const fetchContent = useCallback(async () => {
-    try {
-      const data = await getJavascriptContent();
-      setContent(data);
-      if (data?.topics?.length) {
-        setActiveTopic(data.topics[0].id);
-      }
-      return data;
-    } catch (err) {
+  useEffect(() => {
+    const isLoading = javascriptContentQuery.isLoading;
+    const hasData = !!javascriptContentQuery.data;
+    const hasError = !!javascriptContentQuery.error;
+
+    setLoading(isLoading);
+
+    if (hasError) {
       const errorMessage =
-        err instanceof Error
-          ? err.message
+        javascriptContentQuery.error instanceof Error
+          ? javascriptContentQuery.error.message
           : 'Failed to load JavaScript content';
       setError(`Error: ${errorMessage}. Please try again later.`);
-      console.error('Error fetching JavaScript content:', err);
-      throw err;
     }
-  }, []);
 
-  useEffect(() => {
-    const loadContent = async () => {
-      try {
-        await fetchContent();
-      } catch (error) {
-        // Error is already handled in fetchContent
-      } finally {
-        setLoading(false);
+    // Set content when data is available
+    if (hasData) {
+      setContent(javascriptContentQuery.data || null);
+      if (javascriptContentQuery.data?.topics?.length) {
+        setActiveTopic(javascriptContentQuery.data.topics[0].id);
       }
-    };
-
-    loadContent();
-  }, [fetchContent]);
+    } else if (!isLoading && !hasError) {
+      // No data and not loading - set content to null to show "No content available"
+      setContent(null);
+    }
+  }, [
+    javascriptContentQuery.isLoading,
+    javascriptContentQuery.data,
+    javascriptContentQuery.error,
+  ]);
 
   // Handle initial content load and set the active topic/subtopic from URL params
   useEffect(() => {

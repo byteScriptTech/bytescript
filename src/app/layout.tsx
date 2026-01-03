@@ -9,6 +9,7 @@ import React from 'react';
 
 import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from '@/context/theme-provider';
+import { ReduxProvider } from '@/providers/ReduxProvider';
 
 const fontSans = Poppins({
   subsets: ['latin'],
@@ -163,12 +164,14 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen bg-background font-sans antialiased">
-        <ThemeProvider>
-          <NextTopLoader />
-          <Toaster />
-          <Analytics />
-          {children}
-        </ThemeProvider>
+        <ReduxProvider>
+          <ThemeProvider>
+            <NextTopLoader />
+            <Toaster />
+            <Analytics />
+            {children}
+          </ThemeProvider>
+        </ReduxProvider>
       </body>
     </html>
   );

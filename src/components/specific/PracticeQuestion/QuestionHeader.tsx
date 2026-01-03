@@ -3,7 +3,9 @@ import { useRouter, useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 import { Progress } from '@/components/ui/progress';
-import { usePractice } from '@/context/PracticeContext';
+import { useTimerSettings } from '@/hooks/useTimerSettings';
+import { useGetTopicBySlugQuery } from '@/store/slices/dsaTopicsSlice';
+import { DSATopic } from '@/types/dsa';
 import { PracticeQuestion } from '@/types/practiceQuestion';
 
 interface QuestionHeaderProps {
@@ -25,7 +27,8 @@ export function QuestionHeader({
 }: QuestionHeaderProps) {
   const params = useParams<{ id: string }>();
   const id = params?.id;
-  const { getTopic, getTimerEnabled } = usePractice();
+  const topicQuery = useGetTopicBySlugQuery(id || '', { skip: !id });
+  const { getTimerEnabled } = useTimerSettings();
   const router = useRouter();
 
   const isTimerEnabled = id ? getTimerEnabled(id) : true;
@@ -37,41 +40,38 @@ export function QuestionHeader({
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
-  const [topic, setTopic] = useState<any>(null);
+  const [topic, setTopic] = useState<DSATopic | null>(null);
   useEffect(() => {
-    const loadTopic = async () => {
-      if (!id) {
-        router.push('/practice');
-        return;
+    if (!id) {
+      router.push('/practice');
+      return;
+    }
+
+    if (topicQuery.isError) {
+      router.push('/practice');
+      return;
+    }
+
+    if (topicQuery.data) {
+      setTopic(topicQuery.data);
+
+      // Set initial time remaining based on first question
+      if (mockQuestions[0]?.timeLimit) {
+        setTimeRemaining(mockQuestions[0].timeLimit);
       }
-      try {
-        const topicData = await getTopic(id);
-        if (!topicData) {
-          router.push('/practice');
-          return;
-        }
-        setTopic(topicData);
-
-        // In a real app, we would fetch questions from an API
-        // const questions = await fetchQuestionsForTopic(id);
-        // setQuestions(questions);
-
-        // Set initial time remaining based on first question
-        if (mockQuestions[0]?.timeLimit) {
-          setTimeRemaining(mockQuestions[0].timeLimit);
-        }
-      } catch (error) {
-        console.error('Error loading topic:', error);
-        router.push('/practice');
-      }
-    };
-
-    loadTopic();
-  }, [id]);
+    }
+  }, [
+    id,
+    topicQuery.data,
+    topicQuery.isError,
+    router,
+    mockQuestions,
+    setTimeRemaining,
+  ]);
 
   return (
     <div className="mb-6">
-      <h1 className="text-2xl font-bold mb-2">{topic?.name} Practice</h1>
+      <h1 className="text-2xl font-bold mb-2">{topic?.title} Practice</h1>
       <div className="flex items-center justify-between">
         <div className="text-sm text-gray-600 dark:text-gray-400">
           Question {currentQuestionIndex + 1} of {totalQuestions}

@@ -6,6 +6,7 @@ export interface Problem {
   description: string;
   difficulty: 'Easy' | 'Medium' | 'Hard';
   category: string;
+  tags: string[];
   constraints: string[];
   examples: Array<{
     input: string;
@@ -13,8 +14,10 @@ export interface Problem {
     explanation?: string;
   }>;
   starterCode: string;
-  createdAt: Timestamp | Date;
-  updatedAt: Timestamp | Date;
+  createdAt: string;
+  updatedAt: string;
+  solved?: boolean;
+  lastAttempted?: string | null;
 }
 
 export interface TestCase {

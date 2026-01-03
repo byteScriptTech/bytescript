@@ -2,13 +2,12 @@
 
 import { Database, BookOpen, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
 import type { ComponentType } from 'react';
 
 import { AdminRoute } from '@/components/auth/ProtectedRoute';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { dsaService } from '@/services/firebase/dsaService';
-import { problemsService } from '@/services/firebase/problemsService';
+import { useGetAllTopicsQuery } from '@/store/slices/dsaTopicsSlice';
+import { useGetAllProblemsQuery } from '@/store/slices/problemsSlice';
 
 interface StatCard {
   title: string;
@@ -19,43 +18,27 @@ interface StatCard {
 }
 
 function AdminDashboard() {
-  const [loading, setLoading] = useState(true);
-  const [dataStructures, setDataStructures] = useState<any[]>([]);
-  const [problemsCount, setProblemsCount] = useState<number>(0);
+  const { data: topics = [], isLoading: topicsLoading } =
+    useGetAllTopicsQuery();
+  const { data: problems = [], isLoading: problemsLoading } =
+    useGetAllProblemsQuery();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [topics, problems] = await Promise.all([
-          dsaService.getAllTopics(),
-          problemsService.getAllProblems(),
-        ]);
-        setDataStructures(topics);
-        setProblemsCount(problems?.length || 0);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
+  const isLoading = topicsLoading || problemsLoading;
 
   const stats: StatCard[] = [
     {
       title: 'Data Structures & Algorithms',
-      value: loading ? '...' : dataStructures?.length || 0,
+      value: isLoading ? '...' : topics?.length || 0,
       icon: Database,
       href: '/admin/dsa',
-      loading,
+      loading: isLoading,
     },
     {
       title: 'Problems',
-      value: loading ? '...' : problemsCount || 0,
+      value: isLoading ? '...' : problems?.length || 0,
       icon: BookOpen,
       href: '/admin/problems',
-      loading,
+      loading: isLoading,
     },
   ];
 

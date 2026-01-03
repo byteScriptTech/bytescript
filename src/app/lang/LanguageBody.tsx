@@ -6,7 +6,7 @@ import React from 'react';
 import Navbar from '@/components/common/Navbar';
 import LearnContent from '@/components/specific/LearnContent';
 import LearnScreenBreadCrumb from '@/components/specific/LearnScreenBreadCrumb';
-import { useLanguages } from '@/context/LanguagesContext';
+import { useLanguagesRedux } from '@/hooks/useLanguagesRedux';
 
 type Topic = {
   name: string;
@@ -27,7 +27,7 @@ const LanguageBody: React.FC<LanguageBodyProps> = ({
   setCurrentTopic,
   searchParams,
 }) => {
-  const { loading, languages } = useLanguages();
+  const { loading, languages } = useLanguagesRedux();
 
   if (!searchParams?.name || !searchParams?.id) {
     console.warn('Missing required search parameters:', searchParams);

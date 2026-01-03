@@ -1,12 +1,12 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
-import { useAuth } from '@/context/AuthContext';
+import { useAuthRedux } from '@/hooks/useAuthRedux';
 
 import Authentication from '.';
 
-jest.mock('@/context/AuthContext', () => ({
-  useAuth: jest.fn(() => ({
+jest.mock('@/hooks/useAuthRedux', () => ({
+  useAuthRedux: jest.fn(() => ({
     signInWithGithub: jest.fn(),
   })),
 }));
@@ -18,7 +18,7 @@ describe('Authentication Component', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (useAuth as jest.Mock).mockReturnValue({
+    (useAuthRedux as jest.Mock).mockReturnValue({
       signInWithGithub: mockSignInWithGithub,
     });
   });

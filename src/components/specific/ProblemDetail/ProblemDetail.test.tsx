@@ -17,6 +17,7 @@ describe('ProblemDetail', () => {
     title: 'Test Problem',
     difficulty: 'Medium' as const,
     category: 'Algorithms',
+    tags: ['arrays', 'sorting'],
     description: 'This is a test problem description.',
     examples: [
       {
@@ -27,8 +28,8 @@ describe('ProblemDetail', () => {
     ],
     constraints: ['1 <= n <= 100'],
     starterCode: 'function solve() {}',
-    createdAt: Timestamp.now(),
-    updatedAt: Timestamp.now(),
+    createdAt: Timestamp.now().toDate().toISOString(),
+    updatedAt: Timestamp.now().toDate().toISOString(),
   };
 
   it('renders the problem title', () => {

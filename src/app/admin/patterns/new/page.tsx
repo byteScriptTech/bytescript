@@ -17,11 +17,10 @@ const MDEditor = dynamic(
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { patternService } from '@/services/patternService';
+import { useCreatePatternMutation } from '@/store/slices/patternsSlice';
 
 export default function NewPatternPage() {
   const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     slug: '',
@@ -33,6 +32,8 @@ export default function NewPatternPage() {
     order: 0,
     icon: '',
   });
+
+  const [createPattern, { isLoading }] = useCreatePatternMutation();
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -46,16 +47,12 @@ export default function NewPatternPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
 
     try {
-      await patternService.savePattern(formData);
+      await createPattern(formData);
       router.push('/admin/patterns');
     } catch (error) {
       console.error('Failed to create pattern:', error);
-      // Handle error (e.g., show error toast)
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -176,8 +173,8 @@ export default function NewPatternPage() {
           >
             Cancel
           </Button>
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Creating...' : 'Create Pattern'}
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? 'Creating...' : 'Create Pattern'}
           </Button>
         </div>
       </form>

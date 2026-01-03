@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
-import { CustomTestService } from '@/services/firebase/customTestService';
+import { useCustomTestsRedux } from '@/hooks/useCustomTestsRedux';
 import { CustomTest, TestAttempt, TestResult } from '@/types/customTest';
 
 import CustomTestList from './CustomTestList';
@@ -16,6 +16,7 @@ type ViewState = 'list' | 'create' | 'edit' | 'take' | 'results';
 
 export default function CustomTestContent() {
   const router = useRouter();
+  const { getTest } = useCustomTestsRedux();
   const [viewState, setViewState] = useState<ViewState>('list');
   const [selectedTest, setSelectedTest] = useState<CustomTest | null>(null);
   const [selectedAttempt, setSelectedAttempt] = useState<TestAttempt | null>(
@@ -38,10 +39,12 @@ export default function CustomTestContent() {
 
   const handleStartTest = async (testId: string) => {
     try {
-      const test = await CustomTestService.getTest(testId);
-      if (test) {
+      const result = getTest(testId);
+      if (result.data) {
         // Navigate to the separate custom test page
         router.push(`/customtest/${testId}`);
+      } else if (result.error) {
+        toast.error('Failed to load test');
       }
     } catch (error) {
       console.error('Error loading test:', error);
@@ -51,12 +54,12 @@ export default function CustomTestContent() {
 
   const handleEditTest = async (testId: string) => {
     try {
-      const test = await CustomTestService.getTest(testId);
-      if (test) {
-        setSelectedTest(test);
+      const result = getTest(testId);
+      if (result.data) {
+        setSelectedTest(result.data);
         setEditingTestId(testId);
         setViewState('edit');
-      } else {
+      } else if (result.error) {
         toast.error('Test not found');
       }
     } catch (error) {
@@ -78,11 +81,13 @@ export default function CustomTestContent() {
 
   const handleViewAttemptResults = async (attempt: TestAttempt) => {
     try {
-      const test = await CustomTestService.getTest(attempt.testId);
-      if (test) {
-        setSelectedTest(test);
+      const result = getTest(attempt.testId);
+      if (result.data) {
+        setSelectedTest(result.data);
         setSelectedAttempt(attempt);
         setViewState('results');
+      } else if (result.error) {
+        toast.error('Failed to load test results');
       }
     } catch (error) {
       console.error('Error loading test for results:', error);

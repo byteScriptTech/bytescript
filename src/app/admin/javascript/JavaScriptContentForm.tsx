@@ -29,7 +29,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { javascriptService } from '@/services/javascriptService';
+import { useJavascriptRedux } from '@/hooks/useJavascriptRedux';
 import type { Topic } from '@/types/content';
 
 const difficultyLevels = ['Beginner', 'Intermediate', 'Advanced'] as const;
@@ -132,11 +132,8 @@ const contentSchema = z.object({
 });
 
 type TopicService = {
-  createTopic: (topicData: Omit<Topic, 'id'>) => Promise<Topic | null>;
-  updateTopic: (
-    id: string,
-    topicData: Partial<Omit<Topic, 'id'>>
-  ) => Promise<Topic | null>;
+  createTopic: (data: Omit<Topic, 'id'>) => Promise<Topic>;
+  updateTopic: (id: string, data: Partial<Omit<Topic, 'id'>>) => Promise<Topic>;
 };
 
 interface JavaScriptContentFormProps {
@@ -156,7 +153,16 @@ export function JavaScriptContentForm({
   const [loading, setLoading] = useState(false);
   const [newObjective, setNewObjective] = useState('');
   const [newMistake, setNewMistake] = useState('');
-  const contentService = service ?? javascriptService;
+
+  // Redux hook for JavaScript content
+  const javascriptRedux = useJavascriptRedux();
+  const { createTopic, updateTopic } = javascriptRedux;
+
+  const contentService = service ?? {
+    createTopic: createTopic.mutateAsync,
+    updateTopic: (id: string, data: Partial<Omit<Topic, 'id'>>) =>
+      updateTopic.mutateAsync({ id, topicData: data }),
+  };
   const successRedirect = redirectPath ?? '/admin/javascript';
 
   const form = useForm<ContentFormValues>({

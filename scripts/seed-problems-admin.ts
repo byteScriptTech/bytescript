@@ -1,6 +1,6 @@
 import admin from 'firebase-admin';
 
-import { Problem } from '../src/services/firebase/problemsService';
+import type { Problem } from '../src/types/problem';
 
 // Initialize Firebase Admin with your service account credentials
 // You'll need to create a service account key from Firebase Console and place it in the project root
@@ -21,6 +21,9 @@ const sampleProblems: Omit<Problem, 'id' | 'createdAt' | 'updatedAt'>[] = [
     difficulty: 'Easy',
     category: 'Arrays',
     tags: ['arrays', 'hashmap', 'two-pointers'],
+    starterCode: `function twoSum(nums, target) {
+  // Write your solution here
+};`,
     examples: [
       {
         input: 'nums = [2,7,11,15], target = 9',
@@ -42,6 +45,16 @@ const sampleProblems: Omit<Problem, 'id' | 'createdAt' | 'updatedAt'>[] = [
     difficulty: 'Medium',
     category: 'Linked List',
     tags: ['linked-list', 'math'],
+    starterCode: `/**
+ * Definition for singly-linked list.
+ * function ListNode(val, next) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.next = (next===undefined ? null : next)
+ * }
+ */
+function addTwoNumbers(l1, l2) {
+  // Write your solution here
+};`,
     examples: [
       {
         input: 'l1 = [2,4,3], l2 = [5,6,4]',
@@ -62,6 +75,9 @@ const sampleProblems: Omit<Problem, 'id' | 'createdAt' | 'updatedAt'>[] = [
     difficulty: 'Medium',
     category: 'Strings',
     tags: ['strings', 'sliding-window'],
+    starterCode: `function lengthOfLongestSubstring(s) {
+  // Write your solution here
+};`,
     examples: [
       {
         input: 's = "abcabcbb"',
@@ -81,6 +97,9 @@ const sampleProblems: Omit<Problem, 'id' | 'createdAt' | 'updatedAt'>[] = [
     difficulty: 'Hard',
     category: 'Arrays',
     tags: ['arrays', 'binary-search'],
+    starterCode: `function findMedianSortedArrays(nums1, nums2) {
+  // Write your solution here
+};`,
     examples: [
       {
         input: 'nums1 = [1,3], nums2 = [2]',

@@ -8,16 +8,14 @@ import Navbar from '@/components/common/Navbar';
 import AuthGuard from '@/components/misc/authGuard';
 import CustomTestContent from '@/components/specific/CustomTest/CustomTestContent';
 import PracticeContent from '@/components/specific/PracticeContent';
-import { AuthProvider } from '@/context/AuthContext';
-import { LanguagesProvider } from '@/context/LanguagesContext';
 import { LocalStorageProvider } from '@/context/LocalhostContext';
-import { PracticeProvider } from '@/context/PracticeContext';
-import { PracticeTopic, SidebarItem } from '@/types/practice';
+import type { DSATopic } from '@/types/dsa';
+import { SidebarItem } from '@/types/practice';
 
 export const dynamic = 'force-dynamic';
 
 export default function Practice() {
-  const [currentTopic, setCurrentTopic] = useState<PracticeTopic | undefined>(
+  const [currentTopic, setCurrentTopic] = useState<DSATopic | undefined>(
     undefined
   );
   const [category, setCategory] = useState<string>('problems');
@@ -85,49 +83,43 @@ export default function Practice() {
   );
 
   return (
-    <AuthProvider>
-      <LocalStorageProvider>
-        <LanguagesProvider>
-          <PracticeProvider>
-            <AuthGuard>
-              <div className="flex min-h-screen w-full flex-col bg-background">
-                <div className="flex flex-col flex-1">
-                  <Navbar />
-                  <main className="flex-1">
-                    <div className="flex flex-col md:flex-row gap-6">
-                      <div className="w-full md:w-64 flex-shrink-0">
-                        <CollapsibleSidebar
-                          items={sidebarItems}
-                          header="Choose Category"
-                          defaultOpen={true}
-                          collapsible={true}
-                          activeItemId={activeItemId}
-                          onItemClick={(item) => {
-                            setActiveItemId(item.id);
-                            if (item.onClick) item.onClick();
-                          }}
-                          className="border-r border-border h-[calc(100vh-4rem)] fixed md:sticky top-16 left-0"
-                        />
-                      </div>
-                      <div className="w-full md:pl-4 flex-1">
-                        {view === 'custom-tests' ? (
-                          <CustomTestContent />
-                        ) : (
-                          <PracticeContent
-                            currentTopic={currentTopic}
-                            setCurrentTopic={setCurrentTopic}
-                            category={category}
-                          />
-                        )}
-                      </div>
-                    </div>
-                  </main>
+    <LocalStorageProvider>
+      <AuthGuard>
+        <div className="flex min-h-screen w-full flex-col bg-background">
+          <div className="flex flex-col flex-1">
+            <Navbar />
+            <main className="flex-1">
+              <div className="flex flex-col md:flex-row gap-6">
+                <div className="w-full md:w-64 flex-shrink-0">
+                  <CollapsibleSidebar
+                    items={sidebarItems}
+                    header="Choose Category"
+                    defaultOpen={true}
+                    collapsible={true}
+                    activeItemId={activeItemId}
+                    onItemClick={(item) => {
+                      setActiveItemId(item.id);
+                      if (item.onClick) item.onClick();
+                    }}
+                    className="border-r border-border h-[calc(100vh-4rem)] fixed md:sticky top-16 left-0"
+                  />
+                </div>
+                <div className="w-full md:pl-4 flex-1">
+                  {view === 'custom-tests' ? (
+                    <CustomTestContent />
+                  ) : (
+                    <PracticeContent
+                      currentTopic={currentTopic}
+                      setCurrentTopic={setCurrentTopic}
+                      category={category}
+                    />
+                  )}
                 </div>
               </div>
-            </AuthGuard>
-          </PracticeProvider>
-        </LanguagesProvider>
-      </LocalStorageProvider>
-    </AuthProvider>
+            </main>
+          </div>
+        </div>
+      </AuthGuard>
+    </LocalStorageProvider>
   );
 }

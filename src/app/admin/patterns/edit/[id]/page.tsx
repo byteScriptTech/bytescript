@@ -15,7 +15,11 @@ const MDEditor = dynamic(
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { patternService } from '@/services/patternService';
+import {
+  useGetPatternByIdQuery,
+  useUpdatePatternMutation,
+  useDeletePatternMutation,
+} from '@/store/slices/patternsSlice';
 
 export default function EditPatternPage({
   params,
@@ -25,8 +29,6 @@ export default function EditPatternPage({
   const router = useRouter();
 
   const [id, setId] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     slug: '',
@@ -39,6 +41,16 @@ export default function EditPatternPage({
     icon: '',
   });
 
+  const { data: pattern, isLoading: patternLoading } = useGetPatternByIdQuery(
+    id!,
+    {
+      skip: !id,
+    }
+  );
+
+  const [updatePattern, { isLoading: isUpdating }] = useUpdatePatternMutation();
+  const [deletePattern, { isLoading: isDeleting }] = useDeletePatternMutation();
+
   useEffect(() => {
     params.then((resolved) => {
       setId(resolved.id);
@@ -46,33 +58,20 @@ export default function EditPatternPage({
   }, [params]);
 
   useEffect(() => {
-    if (!id) return;
-
-    const fetchPattern = async () => {
-      try {
-        const pattern = await patternService.getPatternById(id);
-        if (pattern) {
-          setFormData({
-            title: pattern.title,
-            slug: pattern.slug,
-            description: pattern.description,
-            readme: pattern.readme,
-            category: pattern.category || '',
-            timeComplexity: pattern.timeComplexity || '',
-            spaceComplexity: pattern.spaceComplexity || '',
-            order: pattern.order || 0,
-            icon: pattern.icon || '',
-          });
-        }
-      } catch (error) {
-        console.error('Failed to fetch pattern:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchPattern();
-  }, [id]);
+    if (pattern) {
+      setFormData({
+        title: pattern.title,
+        slug: pattern.slug,
+        description: pattern.description,
+        readme: pattern.readme,
+        category: pattern.category || '',
+        timeComplexity: pattern.timeComplexity || '',
+        spaceComplexity: pattern.spaceComplexity || '',
+        order: pattern.order || 0,
+        icon: pattern.icon || '',
+      });
+    }
+  }, [pattern]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -88,18 +87,15 @@ export default function EditPatternPage({
     e.preventDefault();
     if (!id) return;
 
-    setIsSubmitting(true);
     try {
-      await patternService.savePattern(formData, id);
+      await updatePattern({ id, updates: formData });
       router.push('/admin/patterns');
     } catch (error) {
       console.error('Failed to update pattern:', error);
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
-  if (isLoading) {
+  if (patternLoading) {
     return <div>Loading...</div>;
   }
 
@@ -208,12 +204,13 @@ export default function EditPatternPage({
           <Button
             type="button"
             variant="destructive"
+            disabled={isDeleting}
             onClick={async () => {
               if (!id) return;
 
               if (confirm('Are you sure you want to delete this pattern?')) {
                 try {
-                  await patternService.deletePattern(id);
+                  await deletePattern(id);
                   router.push('/admin/patterns');
                 } catch (error) {
                   console.error('Failed to delete pattern:', error);
@@ -232,8 +229,8 @@ export default function EditPatternPage({
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Saving...' : 'Save Changes'}
+            <Button type="submit" disabled={isUpdating}>
+              {isUpdating ? 'Saving...' : 'Save Changes'}
             </Button>
           </div>
         </div>

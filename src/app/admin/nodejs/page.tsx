@@ -2,7 +2,6 @@
 
 import { Pencil, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -13,42 +12,20 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { nodejsService } from '@/services/nodejsService';
-
-interface NodejsTopic {
-  id: string;
-  name: string;
-  slug: string;
-  description?: string;
-  difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
-}
+import {
+  useGetAllTopicsQuery,
+  useDeleteTopicMutation,
+} from '@/store/slices/nodejsSlice';
 
 export default function NodejsContentPage() {
   const router = useRouter();
-  const [topics, setTopics] = useState<NodejsTopic[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchContent();
-  }, []);
-
-  const fetchContent = async () => {
-    try {
-      setLoading(true);
-      const data = await nodejsService.getAllTopics();
-      setTopics(data as NodejsTopic[]);
-    } catch (error) {
-      console.error('Error fetching Node.js content:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { data: topics = [], isLoading: loading } = useGetAllTopicsQuery();
+  const [deleteTopic] = useDeleteTopicMutation();
 
   const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this topic?')) {
       try {
-        await nodejsService.deleteTopic(id);
-        fetchContent();
+        await deleteTopic(id).unwrap();
       } catch (error) {
         console.error('Error deleting topic:', error);
       }

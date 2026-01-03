@@ -1,59 +1,32 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useAuth } from '@/context/AuthContext';
-import { CustomTestService } from '@/services/firebase/customTestService';
-import { type CustomTest, TestAttempt } from '@/types/customTest';
+import { useAuthRedux } from '@/hooks/useAuthRedux';
+import { useCustomTestsRedux } from '@/hooks/useCustomTestsRedux';
 
 export default function CustomTestResults() {
   const params = useParams<{ id: string }>();
   const testId = params?.id;
   const router = useRouter();
-  const { currentUser } = useAuth();
+  const { currentUser } = useAuthRedux();
 
-  const [test, setTest] = useState<CustomTest | null>(null);
-  const [attempts, setAttempts] = useState<TestAttempt[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // Use RTK Query hooks directly
+  const {
+    data: test,
+    isLoading: testLoading,
+    error: testError,
+  } = useCustomTestsRedux().getTest(testId || '');
+  const {
+    data: attempts,
+    isLoading: attemptsLoading,
+    error: attemptsError,
+  } = useCustomTestsRedux().getUserTestAttempts(currentUser?.uid || '');
 
-  useEffect(() => {
-    const fetchTestAndAttempts = async () => {
-      try {
-        setLoading(true);
-
-        if (!currentUser || !testId) {
-          setError('Missing required information');
-          return;
-        }
-
-        const [testData, userAttempts] = await Promise.all([
-          CustomTestService.getTest(testId),
-          CustomTestService.getUserTestAttempts(currentUser.uid, testId),
-        ]);
-
-        if (!testData) {
-          setError('Test not found');
-          return;
-        }
-
-        setTest(testData);
-        setAttempts(userAttempts);
-      } catch (err) {
-        console.error('Error fetching test results:', err);
-        setError('Failed to load results');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (testId && currentUser) {
-      fetchTestAndAttempts();
-    }
-  }, [testId, currentUser]);
+  const loading = testLoading || attemptsLoading;
+  const error = testError || attemptsError;
 
   if (loading) {
     return (
@@ -66,7 +39,9 @@ export default function CustomTestResults() {
   if (error || !test) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
-        <p className="text-red-500">{error || 'Test not found'}</p>
+        <p className="text-red-500">
+          {error ? String(error) : 'Test not found'}
+        </p>
         <Button className="mt-4" onClick={() => router.push('/customtest')}>
           Back to Custom Tests
         </Button>
@@ -74,7 +49,7 @@ export default function CustomTestResults() {
     );
   }
 
-  const latestAttempt = attempts[0];
+  const latestAttempt = attempts?.[0];
   const score = latestAttempt
     ? (latestAttempt.score / latestAttempt.totalPoints) * 100
     : 0;

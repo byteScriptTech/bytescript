@@ -18,8 +18,7 @@ import { FloatingMenuButton } from '@/components/common/FloatingMenuButton/Float
 import { Content } from '@/components/specific/LearnContent/Content';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { cn } from '@/lib/utils';
-import { getNodejsContent } from '@/services/nodejsService';
-import type { LanguageContent } from '@/types/content';
+import { useGetNodejsContentQuery } from '@/store/slices/nodejsSlice';
 
 const DraggableCircle = dynamic(
   () =>
@@ -54,14 +53,24 @@ const LearnContentInner: FC<LearnContentInnerProps> = ({
 }) => {
   const initialTopicId = useRef(_initialTopicId);
   const initialSubtopicId = useRef(_initialSubtopicId);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [content, setContent] = useState<LanguageContent | null>(null);
-  const [activeTopic, setActiveTopic] = useState<string | null>(null);
-  const [activeSubtopic, setActiveSubtopic] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showEditor, setShowEditor] = useState(false);
+  const [activeTopic, setActiveTopic] = useState<string | null>(null);
+  const [activeSubtopic, setActiveSubtopic] = useState<string | null>(null);
   const isMobile = useIsMobile();
+
+  // Use Redux hook for fetching content
+  const {
+    data: content,
+    isLoading: loading,
+    error: reduxError,
+  } = useGetNodejsContentQuery();
+
+  // Convert Redux error to string for display
+  const error = reduxError
+    ? (reduxError as { error?: { data?: string } })?.error?.data ||
+      'Failed to load content'
+    : null;
 
   useEffect(() => {
     setSidebarOpen(!isMobile);
@@ -121,36 +130,12 @@ const LearnContentInner: FC<LearnContentInnerProps> = ({
     }
   }, []);
 
-  const fetchContent = useCallback(async () => {
-    try {
-      const data = await getNodejsContent();
-      setContent(data);
-      if (data?.topics?.length) {
-        setActiveTopic(data.topics[0].id);
-      }
-      return data;
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : 'Failed to load Node.js content';
-      setError(`Error: ${errorMessage}. Please try again later.`);
-      console.error('Error fetching Node.js content:', err);
-      throw err;
-    }
-  }, []);
-
+  // Set initial active topic when content is loaded
   useEffect(() => {
-    const loadContent = async () => {
-      try {
-        await fetchContent();
-      } catch (error) {
-        // handled in fetchContent
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadContent();
-  }, [fetchContent]);
+    if (content?.topics?.length && !activeTopic) {
+      setActiveTopic(content.topics[0].id);
+    }
+  }, [content, activeTopic]);
 
   useEffect(() => {
     if (!content?.topics?.length) return;
@@ -188,40 +173,40 @@ const LearnContentInner: FC<LearnContentInnerProps> = ({
   }, [content, activeTopic, scrollToSubtopic]);
 
   const topicSidebarItems = useMemo(() => {
-    return (
-      content?.topics?.map((topic) => ({
-        id: topic.id,
-        name: topic.name,
-        isActive: activeTopic === topic.id,
-        onClick: () => {
-          setActiveTopic(topic.id);
-          setActiveSubtopic(null);
-        },
-        children: [
-          ...(topic.subtopics?.map((subtopic) => ({
-            id: subtopic.id,
-            name: subtopic.name,
-            isActive: activeSubtopic === subtopic.id,
-            onClick: () => {
-              scrollToSubtopic(subtopic.id);
-              if (isMobile) setSidebarOpen(false);
-            },
-          })) || []),
-          ...(topic.exercises?.length
-            ? [
-                {
-                  id: `exercises-${topic.id}`,
-                  name: `Exercises (${topic.exercises.length})`,
-                  onClick: () => {
-                    scrollToExercises();
-                    if (isMobile) setSidebarOpen(false);
-                  },
+    if (!content?.topics) return [];
+
+    return content.topics.map((topic) => ({
+      id: topic.id,
+      name: topic.name,
+      isActive: activeTopic === topic.id,
+      onClick: () => {
+        setActiveTopic(topic.id);
+        setActiveSubtopic(null);
+      },
+      children: [
+        ...(topic.subtopics?.map((subtopic) => ({
+          id: subtopic.id,
+          name: subtopic.name,
+          isActive: activeSubtopic === subtopic.id,
+          onClick: () => {
+            scrollToSubtopic(subtopic.id);
+            if (isMobile) setSidebarOpen(false);
+          },
+        })) || []),
+        ...(topic.exercises?.length
+          ? [
+              {
+                id: `exercises-${topic.id}`,
+                name: `Exercises (${topic.exercises.length})`,
+                onClick: () => {
+                  scrollToExercises();
+                  if (isMobile) setSidebarOpen(false);
                 },
-              ]
-            : []),
-        ],
-      })) || []
-    );
+              },
+            ]
+          : []),
+      ],
+    }));
   }, [
     content?.topics,
     activeTopic,

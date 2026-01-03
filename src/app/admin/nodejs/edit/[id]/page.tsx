@@ -4,8 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
-import { Button } from '@/components/ui/button';
-import { nodejsService } from '@/services/nodejsService';
+import { useGetTopicByIdQuery } from '@/store/slices/nodejsSlice';
 
 import { NodejsContentForm } from '../../NodejsContentForm';
 
@@ -15,10 +14,7 @@ export default function EditNodejsContentPage({
   params: Promise<{ id: string }>;
 }) {
   const router = useRouter();
-
   const [id, setId] = useState<string | null>(null);
-  const [content, setContent] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     params.then((resolved) => {
@@ -26,58 +22,31 @@ export default function EditNodejsContentPage({
     });
   }, [params]);
 
+  const {
+    data: content,
+    isLoading: loading,
+    error,
+  } = useGetTopicByIdQuery(id || '', {
+    skip: !id,
+  });
+
   useEffect(() => {
-    if (!id) return;
-
-    const fetchContent = async () => {
-      try {
-        const data = await nodejsService.getTopicById(id);
-        if (!data) {
-          router.push('/404');
-          return;
-        }
-        setContent(data);
-      } catch (error) {
-        console.error('Error fetching content:', error);
-        router.push('/500');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchContent();
-  }, [id, router]);
-
-  const handleSuccess = async () => {
-    if (!id) return;
-
-    try {
-      const updatedContent = await nodejsService.getTopicById(id);
-      setContent(updatedContent);
-      toast.success('Content updated successfully!');
-    } catch (error) {
-      console.error('Error refetching content:', error);
-      toast.error('Failed to refresh content');
+    if (error && id) {
+      console.error('Error fetching content:', error);
+      router.push('/500');
     }
+  }, [error, id, router]);
+
+  const handleSuccess = () => {
+    toast.success('Content updated successfully!');
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
+  if (loading || !id) {
+    return <div className="container mx-auto py-10">Loading...</div>;
   }
 
   if (!content) {
-    return (
-      <div className="text-center py-10">
-        <h2 className="text-xl font-semibold">Content not found</h2>
-        <Button onClick={() => router.push('/admin/nodejs')} className="mt-4">
-          Back to Node.js Content
-        </Button>
-      </div>
-    );
+    return <div className="container mx-auto py-10">Content not found</div>;
   }
 
   const formContent = {

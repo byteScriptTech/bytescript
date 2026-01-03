@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 
-import { useAuth } from '@/context/AuthContext';
+import { useAuthRedux } from '@/hooks/useAuthRedux';
 
 const Greetings: React.FC = () => {
-  const { currentUser } = useAuth();
+  const { currentUser } = useAuthRedux();
   const [greeting, setGreeting] = useState('');
   const getGreeting = () => {
     const currentHour = new Date().getHours();

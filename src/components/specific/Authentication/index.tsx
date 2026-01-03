@@ -3,11 +3,11 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { FaGithub } from 'react-icons/fa';
 
-import { useAuth } from '@/context/AuthContext';
+import { useAuthRedux } from '@/hooks/useAuthRedux';
 
 const Authentication = () => {
   const [error, setError] = useState<string | null>(null);
-  const { signInWithGithub } = useAuth();
+  const { signInWithGithub } = useAuthRedux();
 
   const handleGithubLogin = async () => {
     try {

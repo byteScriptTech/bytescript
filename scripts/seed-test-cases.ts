@@ -1,7 +1,7 @@
 import * as admin from 'firebase-admin';
 import { Timestamp } from 'firebase-admin/firestore';
 
-import { Problem } from '@/services/firebase/problemsService';
+import type { Problem } from '@/types/problem';
 
 // Initialize Firebase Admin SDK
 admin.initializeApp({

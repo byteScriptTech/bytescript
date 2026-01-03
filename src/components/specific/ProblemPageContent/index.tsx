@@ -6,9 +6,10 @@ import { toast } from 'sonner';
 
 import ProblemDetail from '@/components/specific/ProblemDetail';
 import ProblemEditor from '@/components/specific/ProblemEditor';
-import { useAuth } from '@/context/AuthContext';
-import { problemsService } from '@/services/firebase/problemsService';
+import { useAuthRedux } from '@/hooks/useAuthRedux';
+import { useProblemsRedux } from '@/hooks/useProblemsRedux';
 import { testCasesService } from '@/services/firebase/testCasesService';
+import { useGetProblemByIdQuery } from '@/store/slices/problemsSlice';
 import type { Problem, TestCase } from '@/types/problem';
 
 import styles from './ProblemPageContent.module.css';
@@ -32,7 +33,7 @@ interface CodeExecutionResult {
 // Create a type that makes starterCode optional and adds lastAttempted
 interface ProblemWithOptionalStarterCode extends Omit<Problem, 'starterCode'> {
   starterCode: string;
-  lastAttempted?: Date | null;
+  lastAttempted?: string | null;
 }
 
 const ProblemPageContent = () => {
@@ -46,15 +47,21 @@ const ProblemPageContent = () => {
   const [executionResult, setExecutionResult] =
     useState<CodeExecutionResult | null>(null);
 
-  const { currentUser } = useAuth();
+  const { currentUser } = useAuthRedux();
+  const { getProblemByIdWithFallback } = useProblemsRedux();
+  const problemQuery = useGetProblemByIdQuery(problemId || '');
+  const problemWithFallback = getProblemByIdWithFallback(
+    problemId || '',
+    problemQuery
+  );
 
   useEffect(() => {
     const fetchProblemAndTestCases = async () => {
       if (!problemId) return;
       setLoading(true);
       try {
-        const fetchedProblem = await problemsService.getProblemById(problemId);
-        if (!fetchedProblem) {
+        const fetchedProblem = problemWithFallback.data;
+        if (!fetchedProblem || fetchedProblem.id === 'fallback') {
           toast.error('Problem not found');
           return;
         }
@@ -172,9 +179,7 @@ const ProblemPageContent = () => {
       } else if (typeof input === 'string') {
         try {
           // Parse the entire input string as JSON
-          console.log(input, ' this is input data!');
           const parsed = JSON.parse(input);
-          console.log(parsed, ' this is parsed data!');
           // If it's an array, use it directly, otherwise wrap it in an array
           fnArgs = Array.isArray(parsed) ? parsed : [parsed];
         } catch (e) {
@@ -196,24 +201,15 @@ const ProblemPageContent = () => {
         ${code}
         
         try {
-          // Debug: Log the input parameters
-          console.log('=== DEBUG: Input to solve() ===');
           const params = [${paramNames.join(', ')}];
-          console.log('Number of parameters:', params.length);
           
           // Log the parameters
           params.forEach((param, i) => {
             const type = Array.isArray(param) ? 'array' : typeof param;
-            console.log(\`Param \${i + 1} (\${type}):\`, JSON.stringify(param));
           });
           
           // Execute the solve function with provided arguments
           const result = solve(${paramNames.join(', ')});
-          
-          // Debug: Log the result
-          console.log('=== DEBUG: Output from solve() ===');
-          console.log('Type:', typeof result);
-          console.log('Value:', result);
           
           // Convert the result to a string representation
           if (result === undefined) return '';
@@ -223,7 +219,6 @@ const ProblemPageContent = () => {
           }
           return String(result);
         } catch (e) {
-          console.error('=== DEBUG: Error in solve() ===', e);
           return 'Error: ' + (e instanceof Error ? e.message : String(e));
         }
       `;
@@ -389,7 +384,12 @@ const ProblemPageContent = () => {
             <div
               className={`flex-1 overflow-y-auto p-5 sm:p-6 md:p-7 lg:p-8 ${styles.scrollContainer} scrollbar-thin scrollbar-thumb-border/20 hover:scrollbar-thumb-border/30 dark:scrollbar-thumb-border/10 dark:hover:scrollbar-thumb-border/20 scrollbar-track-transparent transition-colors duration-200`}
             >
-              <ProblemDetail problem={problem} />
+              <ProblemDetail
+                problem={{
+                  ...problem,
+                  lastAttempted: problem.lastAttempted,
+                }}
+              />
             </div>
 
             {/* Subtle gradient at bottom to indicate scrollability */}

@@ -1,14 +1,7 @@
 'use client';
 
 import { Plus, Loader2, Edit, Trash2 } from 'lucide-react';
-import {
-  useState,
-  useEffect,
-  useMemo,
-  useCallback,
-  ChangeEvent,
-  FormEvent,
-} from 'react';
+import { useState, useMemo, useCallback, ChangeEvent, FormEvent } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,18 +15,30 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { practiceQuestionsService } from '@/services/firebase/practiceQuestionsService';
-import { practiceTopicsService } from '@/services/firebase/practiceTopicsService';
-import type { PracticeTopic } from '@/types/practice';
+import { usePracticeTopicsRedux } from '@/hooks/usePracticeTopicsRedux';
+import {
+  useGetAllQuestionsQuery,
+  useCreateQuestionMutation,
+  useUpdateQuestionMutation,
+  useDeleteQuestionMutation,
+} from '@/store/slices/practiceQuestionsSlice';
 import { Option } from '@/types/practiceQuestion';
 import type { PracticeQuestion, TestCase } from '@/types/practiceQuestion';
 import type { QuestionType } from '@/types/practiceQuestion';
 
 export default function AdminPracticeQuestions() {
   const { toast } = useToast();
-  const [questions, setQuestions] = useState<PracticeQuestion[]>([]);
-  const [topics, setTopics] = useState<PracticeTopic[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { allTopics } = usePracticeTopicsRedux();
+  const {
+    data: questions = [],
+    isLoading: questionsLoading,
+    refetch,
+  } = useGetAllQuestionsQuery();
+  const [createQuestion] = useCreateQuestionMutation();
+  const [updateQuestion] = useUpdateQuestionMutation();
+  const [deleteQuestion] = useDeleteQuestionMutation();
+  // Combined loading state
+  const isLoadingCombined = allTopics.isLoading || questionsLoading;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -48,9 +53,12 @@ export default function AdminPracticeQuestions() {
   const categories = useMemo(() => {
     return [
       { id: 'all', name: 'All Categories' },
-      ...topics.map((topic) => ({ id: topic.id, name: topic.name })),
+      ...(allTopics.data?.map((topic) => ({
+        id: topic.id,
+        name: topic.name,
+      })) || []),
     ];
-  }, [topics]);
+  }, [allTopics.data]);
 
   type QuestionFormData =
     | {
@@ -97,32 +105,6 @@ export default function AdminPracticeQuestions() {
     });
   }, []);
 
-  // Fetch questions and topics
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const [questionsData, topicsData] = await Promise.all([
-          practiceQuestionsService.getAllQuestions(),
-          practiceTopicsService.getAllTopics(),
-        ]);
-        setQuestions(questionsData);
-        setTopics(topicsData);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        toast({
-          title: 'Error',
-          description: 'Failed to load practice questions',
-          variant: 'destructive',
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [toast]);
-
   const handleInputChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -168,24 +150,25 @@ export default function AdminPracticeQuestions() {
     setIsSubmitting(true);
     try {
       if (editingId) {
-        // Update existing question
-        await practiceQuestionsService.updateQuestion(editingId, questionData);
+        await updateQuestion({
+          id: editingId,
+          updates: questionData,
+        }).unwrap();
         toast({
           title: 'Success',
           description: 'Question updated successfully',
         });
       } else {
         // Create new question
-        await practiceQuestionsService.createQuestion(questionData);
+        await createQuestion(questionData).unwrap();
         toast({
           title: 'Success',
           description: 'Question created successfully',
         });
       }
 
-      // Refresh questions
-      const updatedQuestions = await practiceQuestionsService.getAllQuestions();
-      setQuestions(updatedQuestions);
+      // Refresh questions from Redux
+      refetch();
       resetForm();
     } catch (error) {
       console.error('Error saving question:', error);
@@ -212,8 +195,7 @@ export default function AdminPracticeQuestions() {
     if (!confirm('Are you sure you want to delete this question?')) return;
 
     try {
-      await practiceQuestionsService.deleteQuestion(id);
-      setQuestions(questions.filter((q) => q.id !== id));
+      await deleteQuestion(id).unwrap();
       toast({
         title: 'Success',
         description: 'Question deleted successfully',
@@ -233,12 +215,12 @@ export default function AdminPracticeQuestions() {
       type: 'mcq',
       question: '',
       points: 1,
-      topicId: topics[0]?.id || '',
+      topicId: allTopics.data?.[0]?.id || '',
       options: [],
       explanation: '',
     });
     setEditingId(null);
-  }, [topics, updateFormData]);
+  }, [updateFormData, allTopics.data]);
 
   const renderQuestionForm = () => (
     <form onSubmit={handleSubmit} className="space-y-6 mb-8">
@@ -260,7 +242,7 @@ export default function AdminPracticeQuestions() {
               <SelectValue placeholder="Select a topic" />
             </SelectTrigger>
             <SelectContent>
-              {topics.map((topic) => (
+              {allTopics.data?.map((topic) => (
                 <SelectItem key={topic.id} value={topic.id}>
                   {topic.name}
                 </SelectItem>
@@ -590,7 +572,7 @@ export default function AdminPracticeQuestions() {
         <h2 className="text-2xl font-bold">
           {selectedCategory === 'all'
             ? 'All Practice Questions'
-            : `Practice Questions: ${topics.find((t) => t.id === selectedCategory)?.name || 'Unknown'}`}
+            : `Practice Questions: ${allTopics.data?.find((t) => t.id === selectedCategory)?.name || 'Unknown'}`}
         </h2>
         <div className="flex items-center gap-4">
           <Select value={selectedCategory} onValueChange={setSelectedCategory}>
@@ -612,7 +594,7 @@ export default function AdminPracticeQuestions() {
         </div>
       </div>
 
-      {loading ? (
+      {isLoadingCombined ? (
         <div className="space-y-4">
           {[...Array(3)].map((_, i) => (
             <div
@@ -632,7 +614,7 @@ export default function AdminPracticeQuestions() {
                 type: 'mcq',
                 question: '',
                 points: 1,
-                topicId: topics[0]?.id || '',
+                topicId: allTopics.data?.[0]?.id || '',
                 options: [],
                 explanation: '',
               });
@@ -645,7 +627,9 @@ export default function AdminPracticeQuestions() {
       ) : (
         <div className="space-y-4">
           {filteredQuestions.map((question) => {
-            const topic = topics.find((t) => t.id === question.topicId);
+            const topic = allTopics.data?.find(
+              (t) => t.id === question.topicId
+            );
             return (
               <div
                 key={question.id}

@@ -1,55 +1,22 @@
-import { useEffect, useState } from 'react';
+import {
+  useGetAllProblemsQuery,
+  useUpdateProblemMutation,
+} from '../store/slices/problemsSlice';
+import type { Problem } from '../types/problem';
 
-import { problemsService } from '@/services/firebase/problemsService';
-
-export interface Problem {
-  id: string;
-  title: string;
-  difficulty: 'Easy' | 'Medium' | 'Hard';
-  description: string;
-  examples: Array<{
-    input: string;
-    output: string;
-    explanation: string;
-  }>;
-  constraints: string[];
-  category: string;
-  tags: string[];
+export interface ProblemWithUserProgress extends Problem {
   solved?: boolean;
-  lastAttempted?: Date;
-  createdAt: Date;
-  updatedAt: Date;
+  lastAttempted?: string | null;
 }
 
 export const useProblems = () => {
-  const [problems, setProblems] = useState<Problem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: problems = [], error, isLoading } = useGetAllProblemsQuery();
 
-  useEffect(() => {
-    const fetchProblems = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const fetchedProblems = await problemsService.getAllProblems();
-        setProblems(fetchedProblems || []);
-      } catch {
-        setError('Failed to load problems');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProblems();
-  }, []);
+  const [updateProblem] = useUpdateProblemMutation();
 
   const updateProblemSolvedStatus = async (id: string, solved: boolean) => {
     try {
-      await problemsService.updateProblem(id, { solved });
-      const updatedProblems = problems.map((p) =>
-        p.id === id ? { ...p, solved } : p
-      );
-      setProblems(updatedProblems);
+      await updateProblem({ id, updates: { solved } });
     } catch (err) {
       console.error('Failed to update problem status:', err);
     }
@@ -57,11 +24,10 @@ export const useProblems = () => {
 
   const updateLastAttempted = async (id: string) => {
     try {
-      await problemsService.updateProblem(id, { lastAttempted: new Date() });
-      const updatedProblems = problems.map((p) =>
-        p.id === id ? { ...p, lastAttempted: new Date() } : p
-      );
-      setProblems(updatedProblems);
+      await updateProblem({
+        id,
+        updates: { lastAttempted: new Date().toISOString() },
+      });
     } catch (err) {
       console.error('Failed to update last attempted time:', err);
     }
@@ -69,8 +35,8 @@ export const useProblems = () => {
 
   return {
     problems,
-    loading,
-    error,
+    loading: isLoading,
+    error: error ? 'Failed to load problems' : null,
     updateProblemSolvedStatus,
     updateLastAttempted,
   };
