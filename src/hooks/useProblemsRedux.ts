@@ -64,8 +64,8 @@ export const useProblemsRedux = () => {
           constraints: [],
           examples: [],
           starterCode: '',
-          createdAt: new Date(),
-          updatedAt: new Date(),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
         } as Problem,
         isError: false,
       };

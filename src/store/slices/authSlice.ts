@@ -1,13 +1,27 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { User } from 'firebase/auth';
 
 export type UserRole = 'admin' | 'user';
 
-export interface AppUser extends User {
+export interface AppUser {
+  uid: string;
+  email: string | null;
+  displayName: string | null;
+  photoURL: string | null;
+  emailVerified: boolean;
+  isAnonymous: boolean;
+  tenantId: string | null;
+  providerData: any[];
+  phoneNumber: string | null;
+  providerId: string | null;
   role?: UserRole;
   createdAt?: string | null;
   updatedAt?: string | null;
   lastLogin?: string | null;
+  metadata: {
+    creationTime: string;
+    lastSignInTime: string;
+  };
+  refreshToken: string;
 }
 
 interface AuthState {

@@ -33,7 +33,7 @@ interface CodeExecutionResult {
 // Create a type that makes starterCode optional and adds lastAttempted
 interface ProblemWithOptionalStarterCode extends Omit<Problem, 'starterCode'> {
   starterCode: string;
-  lastAttempted?: Date | null;
+  lastAttempted?: string | null;
 }
 
 const ProblemPageContent = () => {
@@ -394,7 +394,12 @@ const ProblemPageContent = () => {
             <div
               className={`flex-1 overflow-y-auto p-5 sm:p-6 md:p-7 lg:p-8 ${styles.scrollContainer} scrollbar-thin scrollbar-thumb-border/20 hover:scrollbar-thumb-border/30 dark:scrollbar-thumb-border/10 dark:hover:scrollbar-thumb-border/20 scrollbar-track-transparent transition-colors duration-200`}
             >
-              <ProblemDetail problem={problem} />
+              <ProblemDetail
+                problem={{
+                  ...problem,
+                  lastAttempted: problem.lastAttempted,
+                }}
+              />
             </div>
 
             {/* Subtle gradient at bottom to indicate scrollability */}

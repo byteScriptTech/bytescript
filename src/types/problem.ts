@@ -14,10 +14,10 @@ export interface Problem {
     explanation?: string;
   }>;
   starterCode: string;
-  createdAt: Timestamp | Date;
-  updatedAt: Timestamp | Date;
+  createdAt: string;
+  updatedAt: string;
   solved?: boolean;
-  lastAttempted?: Timestamp | Date | null;
+  lastAttempted?: string | null;
 }
 
 export interface TestCase {

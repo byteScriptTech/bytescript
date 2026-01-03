@@ -110,9 +110,7 @@ export function ProblemsTable({ data, onDelete, onEdit }: ProblemsTableProps) {
               </TableCell>
               <TableCell>{getDifficultyBadge(item.difficulty)}</TableCell>
               <TableCell className="text-sm text-muted-foreground">
-                {item.updatedAt instanceof Date
-                  ? item.updatedAt.toLocaleDateString()
-                  : item.updatedAt.toDate().toLocaleDateString()}
+                {new Date(item.updatedAt).toLocaleDateString()}
               </TableCell>
               <TableCell>
                 <div className="flex space-x-2">

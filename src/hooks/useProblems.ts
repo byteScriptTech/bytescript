@@ -6,7 +6,7 @@ import type { Problem } from '../types/problem';
 
 export interface ProblemWithUserProgress extends Problem {
   solved?: boolean;
-  lastAttempted?: Date | null;
+  lastAttempted?: string | null;
 }
 
 export const useProblems = () => {
@@ -24,7 +24,10 @@ export const useProblems = () => {
 
   const updateLastAttempted = async (id: string) => {
     try {
-      await updateProblem({ id, updates: { lastAttempted: new Date() } });
+      await updateProblem({
+        id,
+        updates: { lastAttempted: new Date().toISOString() },
+      });
     } catch (err) {
       console.error('Failed to update last attempted time:', err);
     }

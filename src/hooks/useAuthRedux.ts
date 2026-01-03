@@ -58,16 +58,42 @@ export const useAuthRedux = () => {
 
       const updatedUserDoc = await getDoc(userDocRef);
       const docData = updatedUserDoc.data();
-      return {
-        ...user,
+      const serializableUser = {
+        uid: user.uid,
+        email: user.email,
+        displayName: user.displayName,
+        photoURL: user.photoURL,
+        emailVerified: user.emailVerified,
+        isAnonymous: user.isAnonymous,
+        tenantId: user.tenantId,
+        providerData: user.providerData,
+        phoneNumber: user.phoneNumber || null,
+        providerId: user.providerId || null,
         ...docData,
         // Convert all Firestore Timestamps to ISO strings
-        createdAt: docData?.createdAt?.toDate?.() || null,
-        updatedAt: docData?.updatedAt?.toDate?.() || null,
-        lastLogin: docData?.lastLogin?.toDate?.() || null,
-        // Filter out any non-serializable properties
+        createdAt: docData?.createdAt
+          ? docData.createdAt.toDate
+            ? docData.createdAt.toDate().toISOString()
+            : docData.createdAt
+          : null,
+        updatedAt: docData?.updatedAt
+          ? docData.updatedAt.toDate
+            ? docData.updatedAt.toDate().toISOString()
+            : docData.updatedAt
+          : null,
+        lastLogin: docData?.lastLogin
+          ? docData.lastLogin.toDate
+            ? docData.lastLogin.toDate().toISOString()
+            : docData.lastLogin
+          : null,
         proactiveRefresh: undefined,
+        metadata: {
+          creationTime: user.metadata?.creationTime || '',
+          lastSignInTime: user.metadata?.lastSignInTime || '',
+        },
+        refreshToken: user.refreshToken || '',
       } as AppUser;
+      return serializableUser;
     },
     []
   );

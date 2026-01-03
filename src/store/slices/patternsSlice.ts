@@ -22,8 +22,8 @@ export interface Pattern {
   spaceComplexity?: string;
   order?: number;
   icon?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // Transform Firestore document to Pattern
@@ -32,8 +32,10 @@ const transformDoc = (doc: any): Pattern => {
   return {
     id: doc.id,
     ...data,
-    createdAt: data.createdAt?.toDate() || new Date(),
-    updatedAt: data.updatedAt?.toDate() || new Date(),
+    createdAt:
+      data.createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
+    updatedAt:
+      data.updatedAt?.toDate?.()?.toISOString() || new Date().toISOString(),
   } as Pattern;
 };
 
@@ -136,8 +138,8 @@ export const patternsApi = createApi({
           const createdPattern = {
             id: docRef.id,
             ...newPattern,
-            createdAt: newPattern.createdAt.toDate(),
-            updatedAt: newPattern.updatedAt.toDate(),
+            createdAt: newPattern.createdAt.toDate().toISOString(),
+            updatedAt: newPattern.updatedAt.toDate().toISOString(),
           } as Pattern;
 
           return { data: createdPattern };

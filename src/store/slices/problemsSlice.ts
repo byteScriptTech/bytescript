@@ -18,8 +18,10 @@ const transformDoc = (doc: any): Problem => {
   return {
     id: doc.id,
     ...data,
-    createdAt: data.createdAt?.toDate() || new Date(),
-    updatedAt: data.updatedAt?.toDate() || new Date(),
+    createdAt:
+      data.createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
+    updatedAt:
+      data.updatedAt?.toDate?.()?.toISOString() || new Date().toISOString(),
   } as Problem;
 };
 
@@ -116,8 +118,8 @@ export const problemsApi = createApi({
           const createdProblem = {
             id: docRef.id,
             ...newProblem,
-            createdAt: newProblem.createdAt.toDate(),
-            updatedAt: newProblem.updatedAt.toDate(),
+            createdAt: newProblem.createdAt.toDate().toISOString(),
+            updatedAt: newProblem.updatedAt.toDate().toISOString(),
           } as Problem;
 
           return { data: createdProblem };
