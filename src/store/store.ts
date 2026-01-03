@@ -9,6 +9,7 @@ import { javascriptApi } from './slices/javascriptSlice';
 import { languagesApi } from './slices/languagesSlice';
 import { notesApi } from './slices/notesSlice';
 import { practiceQuestionsApi } from './slices/practiceQuestionsSlice';
+import { practiceTopicsApi } from './slices/practiceTopicsSlice';
 import timerSlice from './slices/timerSlice';
 
 export const store = configureStore({
@@ -21,6 +22,7 @@ export const store = configureStore({
     [dsaTopicsApi.reducerPath]: dsaTopicsApi.reducer,
     [javascriptApi.reducerPath]: javascriptApi.reducer,
     [practiceQuestionsApi.reducerPath]: practiceQuestionsApi.reducer,
+    [practiceTopicsApi.reducerPath]: practiceTopicsApi.reducer,
     [customTestsApi.reducerPath]: customTestsApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
@@ -35,6 +37,7 @@ export const store = configureStore({
       .concat(dsaTopicsApi.middleware)
       .concat(javascriptApi.middleware)
       .concat(practiceQuestionsApi.middleware)
+      .concat(practiceTopicsApi.middleware)
       .concat(customTestsApi.middleware),
 });
 

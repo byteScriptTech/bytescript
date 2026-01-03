@@ -22,10 +22,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useAuthRedux } from '@/hooks/useAuthRedux';
 import { useCustomTestsRedux } from '@/hooks/useCustomTestsRedux';
-import { practiceTopicsService } from '@/services/firebase/practiceTopicsService';
+import { usePracticeTopicsRedux } from '@/hooks/usePracticeTopicsRedux';
 import { useGetAllQuestionsQuery } from '@/store/slices/practiceQuestionsSlice';
 import { CustomTest, TestQuestion } from '@/types/customTest';
-import { PracticeTopic } from '@/types/practice';
 
 import QuestionEditor from './QuestionEditor';
 
@@ -42,15 +41,14 @@ export default function TestCreator({
 }: TestCreatorProps) {
   const { currentUser } = useAuthRedux();
   const { createTest, updateTest } = useCustomTestsRedux();
+  const { allTopics } = usePracticeTopicsRedux();
   const { data: practiceQuestions = [], isLoading: questionsLoading } =
     useGetAllQuestionsQuery();
 
   const [isSaving, setIsSaving] = useState(false);
-  const [topics, setTopics] = useState<PracticeTopic[]>([]);
   const [selectedQuestions, setSelectedQuestions] = useState<Set<string>>(
     new Set()
   );
-  const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'custom' | 'library'>('custom');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTopic, setSelectedTopic] = useState<string>('all');
@@ -68,36 +66,21 @@ export default function TestCreator({
   });
 
   // ----------------------------
-  // Load questions and topics from library and initialize form
+  // Initialize form with initialData
   // ---------------------------------------------
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        setIsLoading(true);
-        const topicsData = await practiceTopicsService.getAllTopics();
-        setTopics(topicsData);
-
-        // If we have initialData, update the testData state
-        if (initialData) {
-          setTestData((prev) => ({
-            ...prev,
-            ...initialData,
-            questions: initialData.questions || [],
-          }));
-        }
-      } catch (error) {
-        console.error(error);
-        toast.error('Failed to load practice questions and topics');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadData();
+    // If we have initialData, update the testData state
+    if (initialData) {
+      setTestData((prev) => ({
+        ...prev,
+        ...initialData,
+        questions: initialData.questions || [],
+      }));
+    }
   }, [initialData]);
 
   // Combined loading state
-  const isLoadingCombined = isLoading || questionsLoading;
+  const isLoadingCombined = allTopics.isLoading || questionsLoading;
 
   // ----------------------------
   // Add custom question
@@ -472,7 +455,7 @@ export default function TestCreator({
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="all">All Topics</SelectItem>
-                            {topics.map((topic) => (
+                            {allTopics.data?.map((topic) => (
                               <SelectItem key={topic.id} value={topic.id}>
                                 {topic.name}
                               </SelectItem>
@@ -541,8 +524,8 @@ export default function TestCreator({
                             <Badge variant="outline">{q.points} pts</Badge>
                             {q.topicId && (
                               <Badge variant="secondary">
-                                {topics.find((t) => t.id === q.topicId)?.name ||
-                                  'Unknown Topic'}
+                                {allTopics.data?.find((t) => t.id === q.topicId)
+                                  ?.name || 'Unknown Topic'}
                               </Badge>
                             )}
                           </div>
