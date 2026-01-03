@@ -54,7 +54,7 @@ const LandingPageBody: React.FC<LandingPageBodyProps> = ({
                 solving.
               </h2>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full p-0">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 w-full p-0 max-w-4xl mx-auto">
               <Link href="/competitive-programming">
                 <div
                   data-testid="feature-card-competitive"
@@ -106,7 +106,7 @@ const LandingPageBody: React.FC<LandingPageBodyProps> = ({
                   </div>
                 </div>
               </Link>
-              <Link href="/practice">
+              {/* <Link href="/practice">
                 <div
                   data-testid="feature-card-problems"
                   className="group flex w-full gap-3 rounded-xl border border-border/50 bg-gradient-to-br from-card to-card/80 p-6 flex-col hover:shadow-2xl hover:scale-102 hover:border-primary/50 transition-all duration-300 cursor-pointer relative overflow-hidden h-full"
@@ -156,7 +156,7 @@ const LandingPageBody: React.FC<LandingPageBodyProps> = ({
                     </div>
                   </div>
                 </div>
-              </Link>
+              </Link> */}
               <Link href="/learn/data-structures">
                 <div
                   data-testid="feature-card-dsa"
