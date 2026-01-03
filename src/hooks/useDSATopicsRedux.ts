@@ -1,6 +1,5 @@
 import { useSelector } from 'react-redux';
 
-import type { DSATopic } from '@/store/slices/dsaTopicsSlice';
 import {
   useGetAllTopicsQuery,
   useGetTopicBySlugQuery,
@@ -10,6 +9,7 @@ import {
   useDeleteTopicMutation,
 } from '@/store/slices/dsaTopicsSlice';
 import type { RootState } from '@/store/store';
+import type { DSATopic } from '@/types/dsa';
 
 // Custom hook for DSA Topics with enhanced functionality
 export const useDSATopicsRedux = () => {

@@ -13,8 +13,10 @@ const transformDoc = (doc: any): LanguageContent => {
   return {
     id: doc.id,
     ...data,
-    createdAt: data.createdAt?.toDate() || new Date(),
-    updatedAt: data.updatedAt?.toDate() || new Date(),
+    createdAt:
+      data.createdAt?.toDate()?.toISOString() || new Date().toISOString(),
+    updatedAt:
+      data.updatedAt?.toDate()?.toISOString() || new Date().toISOString(),
   } as LanguageContent;
 };
 

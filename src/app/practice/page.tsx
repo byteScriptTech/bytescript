@@ -9,7 +9,7 @@ import AuthGuard from '@/components/misc/authGuard';
 import CustomTestContent from '@/components/specific/CustomTest/CustomTestContent';
 import PracticeContent from '@/components/specific/PracticeContent';
 import { LocalStorageProvider } from '@/context/LocalhostContext';
-import type { DSATopic } from '@/store/slices/dsaTopicsSlice';
+import type { DSATopic } from '@/types/dsa';
 import { SidebarItem } from '@/types/practice';
 
 export const dynamic = 'force-dynamic';

@@ -12,25 +12,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { useGetAllTopicsQuery } from '@/store/slices/dsaTopicsSlice';
+import { DSATopic } from '@/types/dsa';
 
 export const dynamic = 'force-dynamic'; // Disable static generation
-
-interface DSATopic {
-  id: string;
-  title: string;
-  slug: string;
-  description: string;
-  category: 'data-structures' | 'algorithms';
-  difficulty?: 'beginner' | 'intermediate' | 'advanced';
-  content?: string;
-  examples?: Array<{
-    input: string;
-    output: string;
-    explanation?: string;
-  }>;
-  createdAt?: Date;
-  updatedAt?: Date;
-}
 
 const TopicCard = ({ topic }: { topic: DSATopic }) => (
   <Card className="h-full flex flex-col hover:shadow-md transition-shadow duration-200">

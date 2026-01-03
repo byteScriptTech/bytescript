@@ -32,6 +32,6 @@ export interface DSATopic {
     explanation?: string;
   }>;
   relatedTopics?: string[];
-  createdAt?: Date | Timestamp;
-  updatedAt?: Date | Timestamp;
+  createdAt?: Date | Timestamp | string;
+  updatedAt?: Date | Timestamp | string;
 }

@@ -1,7 +1,7 @@
 import { collection, doc, getDoc, getDocs } from 'firebase/firestore';
 
 import { db } from '@/firebase/config';
-import type { DSATopic } from '@/store/slices/dsaTopicsSlice';
+import type { DSATopic } from '@/types/dsa';
 
 // Transform Firestore document to DSATopic (same as Redux slice)
 const transformDoc = (doc: any): DSATopic => {
@@ -9,8 +9,10 @@ const transformDoc = (doc: any): DSATopic => {
   return {
     id: doc.id,
     ...data,
-    createdAt: data.createdAt?.toDate() || new Date(),
-    updatedAt: data.updatedAt?.toDate() || new Date(),
+    createdAt:
+      data.createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
+    updatedAt:
+      data.updatedAt?.toDate?.()?.toISOString() || new Date().toISOString(),
   } as DSATopic;
 };
 

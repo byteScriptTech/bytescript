@@ -30,9 +30,23 @@ const transformDoc = (doc: any): CustomTest => {
   return {
     id: doc.id,
     ...data,
-    createdAt: data.createdAt?.toDate() || new Date(),
-    updatedAt: data.updatedAt?.toDate() || new Date(),
+    createdAt:
+      data.createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
+    updatedAt:
+      data.updatedAt?.toDate?.()?.toISOString() || new Date().toISOString(),
   } as CustomTest;
+};
+
+// Transform Firestore document to TestAttempt
+const transformAttemptDoc = (doc: any): TestAttempt => {
+  const data = doc.data();
+  return {
+    id: doc.id,
+    ...data,
+    startedAt:
+      data.startedAt?.toDate?.()?.toISOString() || new Date().toISOString(),
+    completedAt: data.completedAt?.toDate?.()?.toISOString() || undefined,
+  } as TestAttempt;
 };
 
 // Custom base query for Firebase
@@ -61,7 +75,11 @@ const firebaseBaseQuery: BaseQueryFn<
         if (docId) {
           const docRef = doc(db, collectionName, docId);
           const docSnap = await getDoc(docRef);
-          result = docSnap.exists() ? transformDoc(docSnap) : null;
+          if (collectionName === ATTEMPTS_COLLECTION) {
+            result = docSnap.exists() ? transformAttemptDoc(docSnap) : null;
+          } else {
+            result = docSnap.exists() ? transformDoc(docSnap) : null;
+          }
         } else {
           let q;
           if (queryParams && queryParams.length > 0) {
@@ -70,16 +88,24 @@ const firebaseBaseQuery: BaseQueryFn<
             q = query(collection(db, collectionName));
           }
           const querySnapshot = await getDocs(q);
-          result = querySnapshot.docs.map(transformDoc);
+          if (collectionName === ATTEMPTS_COLLECTION) {
+            result = querySnapshot.docs.map(transformAttemptDoc);
+          } else {
+            result = querySnapshot.docs.map(transformDoc);
+          }
         }
         break;
       }
 
       case 'POST': {
+        const timestampFields =
+          collectionName === ATTEMPTS_COLLECTION
+            ? { startedAt: Timestamp.now() }
+            : { createdAt: Timestamp.now(), updatedAt: Timestamp.now() };
+
         const docRef = await addDoc(collection(db, collectionName), {
           ...body,
-          createdAt: Timestamp.now(),
-          updatedAt: Timestamp.now(),
+          ...timestampFields,
         });
         result = { id: docRef.id };
         break;
@@ -89,9 +115,15 @@ const firebaseBaseQuery: BaseQueryFn<
         if (!docId)
           throw new Error('Document ID is required for PUT operations');
         const docRefToUpdate = doc(db, collectionName, docId);
+
+        const timestampFields =
+          collectionName === ATTEMPTS_COLLECTION
+            ? { completedAt: Timestamp.now() }
+            : { updatedAt: Timestamp.now() };
+
         await updateDoc(docRefToUpdate, {
           ...body,
-          updatedAt: Timestamp.now(),
+          ...timestampFields,
         });
         result = { id: docId };
         break;

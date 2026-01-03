@@ -3,8 +3,8 @@ export interface CustomTest {
   title: string;
   description: string;
   createdBy: string; // User ID
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
   duration: number; // Duration in minutes
   questions: TestQuestion[];
   isPublic: boolean;
@@ -35,8 +35,8 @@ export interface TestAttempt {
   id: string;
   testId: string;
   userId: string;
-  startedAt: Date;
-  completedAt?: Date;
+  startedAt: string;
+  completedAt?: string;
   answers: TestAnswer[];
   score: number;
   totalPoints: number;

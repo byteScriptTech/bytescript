@@ -386,7 +386,8 @@ function AttemptCard({
         </CardTitle>
 
         <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed">
-          Completed on {formatDate(attempt.completedAt || attempt.startedAt)}
+          Completed on{' '}
+          {formatDate(new Date(attempt.completedAt || attempt.startedAt))}
         </p>
       </CardHeader>
 

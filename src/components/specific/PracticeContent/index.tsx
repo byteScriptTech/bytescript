@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useDSATopicsRedux } from '@/hooks/useDSATopicsRedux';
 import { useTimerSettings } from '@/hooks/useTimerSettings';
-import type { DSATopic } from '@/store/slices/dsaTopicsSlice';
+import type { DSATopic } from '@/types/dsa';
 
 interface PracticeContentProps {
   currentTopic: DSATopic | undefined;

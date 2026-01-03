@@ -129,8 +129,8 @@ export default function TestTaker({
         score: scoredAnswers.reduce((sum, a) => sum + a.pointsEarned, 0),
         totalPoints,
         timeSpent: totalTime,
-        startedAt: new Date(Date.now() - totalTime * 1000),
-        completedAt: new Date(),
+        startedAt: new Date(Date.now() - totalTime * 1000).toISOString(),
+        completedAt: new Date().toISOString(),
       };
       console.log('Final attempt:', completedAttempt);
 

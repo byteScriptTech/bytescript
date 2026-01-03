@@ -50,7 +50,14 @@ export default function EditDataStructurePage() {
           topic.operations?.map((op: any) =>
             typeof op === 'string' ? op : op.name
           ) || [],
-        examples: topic.examples || [],
+        examples:
+          topic.examples
+            ?.filter((example) => example.input && example.output)
+            .map((example) => ({
+              input: example.input!,
+              output: example.output!,
+              explanation: example.explanation || '',
+            })) || [],
         lastUpdated: topic.updatedAt
           ? topic.updatedAt instanceof Date
             ? topic.updatedAt.toISOString()

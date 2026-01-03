@@ -96,7 +96,13 @@ export default function DataStructuresPage() {
             slug: ds.slug,
             description: ds.description,
             difficulty: ds.difficulty || 'beginner',
-            updatedAt: ds.updatedAt?.toISOString() || new Date().toISOString(),
+            updatedAt: (() => {
+              if (!ds.updatedAt) return new Date().toISOString();
+              if (ds.updatedAt instanceof Date)
+                return ds.updatedAt.toISOString();
+              if (typeof ds.updatedAt === 'string') return ds.updatedAt;
+              return ds.updatedAt.toDate().toISOString();
+            })(),
             category: ds.category,
           }))}
           onDelete={handleDelete}

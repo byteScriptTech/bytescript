@@ -9,48 +9,31 @@ import {
 } from 'firebase/firestore';
 
 import { db } from '@/firebase/config';
-
-export interface DSATopic {
-  id: string;
-  title: string;
-  slug: string;
-  description: string;
-  category: 'data-structures' | 'algorithms';
-  subcategory?: string;
-  difficulty?: 'beginner' | 'intermediate' | 'advanced';
-  content?: string; // Can be markdown or HTML
-  timeComplexity?: string;
-  spaceComplexity?: string;
-  tags?: string[];
-  prerequisites?: string[];
-  operations?: Array<{
-    name: string;
-    description: string;
-    timeComplexity: string;
-    spaceComplexity: string;
-  }>;
-  examples?: Array<{
-    input: string;
-    output: string;
-    explanation?: string;
-  }>;
-  visualizations?: Array<{
-    type: 'array' | 'tree' | 'graph' | 'linked-list';
-    data: any;
-    description: string;
-  }>;
-  createdAt?: Date;
-  updatedAt?: Date;
-}
+import { DSATopic } from '@/types/dsa';
 
 // Transform Firestore document to DSATopic
 const transformDoc = (doc: any): DSATopic => {
   const data = doc.data();
   return {
     id: doc.id,
-    ...data,
-    createdAt: data.createdAt?.toDate() || new Date(),
-    updatedAt: data.updatedAt?.toDate() || new Date(),
+    title: data.title,
+    slug: data.slug,
+    description: data.description,
+    category: data.category,
+    subcategory: data.subcategory,
+    difficulty: data.difficulty,
+    content: data.content,
+    timeComplexity: data.timeComplexity,
+    spaceComplexity: data.spaceComplexity,
+    tags: data.tags || [],
+    prerequisites: data.prerequisites || [],
+    operations: data.operations || [],
+    examples: data.examples || [],
+    visualizations: data.visualizations || [],
+    createdAt:
+      data.createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
+    updatedAt:
+      data.updatedAt?.toDate?.()?.toISOString() || new Date().toISOString(),
   } as DSATopic;
 };
 
@@ -170,8 +153,8 @@ export const dsaTopicsApi = createApi({
           const createdTopic = {
             id: docRef.id,
             ...newTopic,
-            createdAt: newTopic.createdAt.toDate(),
-            updatedAt: newTopic.updatedAt.toDate(),
+            createdAt: newTopic.createdAt.toDate().toISOString(),
+            updatedAt: newTopic.updatedAt.toDate().toISOString(),
           } as DSATopic;
 
           return { data: createdTopic };

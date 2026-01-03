@@ -22,6 +22,11 @@ const transformDoc = (doc: any): Problem => {
       data.createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
     updatedAt:
       data.updatedAt?.toDate?.()?.toISOString() || new Date().toISOString(),
+    // Ensure lastAttempted is serializable (string or null)
+    lastAttempted:
+      data.lastAttempted && typeof data.lastAttempted === 'string'
+        ? data.lastAttempted
+        : data.lastAttempted?.toDate?.()?.toISOString() || null,
   } as Problem;
 };
 
