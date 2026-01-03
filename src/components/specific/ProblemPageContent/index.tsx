@@ -201,24 +201,15 @@ const ProblemPageContent = () => {
         ${code}
         
         try {
-          // Debug: Log the input parameters
-          console.log('=== DEBUG: Input to solve() ===');
           const params = [${paramNames.join(', ')}];
-          console.log('Number of parameters:', params.length);
           
           // Log the parameters
           params.forEach((param, i) => {
             const type = Array.isArray(param) ? 'array' : typeof param;
-            console.log(\`Param \${i + 1} (\${type}):\`, JSON.stringify(param));
           });
           
           // Execute the solve function with provided arguments
           const result = solve(${paramNames.join(', ')});
-          
-          // Debug: Log the result
-          console.log('=== DEBUG: Output from solve() ===');
-          console.log('Type:', typeof result);
-          console.log('Value:', result);
           
           // Convert the result to a string representation
           if (result === undefined) return '';
@@ -228,7 +219,6 @@ const ProblemPageContent = () => {
           }
           return String(result);
         } catch (e) {
-          console.error('=== DEBUG: Error in solve() ===', e);
           return 'Error: ' + (e instanceof Error ? e.message : String(e));
         }
       `;

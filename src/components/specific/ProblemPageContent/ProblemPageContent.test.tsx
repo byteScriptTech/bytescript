@@ -1,12 +1,6 @@
-import { TextEncoder, TextDecoder } from 'util';
-
 import { configureStore } from '@reduxjs/toolkit';
 import { render, screen, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
-
-// Polyfill TextEncoder for test environment
-global.TextEncoder = TextEncoder;
-global.TextDecoder = TextDecoder as any;
 
 // Mock dependencies
 jest.mock('sonner', () => ({

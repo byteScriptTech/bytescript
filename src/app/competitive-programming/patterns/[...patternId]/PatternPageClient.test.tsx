@@ -1,6 +1,37 @@
+import { configureStore } from '@reduxjs/toolkit';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { Provider } from 'react-redux';
 
 import { PatternPageClient } from './PatternPageClient';
+
+// Mock Firebase config
+jest.mock('@/firebase/config', () => ({
+  auth: {
+    currentUser: null,
+  },
+  db: {},
+}));
+
+// Mock Redux hooks
+jest.mock('@/store/slices/problemsSlice', () => ({
+  useGetAllProblemsQuery: () => ({
+    data: [],
+    isLoading: false,
+  }),
+  problemsApi: {
+    reducerPath: 'problemsApi',
+    reducer: (state = {}) => state,
+    middleware: () => (next: any) => (action: any) => next(action),
+  },
+}));
+
+// Create a test store
+const testStore = configureStore({
+  reducer: {
+    problemsApi: (state = {}) => state,
+  },
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware(),
+});
 
 // Mock child components to isolate the PatternPageClient component
 jest.mock('@/components/ui/DraggableCircle', () => ({
@@ -27,11 +58,19 @@ jest.mock('next/dynamic', () => () => {
 });
 
 describe('PatternPageClient', () => {
+  const mockPattern = {
+    slug: 'two-pointers',
+    title: 'Two Pointers',
+    description: 'Two pointers pattern',
+  };
+
   it('should render children and the draggable circle', () => {
     render(
-      <PatternPageClient>
-        <div>Child Content</div>
-      </PatternPageClient>
+      <Provider store={testStore}>
+        <PatternPageClient pattern={mockPattern}>
+          <div>Child Content</div>
+        </PatternPageClient>
+      </Provider>
     );
 
     // Check that the child content is rendered
@@ -46,9 +85,11 @@ describe('PatternPageClient', () => {
 
   it('should toggle the editor visibility when the circle is clicked', () => {
     render(
-      <PatternPageClient>
-        <div>Child Content</div>
-      </PatternPageClient>
+      <Provider store={testStore}>
+        <PatternPageClient pattern={mockPattern}>
+          <div>Child Content</div>
+        </PatternPageClient>
+      </Provider>
     );
 
     const circleButton = screen.getByTestId('draggable-circle');
