@@ -3,13 +3,13 @@ import { notFound } from 'next/navigation';
 import { cache } from 'react';
 
 import { MarkdownRenderer } from '@/components/markdown/MarkdownRenderer';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { patternService } from '@/services/patternService';
 
 import { PatternCategories } from './components/PatternCategories';
 import { PatternHeader } from './components/PatternHeader';
+import { ProblemsTab } from './components/ProblemsTab';
 import { PatternPageClient } from './PatternPageClient';
 
 // Cache the pattern fetch to deduplicate requests
@@ -92,13 +92,6 @@ export default async function PatternPage({ params }: PageProps) {
             >
               <div className="flex items-center gap-2">
                 <span>Problems</span>
-                <Badge
-                  variant="secondary"
-                  className="flex h-5 w-5 items-center justify-center p-0 bg-muted-foreground/10 dark:bg-muted-foreground/20 text-foreground/80"
-                  data-problems-badge
-                >
-                  {/* Will be updated by client component */}0
-                </Badge>
               </div>
             </TabsTrigger>
           </TabsList>
@@ -121,12 +114,7 @@ export default async function PatternPage({ params }: PageProps) {
           </TabsContent>
 
           <TabsContent value="problems" className="space-y-4">
-            {/* Problems will be rendered by client component */}
-            <div className="grid gap-4" data-problems-list>
-              <div className="text-center py-8">
-                <p className="text-muted-foreground">Loading problems...</p>
-              </div>
-            </div>
+            <ProblemsTab patternSlug={pattern.slug} />
           </TabsContent>
         </Tabs>
       </div>
