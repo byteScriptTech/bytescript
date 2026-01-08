@@ -2,9 +2,9 @@ import React, { useEffect, useState, useMemo } from 'react';
 
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useLocalStorage } from '@/context/LocalhostContext';
 import { useContentRedux } from '@/hooks/useContentRedux';
 import { useLanguagesRedux } from '@/hooks/useLanguagesRedux';
-import { useLocalStorage } from '@/context/LocalhostContext';
 
 import ContentWithSuspense from './ContentWithSuspense';
 import NavigationWithSuspense from './NavigationWithSuspense';

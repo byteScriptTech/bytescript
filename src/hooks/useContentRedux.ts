@@ -1,18 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { debounce } from 'lodash';
+import { useState, useEffect } from 'react';
 
 import {
   useGetContentQuery,
   useGetScrollToListQuery,
 } from '@/store/slices/contentSlice';
-import { LanguageContent } from '@/types/content';
-
-interface ScrollToListItem {
-  views: { name: string; id: string }[];
-  id: string;
-}
 
 export const useContentRedux = (topicName: string = '') => {
   const [localTopicName, setLocalTopicName] = useState(topicName);

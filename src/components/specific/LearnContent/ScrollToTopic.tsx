@@ -2,8 +2,8 @@ import React, { useEffect } from 'react';
 
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useContentRedux } from '@/hooks/useContentRedux';
 import { useLocalStorage } from '@/context/LocalhostContext';
+import { useContentRedux } from '@/hooks/useContentRedux';
 
 export type ScrollToTopicProps = {
   loading: boolean;
