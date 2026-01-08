@@ -18,8 +18,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useAuthRedux } from '@/hooks/useAuthRedux';
 import { useToast } from '@/hooks/use-toast';
+import { useAuthRedux } from '@/hooks/useAuthRedux';
 import type { UserData } from '@/lib/admin';
 
 export default function AdminUsersPage() {

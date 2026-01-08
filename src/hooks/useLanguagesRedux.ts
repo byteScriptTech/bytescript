@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { debounce } from 'lodash';
+import { useState, useEffect } from 'react';
 
 import { useAppSelector } from '@/store/hooks';
 import {
@@ -18,11 +18,6 @@ interface Topic {
   name: string;
   id: string;
   isCompleted: boolean;
-}
-
-interface LearningProgress {
-  progress: number;
-  topics: Topic[];
 }
 
 export const useLanguagesRedux = () => {
