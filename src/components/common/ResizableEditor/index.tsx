@@ -4,7 +4,7 @@ import { Maximize2, Minimize2 } from 'lucide-react';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 
-import { JavaScriptCodeEditor } from './common/CodeEditor';
+import { JavaScriptCodeEditor } from '../CodeEditor';
 
 interface CodeEditorProps {
   code?: string;

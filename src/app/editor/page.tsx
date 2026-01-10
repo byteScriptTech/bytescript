@@ -9,30 +9,14 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ThemeProvider } from '@/context/theme-provider';
 
 // Import the CodeEditor components with SSR disabled since they use browser APIs
-const JsEditor = dynamic<{
-  initialCode: string;
-  className?: string;
-  height?: string | number;
-  readOnly?: boolean;
-  showRunButton?: boolean;
-  showOutput?: boolean;
-  showAlgorithm?: boolean;
-  onCodeChange?: (code: string) => void;
-  onOutput?: (output: string) => void;
-}>(
-  () =>
-    import('@/components/common/CodeEditor').then(
-      (mod) => mod.JavaScriptCodeEditor
-    ),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="flex-1 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary" />
-      </div>
-    ),
-  }
-);
+const JsEditor = dynamic(() => import('@/components/common/ResizableEditor'), {
+  ssr: false,
+  loading: () => (
+    <div className="flex-1 flex items-center justify-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary" />
+    </div>
+  ),
+});
 
 const PythonEditor = dynamic<{
   initialCode: string;
