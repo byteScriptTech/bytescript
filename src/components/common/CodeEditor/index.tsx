@@ -2,7 +2,6 @@
 
 import { Copy, Loader2, Play, Square, Trash2 } from 'lucide-react';
 import dynamic from 'next/dynamic';
-import * as React from 'react';
 import { useCallback, useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -26,7 +25,6 @@ export const JavaScriptCodeEditor = ({
   readOnly = false,
   showRunButton = true,
   showOutput = true,
-  showAlgorithm: _showAlgorithm = false,
   onCodeChange,
   onOutput,
 }: {
@@ -36,7 +34,6 @@ export const JavaScriptCodeEditor = ({
   readOnly?: boolean;
   showRunButton?: boolean;
   showOutput?: boolean;
-  showAlgorithm?: boolean;
   onCodeChange?: (value: string) => void;
   onOutput?: (output: string) => void;
 }) => {
@@ -52,24 +49,21 @@ export const JavaScriptCodeEditor = ({
   const [isRunning, setIsRunning] = useState(false);
   const [showStop, setShowStop] = useState(false);
 
-  const flush = useCallback(() => {
+  const flush = () => {
     const newOutput = bufferRef.current;
     setOutput(newOutput);
     onOutput?.(newOutput);
-  }, [onOutput]);
+  };
 
-  const append = useCallback(
-    (line: string) => {
-      bufferRef.current += line + '\n';
-      if (debounceRef.current !== null) {
-        clearTimeout(debounceRef.current);
-      }
-      debounceRef.current = window.setTimeout(() => {
-        flush();
-      }, OUTPUT_DEBOUNCE_MS);
-    },
-    [flush]
-  );
+  const append = (line: string) => {
+    bufferRef.current += line + '\n';
+    if (debounceRef.current !== null) {
+      clearTimeout(debounceRef.current);
+    }
+    debounceRef.current = window.setTimeout(() => {
+      flush();
+    }, OUTPUT_DEBOUNCE_MS);
+  };
 
   const clearConsole = () => {
     bufferRef.current = '';
@@ -136,7 +130,7 @@ export const JavaScriptCodeEditor = ({
     worker.postMessage({
       code: editorRef.current.getValue(),
     });
-  }, [append]);
+  }, []);
 
   const stopExecution = () => {
     if (workerRef.current) {
