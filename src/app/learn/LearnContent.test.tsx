@@ -93,7 +93,7 @@ describe('LearnContent', () => {
     });
 
     render(<LearnContent />);
-    expect(screen.getByText('All Learning Paths')).toBeInTheDocument();
+    expect(screen.getByText('Learning Paths')).toBeInTheDocument();
   });
 
   it('displays loading skeletons when loading', () => {
