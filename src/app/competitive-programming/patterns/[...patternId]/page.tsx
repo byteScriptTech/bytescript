@@ -1,26 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { cache } from 'react';
 
-import { MarkdownRenderer } from '@/components/markdown/MarkdownRenderer';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { patternService } from '@/services/patternService';
-
-import { PatternCategories } from './components/PatternCategories';
-import { PatternHeader } from './components/PatternHeader';
-import { ProblemsTab } from './components/ProblemsTab';
-import { PatternPageClient } from './PatternPageClient';
-
-// Cache the pattern fetch to deduplicate requests
-const getPatternBySlug = cache(async (slug: string) => {
-  try {
-    return await patternService.getPatternBySlug(slug);
-  } catch (error) {
-    console.error('Error fetching pattern:', error);
-    return null;
-  }
-});
+import PatternPageWrapper from './PatternPageWrapper';
 
 interface PageProps {
   params: { patternId: string[] };
@@ -33,91 +14,20 @@ export async function generateMetadata({
 }: PageProps): Promise<Metadata> {
   const resolvedParams = await params;
   const slug = resolvedParams.patternId?.[0] || '';
-  const pattern = await getPatternBySlug(slug);
-
-  if (!pattern) {
-    return {
-      title: 'Pattern Not Found',
-    };
-  }
 
   return {
-    title: `${pattern.title} - Problem Solving Pattern`,
-    description: pattern.description,
+    title: `${slug} - Problem Solving Pattern`,
+    description: 'Learn coding patterns and algorithms',
   };
-}
-
-async function fetchPatternData(slug: string) {
-  try {
-    // Get the pattern by slug (uses cached version)
-    const pattern = await getPatternBySlug(slug);
-    if (!pattern) {
-      console.log(`Pattern not found with slug: ${slug}`);
-      notFound();
-    }
-
-    return { pattern };
-  } catch (error) {
-    console.error('Error fetching pattern data:', error);
-    notFound();
-  }
 }
 
 export default async function PatternPage({ params }: PageProps) {
   const resolvedParams = await params;
   const patternId = resolvedParams.patternId?.[0] || '';
-  const { pattern } = await fetchPatternData(patternId);
 
-  return (
-    <PatternPageClient pattern={pattern}>
-      <div className="container mx-auto max-w-5xl px-4 py-8">
-        <div className="mb-8">
-          <PatternHeader
-            title={pattern.title}
-            description={pattern.description}
-          />
-          {pattern.category && (
-            <PatternCategories categories={pattern.category} />
-          )}
-        </div>
+  if (!patternId) {
+    notFound();
+  }
 
-        <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full max-w-md grid-cols-2 mb-6">
-            <TabsTrigger value="overview" className="text-sm font-medium">
-              Overview
-            </TabsTrigger>
-            <TabsTrigger
-              value="problems"
-              className="text-sm font-medium relative"
-            >
-              <div className="flex items-center gap-2">
-                <span>Problems</span>
-              </div>
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="overview" className="space-y-8">
-            <Card className="overflow-hidden">
-              <CardHeader>
-                <h2 className="text-2xl font-semibold">Pattern Overview</h2>
-                <p className="text-muted-foreground">
-                  Learn how to apply the {pattern.title} pattern to solve coding
-                  problems efficiently.
-                </p>
-              </CardHeader>
-              <CardContent>
-                <div className="prose dark:prose-invert max-w-none prose-headings:font-semibold prose-h2:mt-8 prose-h2:mb-4 prose-h2:text-xl prose-h3:mt-6 prose-h3:mb-3 prose-h3:text-lg prose-p:leading-relaxed prose-ul:pl-6 prose-li:my-1">
-                  <MarkdownRenderer>{pattern.readme}</MarkdownRenderer>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="problems" className="space-y-4">
-            <ProblemsTab patternSlug={pattern.slug} />
-          </TabsContent>
-        </Tabs>
-      </div>
-    </PatternPageClient>
-  );
+  return <PatternPageWrapper slug={patternId} />;
 }
