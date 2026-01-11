@@ -27,7 +27,7 @@ function LearnContentInner() {
       <div className="container mx-auto px-4 py-12 sm:py-16 max-w-7xl">
         {/* All Topics */}
         <div>
-          <h2 className="text-2xl font-bold mb-6">All Learning Paths</h2>
+          <h2 className="text-2xl font-bold mb-6">Learning Paths</h2>
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {[...Array(8)].map((_, i) => (

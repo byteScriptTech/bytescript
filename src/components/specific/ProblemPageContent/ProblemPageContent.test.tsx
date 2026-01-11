@@ -329,7 +329,7 @@ describe('ProblemPageContent', () => {
     expect(require('sonner').toast.error).toHaveBeenCalledWith(
       'Problem not found'
     );
-    expect(screen.getByText('Problem not found')).toBeInTheDocument();
+    expect(screen.getByText('Problem Not Found')).toBeInTheDocument();
   });
 
   it('handles error when fetching problem data fails', async () => {

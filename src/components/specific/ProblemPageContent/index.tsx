@@ -30,9 +30,8 @@ interface CodeExecutionResult {
   success: boolean;
 }
 
-// Create a type that makes starterCode optional and adds lastAttempted
-interface ProblemWithOptionalStarterCode extends Omit<Problem, 'starterCode'> {
-  starterCode: string;
+// Create a type that makes all Problem fields required and adds lastAttempted
+interface ProblemWithOptionalStarterCode extends Problem {
   lastAttempted?: string | null;
 }
 
@@ -54,14 +53,15 @@ const ProblemPageContent = () => {
     problemId || '',
     problemQuery
   );
+  const fetchedProblem = problemWithFallback.data;
 
   useEffect(() => {
     const fetchProblemAndTestCases = async () => {
       if (!problemId) return;
       setLoading(true);
       try {
-        const fetchedProblem = problemWithFallback.data;
-        if (!fetchedProblem || fetchedProblem.id === 'fallback') {
+        if (fetchedProblem === undefined) return;
+        if (fetchedProblem.id === 'fallback') {
           toast.error('Problem not found');
           return;
         }
@@ -77,7 +77,7 @@ const ProblemPageContent = () => {
           }
         }
 
-        const problemWithDefaultStarterCode = {
+        const problemWithDefaultStarterCode: ProblemWithOptionalStarterCode = {
           ...fetchedProblem,
           starterCode:
             'starterCode' in fetchedProblem &&
@@ -88,7 +88,7 @@ const ProblemPageContent = () => {
             'lastAttempted' in fetchedProblem
               ? (fetchedProblem as any).lastAttempted
               : null,
-        } as unknown as ProblemWithOptionalStarterCode;
+        };
 
         setProblem(problemWithDefaultStarterCode);
         setTestCases(fetchedTestCases);
@@ -349,12 +349,10 @@ const ProblemPageContent = () => {
       const errorMessage =
         err instanceof Error ? err.message : 'Failed to submit solution';
       toast.error(errorMessage);
-    } finally {
-      setLoading(false);
     }
   }, [currentUser, executionResult, problem, setLoading]);
 
-  if (loading) {
+  if (!problem && fetchedProblem?.id !== 'fallback') {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-foreground" data-testid="loading">
@@ -364,13 +362,19 @@ const ProblemPageContent = () => {
     );
   }
 
-  // Error state is now handled by toasts
-  // No need for a separate error state UI
-
-  if (!problem) {
+  if (fetchedProblem?.id === 'fallback') {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-foreground">Problem not found</div>
+        <div className="text-center space-y-4">
+          <div className="text-6xl">🔍</div>
+          <h1 className="text-2xl font-bold text-foreground">
+            Problem Not Found
+          </h1>
+          <p className="text-muted-foreground">
+            The problem you&apos;re looking for doesn&apos;t exist or has been
+            removed.
+          </p>
+        </div>
       </div>
     );
   }
@@ -384,12 +388,7 @@ const ProblemPageContent = () => {
             <div
               className={`flex-1 overflow-y-auto p-5 sm:p-6 md:p-7 lg:p-8 ${styles.scrollContainer} scrollbar-thin scrollbar-thumb-border/20 hover:scrollbar-thumb-border/30 dark:scrollbar-thumb-border/10 dark:hover:scrollbar-thumb-border/20 scrollbar-track-transparent transition-colors duration-200`}
             >
-              <ProblemDetail
-                problem={{
-                  ...problem,
-                  lastAttempted: problem.lastAttempted,
-                }}
-              />
+              <ProblemDetail problem={problem!} />
             </div>
 
             {/* Subtle gradient at bottom to indicate scrollability */}
