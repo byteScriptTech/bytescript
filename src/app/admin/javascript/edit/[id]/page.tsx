@@ -22,18 +22,17 @@ export default function EditJavaScriptContentPage({
   // Redux hook for JavaScript content
   const javascriptRedux = useJavascriptRedux();
   const { getTopicById } = javascriptRedux;
+  const topicQuery = getTopicById(id || '');
 
   useEffect(() => {
-    params.then((resolved) => {
-      setId(resolved.id);
-    });
+    (async () => {
+      const paramsResolved = await params;
+      setId(paramsResolved.id);
+    })();
   }, [params]);
 
   useEffect(() => {
     if (!id) return;
-
-    const topicQuery = getTopicById(id);
-
     // Update loading state
     setLoading(topicQuery.isLoading);
 
@@ -45,7 +44,14 @@ export default function EditJavaScriptContentPage({
       router.push('/500');
       setLoading(false);
     }
-  }, [id, router, getTopicById]);
+  }, [
+    id,
+    router,
+    topicQuery.isLoading,
+    topicQuery.data,
+    topicQuery.isError,
+    topicQuery.error,
+  ]);
 
   const handleSuccess = async () => {
     if (!id) return;
