@@ -45,7 +45,13 @@ const components: Components = {
   }) => {
     // Extract language from className if needed in the future
     // const _match = /lang-(\w+)/.exec(className || '');
-    return !inline ? (
+
+    // Force inline if children don't contain newlines (single backticks)
+    const childrenStr =
+      typeof children === 'string' ? children : String(children);
+    const isInline = inline || !childrenStr.includes('\n');
+
+    return !isInline ? (
       <div className="bg-gray-800 text-gray-100 rounded-lg p-4 overflow-x-auto my-4">
         <pre>
           <code className={className} {...props}>
