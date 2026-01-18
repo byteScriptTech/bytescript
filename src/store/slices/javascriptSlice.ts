@@ -3,6 +3,7 @@ import { doc, getDoc, updateDoc } from 'firebase/firestore';
 
 import { db } from '@/firebase/config';
 import type { LanguageContent, Topic } from '@/types/content';
+import { toISOString } from '@/utils/timestamp';
 
 const JAVASCRIPT_CONTENT_COLLECTION = 'languages';
 const JAVASCRIPT_CONTENT_ID = 'javascript';
@@ -10,13 +11,12 @@ const JAVASCRIPT_CONTENT_ID = 'javascript';
 // Transform Firestore document to LanguageContent
 const transformDoc = (doc: any): LanguageContent => {
   const data = doc.data();
+
   return {
     id: doc.id,
     ...data,
-    createdAt:
-      data.createdAt?.toDate()?.toISOString() || new Date().toISOString(),
-    updatedAt:
-      data.updatedAt?.toDate()?.toISOString() || new Date().toISOString(),
+    createdAt: toISOString(data.createdAt),
+    updatedAt: toISOString(data.updatedAt),
   } as LanguageContent;
 };
 

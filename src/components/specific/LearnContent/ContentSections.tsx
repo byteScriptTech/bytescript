@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { LanguageContent } from '@/types/content';
-import { decodeEntities } from '@/util/endecode';
+import { decodeEntities } from '@/utils/endecode';
 
 import CodeBlock from '../CodeBlock';
 
