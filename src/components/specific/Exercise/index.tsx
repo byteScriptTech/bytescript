@@ -96,8 +96,7 @@ export function Exercise({
             />
           </div>
         </div>
-
-        {solution && (
+        {solution && solution?.trim()?.length > 0 && (
           <div className="mt-4">
             <div className="space-y-2">
               <Button
