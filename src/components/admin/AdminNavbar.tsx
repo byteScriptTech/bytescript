@@ -13,7 +13,7 @@ import { useAuthRedux } from '@/hooks/useAuthRedux';
 export function AdminNavbar() {
   const router = useRouter();
   const pathname = usePathname();
-  const { currentUser } = useAuthRedux();
+  const { currentUser, isAdmin } = useAuthRedux();
 
   const isDashboard = pathname === '/admin';
 
@@ -29,10 +29,6 @@ export function AdminNavbar() {
 
     await signOut(auth);
     router.push('/login');
-  };
-
-  const handleMyAccountClick = () => {
-    router.push('my-account');
   };
 
   const handleSettingsClick = () => {
@@ -63,11 +59,9 @@ export function AdminNavbar() {
           {currentUser && (
             <div className="flex items-center gap-3">
               <UserDropDown
-                {...{
-                  handleSignOut,
-                  handleMyAccountClick,
-                  handleSettingsClick,
-                }}
+                handleSignOut={handleSignOut}
+                handleSettingsClick={handleSettingsClick}
+                isAdmin={isAdmin}
               />
             </div>
           )}

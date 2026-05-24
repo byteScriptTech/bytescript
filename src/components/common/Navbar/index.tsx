@@ -98,7 +98,7 @@ const NavigationControls = ({
 );
 
 const Navbar = () => {
-  const { currentUser } = useAuthRedux();
+  const { currentUser, isAdmin } = useAuthRedux();
   const router = useRouter();
   const [canGoBack, setCanGoBack] = useState(false);
   const [canGoForward, setCanGoForward] = useState(false);
@@ -166,7 +166,7 @@ const Navbar = () => {
             <UserDropDown
               handleSignOut={handleSignOut}
               handleSettingsClick={handleSettingsClick}
-              userId={currentUser?.uid}
+              isAdmin={isAdmin}
             />
           )}
         </div>
@@ -192,7 +192,7 @@ const Navbar = () => {
                 <UserDropDown
                   handleSignOut={handleSignOut}
                   handleSettingsClick={handleSettingsClick}
-                  userId={currentUser?.uid}
+                  isAdmin={isAdmin}
                 />
               </div>
             )}

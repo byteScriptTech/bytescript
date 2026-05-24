@@ -60,8 +60,13 @@ export const useAuthRedux = () => {
         );
       }
 
-      const updatedUserDoc = await getDoc(userDocRef);
-      const docData = updatedUserDoc.data();
+      const latestDoc = await getDoc(userDocRef);
+      const docData = latestDoc.data();
+      const role = docData?.role ?? 'user';
+
+      const toISO = (ts: any) =>
+        ts?.toDate ? ts.toDate().toISOString() : (ts ?? null);
+
       const serializableUser = {
         uid: user.uid,
         email: user.email,
@@ -73,23 +78,10 @@ export const useAuthRedux = () => {
         providerData: user.providerData,
         phoneNumber: user.phoneNumber || null,
         providerId: user.providerId || null,
-        ...docData,
-        // Convert all Firestore Timestamps to ISO strings
-        createdAt: docData?.createdAt
-          ? docData.createdAt.toDate
-            ? docData.createdAt.toDate().toISOString()
-            : docData.createdAt
-          : null,
-        updatedAt: docData?.updatedAt
-          ? docData.updatedAt.toDate
-            ? docData.updatedAt.toDate().toISOString()
-            : docData.updatedAt
-          : null,
-        lastLogin: docData?.lastLogin
-          ? docData.lastLogin.toDate
-            ? docData.lastLogin.toDate().toISOString()
-            : docData.lastLogin
-          : null,
+        role,
+        createdAt: toISO(docData?.createdAt),
+        updatedAt: toISO(docData?.updatedAt),
+        lastLogin: toISO(docData?.lastLogin),
         proactiveRefresh: undefined,
         metadata: {
           creationTime: user.metadata?.creationTime || '',

@@ -15,18 +15,14 @@ import {
 type UserDropDownProps = {
   handleSignOut?: () => void;
   handleSettingsClick?: () => void;
-  userId?: string | null;
+  isAdmin?: boolean;
 };
-
-const ADMIN_USER_ID = process.env.NEXT_PUBLIC_FIREBASE_ADMIN_ACCOUNT_ID || '';
 
 function UserDropDown({
   handleSignOut,
   handleSettingsClick,
-  userId,
+  isAdmin,
 }: UserDropDownProps) {
-  const isAdmin = userId === ADMIN_USER_ID;
-
   return (
     <div>
       <DropdownMenu>
